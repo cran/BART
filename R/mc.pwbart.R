@@ -1,0 +1,72 @@
+
+## BART: Bayesian Additive Regression Trees
+## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, a copy is available at
+## https://www.R-project.org/Licenses/GPL-2
+
+mc.pwbart = function(
+   x.test,		#x matrix to predict at
+   treedraws,		#$treedraws from wbart
+   mu=0,		#mean to add on
+   mc.cores=2L,
+   transposed=FALSE,	
+   nice=19L
+)
+{
+    if(.Platform$OS.type!='unix')
+        stop('parallel::mcparallel/mccollect do not exist on windows')
+
+    if(!transposed) x.test <- t(x.test)
+
+    p <- length(treedraws$cutpoints)
+
+    if(p!=nrow(x.test))
+        stop(paste0('The number of columns in x.test must be equal to ', p))   
+        
+    K <- ncol(x.test)
+    k <- K%/%mc.cores
+    j <- K
+    for(i in 1:mc.cores) {
+        if(i==mc.cores) h <- 1
+        else h <- j-k
+        
+        parallel::mcparallel({psnice(value=nice); 
+            pwbart(x.test[ , h:j], treedraws, mu, 1, TRUE)},
+            silent=(i!=1))
+        j <- h-1
+    }
+    
+    ## K <- ncol(x.test)
+    ## k <- ceiling(K/mc.cores)
+    ## h <- K-k
+    
+    ## parallel::mcparallel({psnice(value=nice);
+    ##     pwbart(trees, x.test[ , max(1, h):K], mu, 1, TRUE)})
+    
+    ## if(mc.cores>1) for(i in 1:(mc.cores-1)) {
+    ##     parallel::mcparallel({psnice(value=nice);
+    ##         pwbart(trees, x.test[ , max(1, (h-k)):(h-1)], mu, 1, TRUE)},
+    ##         silent=TRUE)
+    ##     h <- h-k
+    ## }
+
+    pred.list <- parallel::mccollect()
+
+    pred <- pred.list[[1]]
+
+    if(mc.cores>1) for(i in 2:mc.cores) pred <- cbind(pred, pred.list[[i]])
+
+    return(pred)
+}
