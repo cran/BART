@@ -1,5 +1,5 @@
 a2fe356a25c27a23f77ca0045c860f9f *COPYING
-6d681c4c87a7245d353ca5d91f646ce8 *DESCRIPTION
+f0fffd5ddeb9d2bea8f10c4c1ea6c94a *DESCRIPTION
 ff4e7940e3cb987347d14869a59c497e *NAMESPACE
 60c807c70397d743234275fc63bd8d18 *R/crisk.bart.R
 03e29aee5f57e864474d443a084ca1ec *R/crisk.pre.bart.R
@@ -30,7 +30,7 @@ c01f42a9a55645036a71f20a3b4818a2 *data/transplant.rda
 83ffc0370c3e26c5576851f9a20735ce *data/xdm20.train.rda
 86589b4b66ffa6743bc59dd689a008e1 *data/ydm20.test.rda
 42377fb7795c301084d8095656b3e4f4 *data/ydm20.train.rda
-19770026b48c4670d50dc3b61424e944 *man/BART-package.Rd
+1a173cdbdd02c1ae0fd76961d88871b4 *man/BART-package.Rd
 fc00fffb10459047ec3136cf0fab0319 *man/bladder.Rd
 fba465225ce462bd974c7671adde2097 *man/crisk.bart.Rd
 0f0cbabfb1523b3d74783547ccfa5057 *man/crisk.pre.bart.Rd
@@ -60,7 +60,7 @@ c13a7965c1142443ac37f42355bd8f93 *src/bart.h
 9d07541992dfd6078d64d64f41cdd767 *src/bd.cpp
 1972097690fd3cfb6f6d35dd0c68f1f5 *src/bd.h
 835516c045a988a3f4c070078b8cce83 *src/common.h
-6c40b075378c3a246cf3da5899a57c9d *src/cpbart.cpp
+7e8ec0a9df7fe38c6b0e658f8ed12ba3 *src/cpbart.cpp
 6fd907fa0f0677fcd517d6c160f8e263 *src/cpwbart.cpp
 9af888efa810d5c2ee56728d6f5fd828 *src/cwbart.cpp
 4ae8da1bfc3ee291fd3db58fd406a5fa *src/heterbart.cpp

@@ -150,7 +150,7 @@ void cpbart(
    //print args
    printf("*****Data:\n");
    printf("data:n,p,np: %d, %d, %d\n",n,p,np);
-   printf("y1,yn: %lf, %lf\n",iy[0],iy[n-1]);
+   printf("y1,yn: %d, %d\n",iy[0],iy[n-1]);
    printf("x1,x[n*p]: %lf, %lf\n",ix[0],ix[n*p-1]);
    if(np) printf("xp1,xp[np*p]: %lf, %lf\n",ixp[0],ixp[np*p-1]);
    printf("*****Number of Trees: %d\n",m);

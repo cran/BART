@@ -33,21 +33,16 @@ predictions without fitting the model simultaneously) via the
 Robert McCulloch \email{robert.e.mcculloch@gmail.com}\cr
 Maintainer: Rodney Sparapani \email{rsparapa@mcw.edu}
 }
-\references{
-  Chipman, H., George, E., and McCulloch R. (2010)
-   Bayesian Additive Regression Trees.
-   \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298.
+%% \references{
+%%   Chipman, H., George, E., and McCulloch R. (2010)
+%%    Bayesian Additive Regression Trees.
+%%    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
 
-   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
-  Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53}.
-}
+%%    Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
+%%   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
+%%    \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+%% }
 % Optionally other standard keywords, one per line,
 % from the file KEYWORDS in the R documentation.
 \keyword{ package }
-\seealso{
-  Optional links to other man pages
-}
-\examples{
-  # Optional simple examples of the most important functions
-}
+
