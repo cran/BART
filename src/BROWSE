@@ -1,0 +1,281 @@
+[ebrowse-hs "ebrowse 5.0" " -x" () ()][ebrowse-ts [ebrowse-cs "dinfo" () 0"info.h" "class dinfo {" 886"info.h" ]
+()([ebrowse-ms "n" () 0 () "   size_t n;" 968 0  () () 0]
+[ebrowse-ms "p" () 0 () "   size_t p;" 937 0  () () 0]
+[ebrowse-ms "x" () 0 () "   double *x;" 1008 0  () () 0]
+[ebrowse-ms "y" () 0 () "   double *y;" 1060 0  () () 0]
+)
+([ebrowse-ms "dinfo" () 0 () "   dinfo() {" 905 0  () "   dinfo() {" 905]
+)
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "rn" () 0"common.h" "class rn
+{" 1059"common.h" ]
+([ebrowse-ts [ebrowse-cs "arn" () 0"common.h" "class arn:" 2295"common.h" ]
+()([ebrowse-ms "RNGstate" () 0 () "  Rcpp::RNGScope RNGstate;" 2713 2  () () 0]
+[ebrowse-ms "chi" () 0 () "  chiD* chi;" 2112 2  () () 0]
+[ebrowse-ms "df" () 0 () "  int df;" 2686 2  () () 0]
+[ebrowse-ms "gen" () 0 () "  genD* gen;" 2073 2  () () 0]
+[ebrowse-ms "nor" () 0 () "  norD* nor;" 2086 2  () () 0]
+[ebrowse-ms "uni" () 0 () "  uniD* uni;" 2099 2  () () 0]
+)
+([ebrowse-ms "arn" () 0 () " arn():" 2339 0  () " arn():" 2339]
+[ebrowse-ms "chi_square" () 1 () "  virtual double chi_square()" 2514 0  () "  virtual double chi_square()" 2514]
+[ebrowse-ms "exp" () 1 () "  virtual double exp()" 2569 0  () "  virtual double exp()" 2569]
+[ebrowse-ms "get_df" () 0 () "  int get_df()" 2653 0  () "  int get_df()" 2653]
+[ebrowse-ms "normal" () 1 () "  virtual double normal()" 2406 0  () "  virtual double normal()" 2406]
+[ebrowse-ms "set_df" () 1 () "  virtual void set_df(int" 2619 0  () "  virtual void set_df(int" 2619]
+[ebrowse-ms "set_seed" () 0 () "  void set_seed(int" 2033 0  () () 0]
+[ebrowse-ms "uniform" () 1 () "  virtual double uniform()" 2458 0  () "  virtual double uniform()" 2458]
+[ebrowse-ms "~arn" () 1 () "  virtual ~arn()" 2377 0  () "  virtual ~arn()" 2377]
+)
+()
+()
+()
+([ebrowse-ms "chiD" () 0 () "edef std::chi_squared_distribution<double> chiD;" 1688 2  () () 0]
+[ebrowse-ms "genD" () 0 () "  typedef std::default_random_engine genD;" 1530 2  () () 0]
+[ebrowse-ms "norD" () 0 () "  typedef std::normal_distribution<double> norD;" 1579 2  () () 0]
+[ebrowse-ms "uniD" () 0 () "def std::uniform_real_distribution<double> uniD;" 1634 2  () () 0]
+)
+()()
+])()
+([ebrowse-ms "chi_square" () 9 () "   virtual double chi_square()" 1196 0  () () 0]
+[ebrowse-ms "exp" () 9 () "   virtual double exp()" 1238 0  () () 0]
+[ebrowse-ms "normal" () 9 () "   virtual double normal()" 1094 0  () () 0]
+[ebrowse-ms "set_df" () 9 () "   virtual void set_df(int" 1284 0  () () 0]
+[ebrowse-ms "uniform" () 9 () "   virtual double uniform()" 1145 0  () () 0]
+[ebrowse-ms "~rn" () 1 () "   virtual ~rn()" 1334 0  () "   virtual ~rn()" 1334]
+)
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "node_info" () 0"tree.h" "struct node_info {" 1311() ]
+()([ebrowse-ms "c" () 0 () "   std::size_t c;" 1388 0  () () 0]
+[ebrowse-ms "id" () 0 () "   std::size_t id;" 1330 0  () () 0]
+[ebrowse-ms "theta" () 0 () "   double theta;" 1418 0  () () 0]
+[ebrowse-ms "v" () 0 () "   std::size_t v;" 1358 0  () () 0]
+)
+()
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "std" () 0() () 0"common.h" ]
+()([ebrowse-ms "cout" () 0 () () 0 0  () "using std::cout;" 1393]
+[ebrowse-ms "endl" () 0 () () 0 0  () "using std::endl;" 962]
+)
+([ebrowse-ms "operator <<" () 0 () () 0 0  "tree.cpp" "std::ostream& operator<<(std" 6977]
+[ebrowse-ms "operator >>" () 0 () () 0 0  "tree.cpp" "std::istream& operator>>(std" 7318]
+)
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "pinfo" () 0"info.h" "class pinfo
+{" 1121"info.h" ]
+()([ebrowse-ms "alpha" () 0 () "   double alpha;" 1302 0  () () 0]
+[ebrowse-ms "mybeta" () 0 () "   double mybeta;" 1320 0  () () 0]
+[ebrowse-ms "pb" () 0 () "   double pb;" 1255 0  () () 0]
+[ebrowse-ms "pbd" () 0 () "   double pbd;" 1219 0  () () 0]
+[ebrowse-ms "tau" () 0 () "   double tau;" 1335 0  () () 0]
+)
+([ebrowse-ms "pinfo" () 0 () "   pinfo():" 1140 0  () "   pinfo():" 1140]
+[ebrowse-ms "pr" () 0 () "   void pr()" 1348 0  () "   void pr()" 1348]
+)
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "bart" () 0"bart.h" "class bart {" 974"bart.h" ]
+([ebrowse-ts [ebrowse-cs "heterbart" () 0"heterbart.h" "class heterbart :" 940"heterbart.h" ]
+()()
+([ebrowse-ms "draw" () 0 () "   void draw(double" 1055 0  "heterbart.cpp" "void heterbart::draw(double" 1040]
+[ebrowse-ms "heterbart" () 0 () "   heterbart(size_t m):" 1007 0  () "   heterbart(size_t m):" 1007]
+[ebrowse-ms "heterbart" () 0 () "   heterbart():" 977 0  () "   heterbart():" 977]
+[ebrowse-ms "pr" () 0 () "   void pr()" 1034 0  "heterbart.cpp" "void heterbart::pr()" 901]
+)
+()
+()
+()
+()
+()()
+])([ebrowse-ms "allfit" () 0 () "   double *allfit;" 2515 1  () () 0]
+[ebrowse-ms "di" () 0 () "   dinfo di;" 2597 1  () () 0]
+[ebrowse-ms "ftemp" () 0 () "   double *ftemp;" 2584 1  () () 0]
+[ebrowse-ms "m" () 0 () "   size_t m;" 2266 1  () () 0]
+[ebrowse-ms "n" () 0 () "   size_t p,n;" 2382 1  () () 0]
+[ebrowse-ms "pi" () 0 () "   pinfo pi;" 2335 1  () () 0]
+[ebrowse-ms "r" () 0 () "   double *r;" 2566 1  () () 0]
+[ebrowse-ms "t" () 0 () "   std::vector<tree> t;" 2309 1  () () 0]
+[ebrowse-ms "xi" () 0 () "   xinfo xi;" 2467 1  () () 0]
+[ebrowse-ms "y" () 0 () "   double *x,*y;" 2428 1  () () 0]
+)
+([ebrowse-ms "bart" () 0 () "   bart(const bart&);" 1223 0  "bart.cpp" "bart::bart(const bart& ib):" 1088]
+[ebrowse-ms "bart" () 0 () "   bart(size_t m);" 1205 0  "bart.cpp" "bart::bart(size_t im):" 994]
+[ebrowse-ms "bart" () 0 () "   bart();" 1189 0  "bart.cpp" "bart::bart():" 902]
+[ebrowse-ms "birth" () 0 () "   void birth(size_t" 1852 0  () "   void birth(size_t" 1852]
+[ebrowse-ms "death" () 0 () "   void death(size_t" 1967 0  () "   void death(size_t" 1967]
+[ebrowse-ms "draw" () 0 () "   void draw(double" 2183 0  "bart.cpp" "void bart::draw(double" 2752]
+[ebrowse-ms "f" () 0 () "   double f(size_t" 2219 0  () "   double f(size_t" 2219]
+[ebrowse-ms "getm" () 0 () "   size_t getm()" 1393 0  () "   size_t getm()" 1393]
+[ebrowse-ms "gettree" () 0 () "   tree& gettree(size_t" 1721 0  () "   tree& gettree(size_t" 1721]
+[ebrowse-ms "getxinfo" () 0 () "   xinfo& getxinfo()" 1762 0  () "   xinfo& getxinfo()" 1762]
+[ebrowse-ms "operator =" () 0 () "   bart& operator=(const" 1319 0  "bart.cpp" "bart& bart::operator=(const" 1392]
+[ebrowse-ms "pr" () 0 () "   void pr()" 2036 0  "bart.cpp" "void bart::pr()" 3196]
+[ebrowse-ms "predict" () 0 () "   void predict(size_t" 2126 0  "bart.cpp" "void bart::predict(size_t" 2408]
+[ebrowse-ms "setdata" () 0 () "   void setdata(size_t" 1452 0  "bart.cpp" "void bart::setdata(size_t" 1958]
+[ebrowse-ms "setm" () 0 () "   void setm(size_t" 1425 0  "bart.cpp" "void bart::setm(size_t" 1777]
+[ebrowse-ms "setpi" () 0 () "   void setpi(pinfo" 1522 0  () "   void setpi(pinfo" 1522]
+[ebrowse-ms "setprior" () 0 () "   void setprior(double" 1568 0  () "   void setprior(double" 1568]
+[ebrowse-ms "settau" () 0 () "   void settau(double" 1678 0  () "   void settau(double" 1678]
+[ebrowse-ms "tonull" () 0 () "   void tonull()" 2054 0  () "   void tonull()" 2054]
+[ebrowse-ms "~bart" () 0 () "   ~bart()" 1242 0  "bart.cpp" "bart::~bart()" 1212]
+)
+()
+()
+([ebrowse-ms "bd" () 0 () "   friend bool bd(tree" 1054 0  "bd.cpp" "bool bd(tree" 833]
+)
+()
+()()
+][ebrowse-ts [ebrowse-cs "tree" () 0"tree.h" "class tree {" 1498"tree.h" ]
+()([ebrowse-ms "c" () 0 () "   size_t c;" 4174 2  () () 0]
+[ebrowse-ms "l" () 0 () "   tree_p l;" 4229 2  () () 0]
+[ebrowse-ms "p" () 0 () "   tree_p p;" 4207 2  () () 0]
+[ebrowse-ms "r" () 0 () "   tree_p r;" 4255 2  () () 0]
+[ebrowse-ms "theta" () 0 () "   double theta;" 4080 2  () () 0]
+[ebrowse-ms "v" () 0 () "   size_t v;" 4161 2  () () 0]
+)
+([ebrowse-ms "birth" () 0 () "   bool birth(size_t" 2896 0  "tree.cpp" "bool tree::birth(size_t" 1491]
+[ebrowse-ms "birthp" () 0 () "   void birthp(tree_p" 3015 0  "tree.cpp" "void tree::birthp(tree_p" 8759]
+[ebrowse-ms "bn" () 0 () "   tree_p bn(double" 3379 0  "tree.cpp" "tree::tree_p tree::bn(double" 5131]
+[ebrowse-ms "cp" () 0 () "   void cp(tree_p" 4309 2  "tree.cpp" "void tree::cp(tree_p" 6224]
+[ebrowse-ms "death" () 0 () "   bool death(size_t" 2973 0  "tree.cpp" "bool tree::death(size_t" 3350]
+[ebrowse-ms "deathp" () 0 () "   void deathp(tree_p" 3091 0  "tree.cpp" "void tree::deathp(tree_p" 9060]
+[ebrowse-ms "depth" () 0 () "   size_t depth()" 3590 0  "tree.cpp" "size_t tree::depth()" 2115]
+[ebrowse-ms "getbots" () 0 () "   void getbots(npv" 3130 0  "tree.cpp" "void tree::getbots(npv" 4407]
+[ebrowse-ms "getc" () 4 () "   size_t getc()" 2424 0  () "   size_t getc()" 2424]
+[ebrowse-ms "getl" () 0 () "   tree_p getl()" 2490 0  () "   tree_p getl()" 2490]
+[ebrowse-ms "getnodes" () 4 () "   void getnodes(cnpv" 3313 0  "tree.cpp" "void tree::getnodes(cnpv" 4982]
+[ebrowse-ms "getnodes" () 0 () "   void getnodes(npv" 3252 0  "tree.cpp" "void tree::getnodes(npv" 4867]
+[ebrowse-ms "getnogs" () 0 () "   void getnogs(npv" 3183 0  "tree.cpp" "void tree::getnogs(npv" 4592]
+[ebrowse-ms "getp" () 0 () "   tree_p getp()" 2459 0  () "   tree_p getp()" 2459]
+[ebrowse-ms "getptr" () 0 () "   tree_p getptr(size_t" 2595 0  "tree.cpp" "tree::tree_p tree::getptr(size_t" 1133]
+[ebrowse-ms "getr" () 0 () "   tree_p getr()" 2519 0  () "   tree_p getr()" 2519]
+[ebrowse-ms "gettheta" () 4 () "   double gettheta()" 2350 0  () "   double gettheta()" 2350]
+[ebrowse-ms "getv" () 4 () "   size_t getv()" 2389 0  () "   size_t getv()" 2389]
+[ebrowse-ms "isnog" () 0 () "   bool isnog()" 3712 0  "tree.cpp" "bool tree::isnog()" 3813]
+[ebrowse-ms "nbots" () 0 () "   size_t nbots()" 2846 0  "tree.cpp" "size_t tree::nbots()" 4233]
+[ebrowse-ms "nid" () 4 () "   size_t nid()" 3549 0  "tree.cpp" "size_t tree::nid()" 875]
+[ebrowse-ms "nnogs" () 0 () "   size_t nnogs()" 2777 0  "tree.cpp" "size_t tree::nnogs()" 4032]
+[ebrowse-ms "ntype" () 0 () "   char ntype()" 3626 0  "tree.cpp" "char tree::ntype()" 2404]
+[ebrowse-ms "operator =" () 0 () "   tree& operator=(const" 2140 0  "tree.cpp" "tree& tree::operator=(const" 6717]
+[ebrowse-ms "pr" () 0 () "   void pr(bool" 2665 0  "tree.cpp" "void tree::pr(bool" 2656]
+[ebrowse-ms "rg" () 0 () "   void rg(size_t" 3431 0  "tree.cpp" "void tree::rg(size_t" 5361]
+[ebrowse-ms "setc" () 0 () "   void setc(size_t" 2302 0  () "   void setc(size_t" 2302]
+[ebrowse-ms "settheta" () 0 () "   void settheta(double" 2216 0  () "   void settheta(double" 2216]
+[ebrowse-ms "setv" () 0 () "   void setv(size_t" 2264 0  () "   void setv(size_t" 2264]
+[ebrowse-ms "tonull" () 0 () "   void tonull()" 2020 0  "tree.cpp" "void tree::tonull()" 5793]
+[ebrowse-ms "tree" () 0 () "   tree(double itheta):" 1952 0  () "   tree(double itheta):" 1952]
+[ebrowse-ms "tree" () 0 () "   tree(const tree& n):" 1876 0  () "   tree(const tree& n):" 1876]
+[ebrowse-ms "tree" () 0 () "   tree():" 1822 0  () "   tree():" 1822]
+[ebrowse-ms "tree2count" () 0 () "  Rcpp::IntegerVector tree2count(size_t" 3976 0  "tree.cpp" "Rcpp::IntegerVector tree::tree2count(size_t" 11443]
+[ebrowse-ms "tree2list" () 0 () "  Rcpp::List tree2list(xinfo" 3760 0  "tree.cpp" "Rcpp::List tree::tree2list(xinfo" 9446]
+[ebrowse-ms "treesize" () 0 () "   size_t treesize()" 2732 0  "tree.cpp" "size_t tree::treesize()" 2242]
+[ebrowse-ms "~tree" () 0 () "   ~tree()" 2078 0  () "   ~tree()" 2078]
+)
+()
+()
+([ebrowse-ms "operator >>" () 0 () "   friend std::istream& operator>>(std" 1578 0  () () 0]
+)
+([ebrowse-ms "cnpv" () 0 () "   typedef std::vector<tree_cp> cnpv;" 1763 0  () () 0]
+[ebrowse-ms "npv" () 0 () "   typedef std::vector<tree_p> npv;" 1724 0  () () 0]
+[ebrowse-ms "tree_cp" () 0 () "   typedef const tree* tree_cp;" 1688 0  () () 0]
+[ebrowse-ms "tree_p" () 0 () "   typedef tree* tree_p;" 1656 0  () () 0]
+)
+()()
+][ebrowse-ts [ebrowse-cs "Rcpp" () 0() () 0() ]
+()()
+()
+()
+()
+()
+()
+()()
+][ebrowse-ts [ebrowse-cs "*Globals*" () 0() () 0"bart.h" ]
+()()
+([ebrowse-ms "R_init_BART" () 0 "init.c" "void R_init_BART(DllInfo" 752 0  "init.c" "void R_init_BART(DllInfo" 752]
+[ebrowse-ms "allsuff" () 0 "bartfuns.h" "void allsuff(tree" 2221 0  "bartfuns.cpp" "void allsuff(tree" 3980]
+[ebrowse-ms "bd" () 0 "bd.h" "bool bd(tree" 936 0  "bd.cpp" "bool bd(tree" 833]
+[ebrowse-ms "bprop" () 0 "bartfuns.h" "void bprop(tree" 2563 0  "bartfuns.cpp" "void bprop(tree" 5182]
+[ebrowse-ms "cansplit" () 0 "treefuns.h" "bool cansplit(tree" 1461 0  "treefuns.cpp" "bool cansplit(tree" 2276]
+[ebrowse-ms "cpbart" () 0 "cpbart.cpp" "   SEXP" 1004 0  "cpbart.cpp" "   SEXP" 1004]
+[ebrowse-ms "cpwbart" () 0 "cpwbart.cpp" "   SEXP" 1351 0  "cpwbart.cpp" "   SEXP" 1351]
+[ebrowse-ms "cwbart" () 0 "cwbart.cpp" "   SEXP" 989 0  "cwbart.cpp" "   SEXP" 989]
+[ebrowse-ms "dprop" () 0 "bartfuns.h" "void dprop(tree" 2772 0  "bartfuns.cpp" "void dprop(tree" 8035]
+[ebrowse-ms "drawnodemu" () 0 "bartfuns.h" "double drawnodemu(size_t" 2975 0  "bartfuns.cpp" "double drawnodemu(size_t" 9534]
+[ebrowse-ms "drmu" () 0 "bartfuns.h" "void drmu(tree" 2416 0  "bartfuns.cpp" "void drmu(tree" 4779]
+[ebrowse-ms "fit" () 0 "treefuns.h" "void fit(tree" 1273 0  "treefuns.cpp" "void fit(tree" 1968]
+[ebrowse-ms "getgoodvars" () 0 "treefuns.h" "void getgoodvars(tree" 1622 0  "treefuns.cpp" "void getgoodvars(tree" 2733]
+[ebrowse-ms "getpb" () 0 "bartfuns.h" "double getpb(tree" 1206 0  "bartfuns.cpp" "double getpb(tree" 1691]
+[ebrowse-ms "getpred" () 0 "cpwbart.cpp" "void getpred(int" 1195 0  "cpwbart.cpp" "void getpred(int" 3695]
+[ebrowse-ms "getsuff" () 0 "bartfuns.h" "void getsuff(tree" 1949 0  "bartfuns.cpp" "void getsuff(tree" 3409]
+[ebrowse-ms "getsuff" () 0 "bartfuns.h" "void getsuff(tree" 1386 0  "bartfuns.cpp" "void getsuff(tree" 2276]
+[ebrowse-ms "grm" () 0 "treefuns.h" "void grm(tree" 1097 0  "treefuns.cpp" "void grm(tree" 1293]
+[ebrowse-ms "heterallsuff" () 0 "heterbartfuns.h" "void heterallsuff(tree" 1915 0  "heterbartfuns.cpp" "void heterallsuff(tree" 2881]
+[ebrowse-ms "heterbd" () 0 "heterbd.h" "bool heterbd(tree" 978 0  "heterbd.cpp" "bool heterbd(tree" 843]
+[ebrowse-ms "heterdrawnodemu" () 0 "heterbartfuns.h" "double heterdrawnodemu(double" 1712 0  "heterbartfuns.cpp" "double heterdrawnodemu(double" 2571]
+[ebrowse-ms "heterdrmu" () 0 "heterbartfuns.h" "void heterdrmu(tree" 2154 0  "heterbartfuns.cpp" "void heterdrmu(tree" 3771]
+[ebrowse-ms "hetergetsuff" () 0 "heterbartfuns.h" "void hetergetsuff(tree" 1483 0  "heterbartfuns.cpp" "void hetergetsuff(tree" 1954]
+[ebrowse-ms "hetergetsuff" () 0 "heterbartfuns.h" "void hetergetsuff(tree" 1214 0  "heterbartfuns.cpp" "void hetergetsuff(tree" 1204]
+[ebrowse-ms "heterlh" () 0 "heterbartfuns.h" "double heterlh(double" 1057 0  "heterbartfuns.cpp" "double heterlh(double" 965]
+[ebrowse-ms "lh" () 0 "bartfuns.h" "double lh(size_t" 1624 0  "bartfuns.cpp" "double lh(size_t" 2836]
+[ebrowse-ms "local_getpred" () 0 "cpwbart.cpp" "void local_getpred(size_t" 919 0  "cpwbart.cpp" "void local_getpred(size_t" 4236]
+[ebrowse-ms "makexinfo" () 0 "bartfuns.h" "void makexinfo(size_t" 1013 0  "bartfuns.cpp" "void makexinfo(size_t" 926]
+[ebrowse-ms "pgrow" () 0 "bartfuns.h" "double pgrow(tree" 1795 0  "bartfuns.cpp" "double pgrow(tree" 3140]
+[ebrowse-ms "prxi" () 0 "treefuns.h" "void prxi(xinfo" 981 0  "treefuns.cpp" "void prxi(xinfo" 934]
+[ebrowse-ms "rtnorm" () 0 "rtnorm.h" "double rtnorm(double" 888 0  "rtnorm.h" "double rtnorm(double" 888]
+)
+([ebrowse-ms "CallEntries" () 0 () () 0 0  "init.c" "    {NULL, NULL, 0}
+};" 726]
+)
+()
+([ebrowse-ms "GUARD_bart_h" () 512 () () 0 0  () "#define GUARD_bart_h
+" 846]
+[ebrowse-ms "GUARD_bartfuns_h" () 512 () () 0 0  "bartfuns.h" "#define GUARD_bartfuns_h
+" 854]
+[ebrowse-ms "GUARD_bd_h" () 512 () () 0 0  "bd.h" "#define GUARD_bd_h
+" 842]
+[ebrowse-ms "GUARD_common_h" () 512 () () 0 0  "common.h" "#define GUARD_common_h
+" 850]
+[ebrowse-ms "GUARD_heterbart_h" () 512 () () 0 0  "heterbart.h" "#define GUARD_heterbart_h
+" 856]
+[ebrowse-ms "GUARD_heterbartfuns_h" () 512 () () 0 0  "heterbartfuns.h" "#define GUARD_heterbartfuns_h
+" 864]
+[ebrowse-ms "GUARD_heterbd_h" () 512 () () 0 0  "heterbd.h" "#define GUARD_heterbd_h
+" 852]
+[ebrowse-ms "GUARD_info_h" () 512 () () 0 0  "info.h" "#define GUARD_info_h
+" 846]
+[ebrowse-ms "GUARD_rtnorm" () 512 () () 0 0  "rtnorm.h" "#define GUARD_rtnorm
+" 846]
+[ebrowse-ms "GUARD_tree_h" () 512 () () 0 0  "tree.h" "#define GUARD_tree_h
+" 846]
+[ebrowse-ms "GUARD_treefuns_h" () 512 () () 0 0  "treefuns.h" "#define GUARD_treefuns_h
+" 854]
+[ebrowse-ms "LTPI" () 512 () () 0 0  "common.h" "#define LTPI " 2753]
+[ebrowse-ms "PI" () 512 () () 0 0  "common.h" "#define PI " 2128]
+[ebrowse-ms "cout" () 512 () () 0 0  "common.h" "#define cout " 2221]
+[ebrowse-ms "printf" () 512 () () 0 0  "common.h" "#define printf " 2200]
+)
+([ebrowse-ms "vec_d" () 0 () () 0 0  "tree.h" "typedef std::vector<double> vec_d;" 1096]
+[ebrowse-ms "vtree" () 0 () () 0 0  "cpwbart.cpp" "typedef std::vector<tree> vtree;" 877]
+[ebrowse-ms "xinfo" () 0 () () 0 0  "tree.h" "typedef std::vector<vec_d> xinfo;" 1146]
+)
+()()
+]

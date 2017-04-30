@@ -53,7 +53,7 @@ recur.pre.bart <- function(
     if(N!=nrow(delta))
         stop('The number of rows in times and delta must be identical')
 
-    if(length(x.train)>0 & N!=nrow(x.train))
+    if(length(x.train)>0 && N!=nrow(x.train))
         stop('The number of rows in times and x.train, if any, must be identical')
 
     J <- ncol(times)

@@ -1,0 +1,197 @@
+
+bart.h,414
+#define GUARD_bart_h21,825
+class bart 31,962
+   size_t getm(bart::getm47,1377
+   void setpi(bart::setpi50,1503
+   void setprior(bart::setprior51,1545
+   void settau(bart::settau53,1657
+   tree& gettree(bart::gettree54,1698
+   xinfo& getxinfo(bart::getxinfo55,1742
+   void birth(bart::birth58,1832
+   void death(bart::death60,1947
+   void tonull(bart::tonull63,2038
+   double f(bart::f66,2201
+
+bartfuns.h,32
+#define GUARD_bartfuns_h21,829
+
+bd.h,26
+#define GUARD_bd_h21,823
+
+common.h,1076
+#define GUARD_common_h21,827
+using std::endl;29,946
+class rn36,1049
+   virtual ~rn(rn::~rn44,1318
+using std::cout;51,1377
+class arn:arn54,1452
+  typedef std::default_random_engine genD;arn::genD57,1488
+  typedef std::normal_distribution<double> norD;arn::norD58,1531
+  typedef std::uniform_real_distribution<double> uniD;arn::uniD59,1580
+  typedef std::chi_squared_distribution<double> chiD;arn::chiD60,1635
+  virtual double normal(arn::normal66,1753
+  virtual double uniform(arn::uniform67,1802
+  virtual double chi_square(arn::chi_square68,1852
+  virtual double exp(arn::exp69,1905
+  int get_df(arn::get_df71,1985
+#define PI 81,2117
+#define printf 87,2185
+#define cout 88,2208
+class arn:arn91,2285
+ arn(arn::arn95,2333
+  virtual ~arn(arn::~arn97,2361
+  virtual double normal(arn::normal98,2381
+  virtual double uniform(arn::uniform99,2432
+  virtual double chi_square(arn::chi_square100,2485
+  virtual double exp(arn::exp101,2547
+  virtual void set_df(arn::set_df102,2594
+  int get_df(arn::get_df103,2639
+#define LTPI 112,2740
+
+heterbart.h,141
+#define GUARD_heterbart_h21,830
+class heterbart 26,923
+   heterbart(heterbart::heterbart29,963
+   heterbart(heterbart::heterbart30,988
+
+heterbartfuns.h,37
+#define GUARD_heterbartfuns_h21,834
+
+heterbd.h,31
+#define GUARD_heterbd_h21,828
+
+info.h,159
+#define GUARD_info_h21,825
+class dinfo 24,873
+   dinfo(dinfo::dinfo26,895
+class pinfo33,1108
+   pinfo(pinfo::pinfo36,1130
+   void pr(pinfo::pr44,1336
+
+rtnorm.h,50
+#define GUARD_rtnorm21,825
+double rtnorm(25,868
+
+tree.h,809
+#define GUARD_tree_h21,825
+typedef std::vector<double> vec_d;30,1062
+typedef std::vector<vec_d> xinfo;31,1113
+struct node_info 35,1293
+class tree 43,1486
+   typedef tree* tree_p;tree::tree_p48,1632
+   typedef const tree* tree_cp;tree::tree_cp49,1657
+   typedef std::vector<tree_p> npv;tree::npv50,1689
+   typedef std::vector<tree_cp> cnpv;tree::cnpv51,1726
+   tree(tree::tree53,1813
+   tree(tree::tree54,1863
+   tree(tree::tree55,1938
+   ~tree(tree::~tree57,2068
+   void settheta(tree::settheta62,2193
+   void setv(tree::setv63,2245
+   void setc(tree::setc64,2283
+   double gettheta(tree::gettheta66,2330
+   size_t getv(tree::getv67,2373
+   size_t getc(tree::getc68,2408
+   tree_p getp(tree::getp69,2443
+   tree_p getl(tree::getl70,2474
+   tree_p getr(tree::getr71,2503
+
+treefuns.h,32
+#define GUARD_treefuns_h21,829
+
+bart.cpp,257
+bart::bart(24,890
+bart::bart(25,977
+bart::bart(26,1072
+bart::~bart(30,1199
+bart& bart::operator=(bart::operator=39,1365
+void bart::setm(60,1755
+void bart::setdata(68,1933
+void bart::predict(86,2383
+void bart::draw(100,2730
+void bart::pr(116,3181
+
+bartfuns.cpp,291
+void makexinfo(24,905
+double getpb(49,1674
+void getsuff(66,2259
+double lh(87,2820
+double pgrow(96,3123
+void getsuff(106,3392
+void allsuff(127,3963
+   typedef tree::npv::size_type bvsz;136,4305
+void drmu(155,4765
+void bprop(167,5167
+void dprop(237,8020
+double drawnodemu(277,9510
+
+bd.cpp,16
+bool bd(22,821
+
+cpbart.cpp,31
+RcppExport SEXP cpbart(32,973
+
+cpwbart.cpp,125
+typedef std::vector<tree> vtree;23,845
+RcppExport SEXP cpwbart(32,1319
+void getpred(105,3679
+void local_getpred(120,4211
+
+cwbart.cpp,31
+RcppExport SEXP cwbart(30,958
+
+heterbart.cpp,57
+void heterbart::pr(23,881
+void heterbart::draw(29,1013
+
+heterbartfuns.cpp,207
+double heterlh(24,944
+void hetergetsuff(31,1182
+void hetergetsuff(55,1932
+double heterdrawnodemu(79,2542
+void heterallsuff(87,2859
+   typedef tree::npv::size_type bvsz;96,3219
+void heterdrmu(117,3752
+
+heterbd.cpp,21
+bool heterbd(22,826
+
+init.c,86
+static const R_CallMethodDef CallEntries[CallEntries15,534
+void R_init_BART(22,728
+
+tree.cpp,791
+size_t tree::nid(24,857
+tree::tree_p tree::getptr(31,1101
+bool tree::birth(43,1468
+size_t tree::depth(70,2095
+size_t tree::treesize(77,2219
+char tree::ntype(84,2386
+void tree::pr(94,2638
+bool tree::death(123,3327
+bool tree::isnog(146,3795
+size_t tree::nnogs(157,4012
+size_t tree::nbots(167,4213
+void tree::getbots(177,4385
+void tree::getnogs(188,4570
+void tree::getnodes(201,4844
+void tree::getnodes(209,4958
+tree::tree_p tree::bn(218,5103
+void tree::rg(229,5341
+void tree::tonull(248,5774
+void tree::cp(269,6204
+tree& tree::operator=(tree::operator=293,6690
+std::ostream& operator<<(303,6949
+std::istream& operator>>(316,7290
+void tree::birthp(364,8735
+void tree::deathp(378,9036
+Rcpp::List tree::tree2list(395,9414
+Rcpp::IntegerVector tree::tree2count(446,11400
+
+treefuns.cpp,103
+void prxi(24,919
+void grm(35,1280
+void fit(58,1955
+bool cansplit(68,2258
+void getgoodvars(83,2712

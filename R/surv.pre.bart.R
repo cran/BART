@@ -49,7 +49,7 @@ surv.pre.bart <- function(
     if(N!=length(delta))
         stop('The length of times and delta must be identical')
 
-    if(length(x.train)>0 & N!=nrow(x.train))
+    if(length(x.train)>0 && N!=nrow(x.train))
         stop('The length of times and the number of rows in x.train, if any, must be identical')
 
     events <- unique(sort(times))

@@ -53,10 +53,10 @@ crisk.pre.bart <- function(
     if(!all(unique(sort(delta))==0:2)) 
         stop('delta must be coded as: 0(censored), 1(cause of interest) or 2(other cause)')
 
-    if(length(x.train)>0 & length(x.train2)>0 & nrow(x.train)!=nrow(x.train2))
+    if(length(x.train)>0 && length(x.train2)>0 && nrow(x.train)!=nrow(x.train2))
         stop('number of rows in x.train and x.train2 must be equal')
 
-    if(length(x.test)>0 & length(x.test2)>0 & nrow(x.test)!=nrow(x.test2))
+    if(length(x.test)>0 && length(x.test2)>0 && nrow(x.test)!=nrow(x.test2))
         stop('number of rows in x.test and x.test2 must be equal')
         
     pre <- surv.pre.bart(times=times, 1*(delta==1), x.train=x.train, x.test=x.test)

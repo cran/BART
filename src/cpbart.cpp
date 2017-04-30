@@ -62,8 +62,6 @@ RcppExport SEXP cpbart(
    double *ix = &xv[0];
    Rcpp::IntegerVector  yv(_iy); // binary
    int *iy = &yv[0];
-//   Rcpp::NumericVector  zv(n);   // latents
-//   double *iz = &zv[0];
    Rcpp::NumericVector  xpv(_ixp);
    double *ixp = &xpv[0];
    size_t m = Rcpp::as<int>(_im);
@@ -74,7 +72,6 @@ RcppExport SEXP cpbart(
    double alpha = Rcpp::as<double>(_ibase);
    double binaryOffset = Rcpp::as<double>(_binaryOffset);
    double tau = Rcpp::as<double>(_itau);
-   double nu = 1.;
 
    size_t nkeeptrain = Rcpp::as<int>(_inkeeptrain);
    size_t nkeeptest = Rcpp::as<int>(_inkeeptest);
@@ -95,8 +92,10 @@ RcppExport SEXP cpbart(
    Rcpp::NumericMatrix tedraw(nkeeptest,np);
    Rcpp::List list_of_lists(nkeeptreedraws*treesaslists);
 
+   //random number generation
+   arn gen;
+
 #else
-#include <stdio.h> // for printf
 
 void cpbart(
    size_t n,            //number of observations in training data
@@ -117,11 +116,30 @@ void cpbart(
    size_t nkeeptest,
    size_t nkeeptestme,
    size_t nkeeptreedraws,
-   size_t printevery
+   size_t printevery,
+   int treesaslists,
+   unsigned int n1, // additional parameters needed to call from C++
+   unsigned int n2,
+   double* trmean,
+   double* temean,
+   double* sdraw,
+   double* _trdraw,
+   double* _tedraw
 )
 {
   
- double nu = 1.;
+   //return data structures (using C++)
+   for(size_t i=0; i<n; ++i) trmean[i]=0.0;
+   for(size_t i=0; i<np; ++i) temean[i]=0.0;
+
+   std::vector<double*> trdraw(nkeeptrain);
+   std::vector<double*> tedraw(nkeeptest);
+
+   for(size_t i=0; i<nkeeptrain; ++i) trdraw[i]=&_trdraw[i*n];
+   for(size_t i=0; i<nkeeptest; ++i) tedraw[i]=&_tedraw[i*np];
+
+   //random number generation
+   arn gen(n1, n2);
 #endif
    
  double* iz = new double[n];
@@ -131,10 +149,7 @@ void cpbart(
    treess << nkeeptreedraws << " " << m << " " << p << endl;
 
    printf("*****Into main of pbart\n");
-   //random number generation
-   //GetRNGstate();
-   //rrn gen;
-   arn gen;
+
 
    size_t skiptr,skipte,skipteme,skiptreedraws;
    if(nkeeptrain) {skiptr=nd/nkeeptrain;}
@@ -156,11 +171,9 @@ void cpbart(
    printf("*****Number of Trees: %d\n",m);
    printf("*****Number of Cut Points: %d\n",nc);
    printf("*****burn and ndpost: %d, %d\n",burn,nd);
-   printf("*****Prior:\nbeta,alpha,tau,nu: %lf,%lf,%lf,%lf\n",
-                   mybeta,alpha,tau,nu);
-   //printf("*****sigma: %lf\n",sigma);
+   printf("*****Prior:\nbeta,alpha,tau: %lf,%lf,%lf\n",
+                   mybeta,alpha,tau);
    printf("*****binaryOffset: %lf\n",binaryOffset);
-   //printf("*****w (weights): %lf ... %lf\n",iw[0],iw[n-1]);
    printf("*****nkeeptrain,nkeeptest,nkeeptestme,nkeeptreedraws: %d,%d,%d,%d\n",
                nkeeptrain,nkeeptest,nkeeptestme,nkeeptreedraws);
    printf("*****printevery: %d\n",printevery);
@@ -185,8 +198,6 @@ void cpbart(
    //out of sample fit
    double* fhattest=0; //posterior mean for prediction
    if(np) { fhattest = new double[np]; }
-   //double restemp=0.0,rss=0.0;
-
 
    //--------------------------------------------------
    //mcmc
@@ -218,12 +229,12 @@ void cpbart(
          if(nkeeptrain && (((i-burn+1) % skiptr) ==0)) {
             //index = trcnt*n;;
             //for(size_t k=0;k<n;k++) trdraw[index+k]=bm.f(k);
-            for(size_t k=0;k<n;k++) trdraw(trcnt,k)=bm.f(k);
-// if(treesaslists) {
-//    Rcpp::List lists(m);
-//    for(size_t k=0;k<m;k++) lists(k)=bm.gettree(k).tree2list(xi, 0., 1.);
-//    list_of_lists(trcnt)=lists;
-// }
+            for(size_t k=0;k<n;k++) 
+	      #ifndef NoRcpp
+	      trdraw(trcnt,k)=bm.f(k);
+	      #else 
+	      trdraw[trcnt][k]=bm.f(k);
+	      #endif
             trcnt+=1;
          }
          keeptest = nkeeptest && (((i-burn+1) % skipte) ==0) && np;
@@ -232,7 +243,12 @@ void cpbart(
          if(keeptest) {
             //index=tecnt*np;
             //for(size_t k=0;k<np;k++) tedraw[index+k]=fhattest[k];
-            for(size_t k=0;k<np;k++) tedraw(tecnt,k)=fhattest[k];
+            for(size_t k=0;k<np;k++) 
+	      #ifndef NoRcpp
+	      tedraw(tecnt,k)=fhattest[k];
+	      #else
+	      tedraw[tecnt][k]=fhattest[k];
+	      #endif
             tecnt+=1;
          }
          if(keeptestme) {
@@ -272,7 +288,6 @@ void cpbart(
 
    if(fhattest) delete[] fhattest;   
    delete[] iz;
-   //if(svec) delete [] svec;
 
 #ifndef NoRcpp
    //--------------------------------------------------

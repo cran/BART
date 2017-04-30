@@ -96,8 +96,10 @@ RcppExport SEXP cwbart(
    Rcpp::NumericMatrix tedraw(nkeeptest,np);
    Rcpp::List list_of_lists(nkeeptreedraws*treesaslists);
 
+   //random number generation
+   arn gen;
+
 #else
-#include <stdio.h> // for printf
 
 void cwbart(
    size_t n,            //number of observations in training data
@@ -121,17 +123,35 @@ void cwbart(
    size_t nkeeptest,
    size_t nkeeptestme,
    size_t nkeeptreedraws,
-   size_t printevery
+   size_t printevery,
+   int treesaslists,
+   unsigned int n1, // additional parameters needed to call from C++
+   unsigned int n2,
+   double* trmean,
+   double* temean,
+   double* sdraw,
+   double* _trdraw,
+   double* _tedraw
 )
 {
+
+   //return data structures (using C++)
+   for(size_t i=0; i<n; ++i) trmean[i]=0.0;
+   for(size_t i=0; i<np; ++i) temean[i]=0.0;
+
+   std::vector<double*> trdraw(nkeeptrain);
+   std::vector<double*> tedraw(nkeeptest);
+
+   for(size_t i=0; i<nkeeptrain; ++i) trdraw[i]=&_trdraw[i*n];
+   for(size_t i=0; i<nkeeptest; ++i) tedraw[i]=&_tedraw[i*np];
+
+   //random number generation
+   arn gen(n1, n2); 
+
 #endif
 
    printf("*****Into main of wbart\n");
    //-----------------------------------------------------------
-   //random number generation
-   //GetRNGstate();
-   //rrn gen;
-   arn gen;
 
    size_t skiptr,skipte,skipteme,skiptreedraws;
    if(nkeeptrain) {skiptr=nd/nkeeptrain;}
@@ -215,7 +235,12 @@ void cwbart(
          if(nkeeptrain && (((i-burn+1) % skiptr) ==0)) {
             //index = trcnt*n;;
             //for(size_t k=0;k<n;k++) trdraw[index+k]=bm.f(k);
-            for(size_t k=0;k<n;k++) trdraw(trcnt,k)=bm.f(k);
+            for(size_t k=0;k<n;k++) //trdraw(trcnt,k)=bm.f(k);
+	      #ifndef NoRcpp
+	      trdraw(trcnt,k)=bm.f(k);
+	      #else 
+	      trdraw[trcnt][k]=bm.f(k);
+	      #endif
             trcnt+=1;
          }
          keeptest = nkeeptest && (((i-burn+1) % skipte) ==0) && np;
@@ -224,7 +249,12 @@ void cwbart(
          if(keeptest) {
             //index=tecnt*np;
             //for(size_t k=0;k<np;k++) tedraw[index+k]=fhattest[k];
-            for(size_t k=0;k<np;k++) tedraw(tecnt,k)=fhattest[k];
+            for(size_t k=0;k<np;k++) //tedraw(tecnt,k)=fhattest[k];
+              #ifndef NoRcpp
+	      tedraw(tecnt,k)=fhattest[k];
+	      #else
+	      tedraw[tecnt][k]=fhattest[k];
+	      #endif
             tecnt+=1;
          }
          if(keeptestme) {

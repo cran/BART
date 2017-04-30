@@ -211,14 +211,6 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \examples{
 
-##test BART with token run to ensure installation works
-set.seed(21)
-x <- matrix(runif(1000*5), nrow=1000, ncol=5)
-y <- 1*(apply(x, 1, mean)>2.5)
-post <- pbart(x, y, nskip=5, ndpost=5)
-
-\dontrun{
-require(speff2trial)
 data(ACTG175)
 
 ## exclude those who do not have CD4 count at 96 weeks
@@ -271,6 +263,11 @@ test3 <- train; test3[ , 1:4] <- 0; test3[ , 4] <- 1
 
 test <- rbind(test0, test1, test2, test3)
 
+##test BART with token run to ensure installation works
+set.seed(21)
+post <- pbart(train, y, test, nskip=5, ndpost=5)
+
+\dontrun{
 set.seed(21)
 post <- pbart(train, y, test)
 
