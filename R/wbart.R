@@ -16,7 +16,7 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-wbart=function( 
+wbart=function(
 x.train, y.train, x.test=matrix(0.0,0,0),
 sigest=NA, sigdf=3, sigquant=.90,
 k=2.0,
@@ -25,20 +25,16 @@ sigmaf=NA,
 lambda=NA,
 fmean=mean(y.train),
 w=rep(1,length(y.train)),
-ntree=200, numcut=100,
-ndpost=1000, nskip=100,
-nkeeptrain=ndpost,nkeeptest=ndpost,
-nkeeptestmean=ndpost,
-nkeeptreedraws=ndpost,
-printevery=100, transposed=FALSE,
+ntree=200L, numcut=100L,
+ndpost=1000L, nskip=100L, keepevery=1L,
+nkeeptrain=ndpost, nkeeptest=ndpost,
+nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+printevery=100L, transposed=FALSE,
 treesaslists=FALSE
 )
 {
 #--------------------------------------------------
-nd = ndpost
-burn = nskip
-#--------------------------------------------------
-#data 
+#data
 n = length(y.train)
 
 if(!transposed) {
@@ -48,13 +44,13 @@ if(!transposed) {
 
 if(n!=ncol(x.train))
     stop('The length of y.train and the number of rows in x.train must be identical')
-    
+
 p = nrow(x.train)
 np = ncol(x.test)
 
 y.train = y.train-fmean
 #--------------------------------------------------
-#set  nkeeps for thinning
+#set nkeeps for thinning
 if((nkeeptrain!=0) & ((ndpost %% nkeeptrain) != 0)) {
    nkeeptrain=ndpost
    cat('*****nkeeptrain set to ndpost\n')
@@ -106,8 +102,8 @@ res = .Call("cwbart",
             x.test,   #p*np test data x
             ntree,
             numcut,
-            nd,
-            burn,
+            ndpost*keepevery,
+            nskip,
             power,
             base,
             tau,
@@ -122,10 +118,12 @@ res = .Call("cwbart",
             printevery,
             treesaslists
 )
+res$mu = fmean
 res$yhat.train.mean = res$yhat.train.mean+fmean
 res$yhat.train = res$yhat.train+fmean
 res$yhat.test.mean = res$yhat.test.mean+fmean
 res$yhat.test = res$yhat.test+fmean
 ##res$nkeeptreedraws=nkeeptreedraws
+attr(res, 'class') <- 'wbart'
 return(res)
 }

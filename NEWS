@@ -1,0 +1,30 @@
+Changes and New Features in 1.3 (2017-09-18):
+
+	* wbart/mc.wbart/pbart/mc.pbart/surv.bart/mc.surv.bart/
+	  crisk.bart/mc.crisk.bart/recur.bart/mc.recur.bart
+	  now return ndpost values rather ndpost/keepevery
+
+	* for calling BART directly from C++, you can
+	  now use the RNG provided by Rmath or the STL random class
+	  see the improved example in cxx-ex
+
+	* new predict S3 methods, see predict.wbart and other
+	  predict variants
+
+	* Added Geweke diagnostics for pbart, surv.bart, etc.
+	  See gewekediag which is adapted from the coda package
+
+	* Logistic BART added for binary outcomes; see lbart
+
+	* Multinomial BART added for categorical outcomes; see mbart
+
+Changes and New Features in 1.2 (2017-04-30):
+
+	* you can now call BART directly from C++ with the Rmath library 
+	  see new header rn.h and the example in cxx-ex
+
+Changes and New Features in 1.1 (2017-04-13):
+	* No user visible changes: bug-fix release
+
+Changes and New Features in 1.0 (2017-04-07):
+	* First release on CRAN

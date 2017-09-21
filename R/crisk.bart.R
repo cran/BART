@@ -27,16 +27,16 @@ crisk.bart <- function(
     binaryOffset = NULL,
     binaryOffset2 = NULL,
     ntree = 50L, numcut = 100L,
-    ndpost = 10000L, nskip = 250L,
-    keepevery = 10L, 
-    nkeeptrain=ndpost%/%keepevery, nkeeptest=ndpost%/%keepevery,
-    nkeeptestmean=ndpost%/%keepevery, nkeeptreedraws=ndpost%/%keepevery,
-    printevery=100L, 
+    ndpost = 1000L, nskip = 250L,
+    keepevery = 10L,
+    nkeeptrain=ndpost, nkeeptest=ndpost,
+    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    printevery=100L,
     treesaslists=FALSE, keeptrainfits=TRUE,
     id = NULL,
     seed=99,    ## mc.crisk.bart only
     mc.cores=2, ## mc.crisk.bart only
-    nice=19L    ## mc.crisk.bart only  
+    nice=19L    ## mc.crisk.bart only
 )
 {
     if(length(y.train)==0) {
@@ -75,10 +75,12 @@ crisk.bart <- function(
                   binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip,
-                  keepevery=keepevery, nkeeptrain=0*nkeeptrain,
+                  keepevery=keepevery, nkeeptrain=0,
                   nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
                   nkeeptreedraws=nkeeptreedraws, printevery=printevery,
                   treesaslists=treesaslists)
+
+    if(attr(post, 'class')!='pbart') return(post)
 
     post2 <- pbart(x.train=as.matrix(x.train2[cond, ]),
                    y.train=y.train2[cond], x.test=x.test2,
@@ -86,10 +88,12 @@ crisk.bart <- function(
                    binaryOffset=binaryOffset2,
                    ntree=ntree, numcut=numcut,
                    ndpost=ndpost, nskip=nskip,
-                   keepevery=keepevery, nkeeptrain=0*nkeeptrain,
+                   keepevery=keepevery, nkeeptrain=0,
                    nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
                    nkeeptreedraws=nkeeptreedraws, printevery=printevery,
                    treesaslists=treesaslists)
+
+    if(attr(post2, 'class')!='pbart') return(post2)
 
     post$binaryOffset <- binaryOffset
     post$binaryOffset2 <- binaryOffset2
@@ -103,7 +107,7 @@ crisk.bart <- function(
     post$varcount2 <- post2$varcount
     post$yhat.train <- NULL
     post$yhat.train.mean <- NULL
-    
+
     if(length(x.test)>0) {
         post$tx.test <- x.test
         post$tx.test2 <- x.test2
@@ -120,7 +124,7 @@ crisk.bart <- function(
 
         for(h in 1:H) for(j in 2:K) {
                 l <- K*(h-1)+j
-                
+
                 post$cif.test[ , l] <- post$cif.test[ , l-1]+post$surv.test[ , l-1]*post$cif.test[ , l]
                 post$cif.test2[ , l] <- post$cif.test2[ , l-1]+post$surv.test[ , l-1]*post$cif.test2[ , l]
                 post$surv.test[ , l] <- post$surv.test[ , l-1]*post$surv.test[ , l]
@@ -130,6 +134,8 @@ crisk.bart <- function(
         post$cif.test2.mean <- apply(post$cif.test2, 2, mean)
         post$surv.test.mean <- apply(post$surv.test, 2, mean)
     }
+
+    attr(post, 'class') <- 'criskbart'
 
     return(post)
 }

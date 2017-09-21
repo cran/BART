@@ -24,13 +24,13 @@ recur.bart <- function(
     x.test.nogrid = FALSE, ## you may not need the whole grid
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL,
+    binaryOffset = NULL, ##M=1,
     ntree = 50L, numcut = 100L,
-    ndpost = 10000L, nskip = 250L,
-    keepevery = 10L, 
-    nkeeptrain=ndpost%/%keepevery, nkeeptest=ndpost%/%keepevery,
-    nkeeptestmean=ndpost%/%keepevery, nkeeptreedraws=ndpost%/%keepevery,
-    printevery=100L, 
+    ndpost = 1000L, nskip = 250L,
+    keepevery = 10L,
+    nkeeptrain=ndpost, nkeeptest=ndpost,
+    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    printevery=100L,
     treesaslists=FALSE, keeptrainfits=TRUE,
     seed = 99L,    ## only used by mc.recur.bart
     mc.cores = 2L, ## ditto
@@ -61,7 +61,7 @@ recur.bart <- function(
 
     post <- pbart(x.train=x.train, y.train=y.train, x.test=x.test,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset,
+                  binaryOffset=binaryOffset, ##M=M,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip,
                   keepevery=keepevery, nkeeptrain=nkeeptrain,
@@ -69,43 +69,36 @@ recur.bart <- function(
                   nkeeptreedraws=nkeeptreedraws, printevery=printevery,
                   treesaslists=treesaslists)
 
+    if(attr(post, 'class')!='pbart') return(post)
+
     post$binaryOffset <- binaryOffset
     post$times <- times
     post$K <- K
     post$tx.train <- x.train
 
-    post$cum.train <- pnorm(post$yhat.train)
-    post$haz.train <- post$cum.train
+    ## training grid could be incomplete due to death and/or forced zeros
 
-    H <- nrow(x.train)
+    ## if(length(x.test)==0) {
+    ##     post$cum.train <- pnorm(post$yhat.train)
+    ##     post$haz.train <- post$cum.train
 
-    for(h in 1:H) {
-        j <- which(x.train[h, 1]==times) ## for grid points only
+    ##     H <- nrow(x.train)
 
-        if(j==1) post$haz.train[ , h] <- post$haz.train[ , h]/times[1]
-        else {
-            post$haz.train[ , h] <- post$haz.train[ , h]/(times[j]-times[j-1])
-            post$cum.train[ , h] <- post$cum.train[ , h-1]+post$cum.train[ , h]
-        }
-    }
+    ##     for(h in 1:H) {
+    ##         j <- which(x.train[h, 1]==times) ## for grid points only
 
-    ## H <- nrow(x.train)
-    ## time <- 0
-
-    ## for(h in 1:H) {
-    ##     prev <- time
-    ##     time <- x.train[h, 1]
-
-    ##     if(time==post$times[1]) post$haz.train[ , h] <- post$haz.train[ , h]/time
-    ##     else {
-    ##         post$haz.train[ , h] <- post$haz.train[ , h]/(time-prev)
-    ##         post$cum.train[ , h] <- post$cum.train[ , h-1]+post$cum.train[ , h]
+    ##         if(j==1) post$haz.train[ , h] <- post$haz.train[ , h]/times[1]
+    ##         else {
+    ##             post$haz.train[ , h] <- post$haz.train[ , h]/(times[j]-times[j-1])
+    ##             post$cum.train[ , h] <- post$cum.train[ , h-1]+post$cum.train[ , h]
+    ##         }
     ##     }
     ## }
+    ## else {
 
-    if(length(x.test)>0) {
+    if(length(x.test)>0) { ## this should always be the case
         post$tx.test <- x.test
-        
+
         post$haz.test <- pnorm(post$yhat.test)
 
         if(!x.test.nogrid) {
@@ -139,6 +132,8 @@ recur.bart <- function(
         ## }
 
     }
+
+    attr(post, 'class') <- 'recurbart'
 
     return(post)
 }

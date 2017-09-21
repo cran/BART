@@ -19,9 +19,9 @@
 mc.recur.pwbart <- function(
    x.test,		#x matrix to predict at with time points expanded
    treedraws,		#$treedraws for from recur.bart/mc.recur.bart
-   binaryOffset=0,	#mean to add on 
+   binaryOffset=0,	#mean to add on
    mc.cores=2L,
-   transposed=FALSE,	
+   transposed=FALSE,
    nice=19L
 )
 {
@@ -33,16 +33,16 @@ mc.recur.pwbart <- function(
     p <- length(treedraws$cutpoints)
 
     if(p!=nrow(x.test))
-        stop(paste0('The number of columns in x.test must be equal to ', p))   
-    
+        stop(paste0('The number of columns in x.test must be equal to ', p))
+
     K <- ncol(x.test)
     k <- K%/%mc.cores
     j <- K
     for(i in 1:mc.cores) {
         if(i==mc.cores) h <- 1
         else h <- j-k
-        
-        parallel::mcparallel({psnice(value=nice); 
+
+        parallel::mcparallel({psnice(value=nice);
             pwbart(x.test[ , h:j], treedraws, binaryOffset, 1, TRUE)},
             silent=(i!=1))
         j <- h-1
@@ -62,9 +62,11 @@ mc.recur.pwbart <- function(
 
     pred$yhat.test <- yhat.test.list[[1]]
 
-    if(mc.cores>1) for(i in 2:mc.cores) 
+    if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
+
+    if(mc.cores>1) for(i in 2:mc.cores)
                        pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])
-    
+
     H <- nrow(x.test)/K ## the number of different settings
 
     pred$haz.test <- pnorm(pred$yhat.test)
@@ -82,10 +84,12 @@ mc.recur.pwbart <- function(
             pred$cum.test[ , h] <- pred$cum.test[ , h-1]+pred$cum.test[ , h]
         }
     }
-    
+
 ##    pred$yhat.test.mean <- apply(pred$yhat.test, 2, mean)
     pred$haz.test.mean <- apply(pred$haz.test, 2, mean)
     pred$cum.test.mean <- apply(pred$cum.test, 2, mean)
-    
+
+    attr(pred, 'class') <- 'recurbart'
+
     return(pred)
 }

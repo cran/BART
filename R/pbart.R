@@ -16,24 +16,20 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-pbart=function( 
+pbart=function(
 x.train, y.train, x.test=matrix(0.0,0,0),
 k=2.0, power=2.0, base=.95,
-binaryOffset=NULL,
+binaryOffset=NULL, ##M=1,
 ntree=200L, numcut=100L,
-ndpost=1000L, nskip=100L,
-keepevery=1L,
-nkeeptrain=ndpost%/%keepevery, nkeeptest=ndpost%/%keepevery,
-nkeeptestmean=ndpost%/%keepevery, nkeeptreedraws=ndpost%/%keepevery,
-printevery=100, transposed=FALSE,
+ndpost=1000L, nskip=100L, keepevery=1L,
+nkeeptrain=ndpost, nkeeptest=ndpost,
+nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+printevery=100L, transposed=FALSE,
 treesaslists=FALSE
 )
 {
 #--------------------------------------------------
-nd = ndpost
-burn = nskip
-#--------------------------------------------------
-#data 
+#data
 n = length(y.train)
 
 if(length(binaryOffset)==0) binaryOffset <- 0
@@ -84,7 +80,7 @@ if((nkeeptreedraws!=0) & ((ndpost %% nkeeptreedraws) != 0)) {
 ##    }
 ##    qchi = qchisq(1.0-sigquant,nu)
 ##    lambda = (sigest*sigest*qchi)/nu #lambda parameter for sigma prior
-## } 
+## }
 
 ## if(is.na(sigmaf)) {
 ##    tau=(max(y.train)-min(y.train))/(2*k*sqrt(ntree));
@@ -102,12 +98,13 @@ res = .Call("cpbart",
             x.test,    #p*np test data x
             ntree,
             numcut,
-            nd,
-            burn,
+            ndpost*keepevery,
+            nskip,
             power,
             base,
-            binaryOffset, 
+            binaryOffset,
             3/(k*sqrt(ntree)),
+            ##M,
             #nu,
             #lambda,
             #sigest,
@@ -125,5 +122,6 @@ res$yhat.train = res$yhat.train+binaryOffset
 res$yhat.test.mean = res$yhat.test.mean+binaryOffset
 res$yhat.test = res$yhat.test+binaryOffset
 ##res$nkeeptreedraws=nkeeptreedraws
+attr(res, 'class') <- 'pbart'
 return(res)
 }

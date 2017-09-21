@@ -99,7 +99,7 @@ mc.pbart(
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -155,10 +155,11 @@ mc.pbart(
    The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
 }
 \value{
-   \code{mc.pbart} returns a list. % assigned class \sQuote{bart}.
+   \code{mc.pbart} returns an object of type \code{pbart} which is
+   essentially a list. % assigned class \sQuote{bart}.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -169,7 +170,7 @@ mc.pbart(
    \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
    \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
@@ -226,7 +227,15 @@ if(.Platform$OS.type=='unix') {
 set.seed(99)
 pf = pbart(X,y,Xp)
 
+plot(f(Xp), pf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
+     xlab='True f(x)', ylab='BART f(x)')
+lines(c(-4, 4), c(-4, 4))
+
 mf = mc.pbart(X,y,Xp, mc.cores=4, seed=99)
+
+plot(f(Xp), mf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
+     xlab='True f(x)', ylab='BART f(x)')
+lines(c(-4, 4), c(-4, 4))
 
 par(mfrow=c(2,2))
 

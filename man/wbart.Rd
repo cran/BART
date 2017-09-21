@@ -24,11 +24,11 @@ wbart(
    power=2.0, base=.95,
    sigmaf=NA, lambda=NA,
    fmean=mean(y.train), w=rep(1,length(y.train)),
-   ntree=200, numcut=100,
-   ndpost=1000, nskip=100,
+   ntree=200L, numcut=100L,
+   ndpost=1000L, nskip=100L, keepevery=1L,
    nkeeptrain=ndpost, nkeeptest=ndpost,
    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
-   printevery=100, transposed=FALSE, treesaslists=FALSE
+   printevery=100L, transposed=FALSE, treesaslists=FALSE
 )
 }
 \arguments{
@@ -41,7 +41,7 @@ wbart(
    one dummy is created if q=2, where q is the number of levels of the factor.
    %\code{makeind} is used to generate the dummies.
    \code{wbart} will generate draws of \eqn{f(x)} for each \eqn{x}
-   which is a row of x.train.
+   which is a row of \code{x.train}.
    }
 
    \item{y.train}{
@@ -130,7 +130,7 @@ wbart(
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -157,13 +157,13 @@ wbart(
    As the MCMC runs, a message is printed every printevery draws.
    }
 
-   %% \item{keepevery}{
-   %% Every keepevery draw is kept to be returned to the user.\cr
+   \item{keepevery}{
+   Every keepevery draw is kept to be returned to the user.\cr
    %% A \dQuote{draw} will consist of values of the error standard deviation (\eqn{\sigma}{sigma})
    %% and \eqn{f^*(x)}{f*(x)}
    %% at \eqn{x} = rows from the train(optionally) and test data, where \eqn{f^*}{f*} denotes
    %% the current draw of \eqn{f}.
-   %% }
+   }
 
    \item{transposed}{
    When running \code{wbart} in parallel, it is more memory-efficient
@@ -196,11 +196,12 @@ wbart(
    %% The second plot has \eqn{y} on the horizontal axis and posterior intervals for
    %% the corresponding \eqn{f(x)} on the vertical axis.
 
-   \code{wbart} returns a list. % assigned class \sQuote{bart}.
+   \code{wbart} returns an object of type \code{wbart} which is
+   essentially a list. % assigned class \sQuote{bart}.
    In the numeric \eqn{y} case, the list has components:
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -211,9 +212,9 @@ wbart(
    \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
    \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{sigma}{post burn in draws of sigma, length = ndpost/keepevery.}
+   \item{sigma}{post burn in draws of sigma, length = ndpost.}
    \item{first.sigma}{burn-in draws of sigma.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}

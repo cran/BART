@@ -1,0 +1,13 @@
+aids.itr.pbart	   AIDS example for individualized treatment rules with BART
+cube.pbart	   x-cubed example for binary outcomes with BART
+friedman.wbart     Friedman's five dimensional test function and multi-threading with BART   
+geweke.pbart1 	   Geweke diagnostics for binary outcomes with BART part 1
+geweke.pbart2 	   Geweke diagnostics for binary outcomes with BART part 2
+geweke.pbart3 	   Geweke diagnostics for binary outcomes with BART part 3
+geweke.surv.bart   Geweke diagnostics for survival analysis with BART
+geweke.lung.surv.bart   Geweke diagnostics for advanced lung cancer survival analysis with BART
+dm.recur.bart	   Diabetes and hospital admission example for recurrent events with BART
+liver.crisk.bart   Liver transplant example for competing risks with BART
+lung.surv.bart	   Lung cancer example for survival analysis with BART
+nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
+nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2

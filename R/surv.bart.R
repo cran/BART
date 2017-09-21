@@ -23,13 +23,12 @@ surv.bart <- function(
     x.test = matrix(0.0, 0L, 0L),
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL,
+    binaryOffset = NULL, ##M=1,
     ntree = 50L, numcut = 100L,
-    ndpost = 10000L, nskip = 250L,
-    keepevery = 10L, 
-    nkeeptrain=ndpost%/%keepevery, nkeeptest=ndpost%/%keepevery,
-    nkeeptestmean=ndpost%/%keepevery, nkeeptreedraws=ndpost%/%keepevery,
-    printevery=100L, 
+    ndpost = 1000L, nskip = 250L, keepevery = 10L,
+    nkeeptrain=ndpost, nkeeptest=ndpost,
+    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    printevery=100L,
     treesaslists=FALSE, keeptrainfits=TRUE,
     id = NULL,     ## only used by surv.bart
     seed = 99L,    ## only used by mc.surv.bart
@@ -50,6 +49,9 @@ surv.bart <- function(
         if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
     }
     else {
+        if(length(unique(sort(y.train)))>2)
+            stop('y.train has >2 values; make sure you specify times=times & delta=delta')
+
         if(length(binaryOffset)==0) binaryOffset <- 0
 
         times <- unique(sort(x.train[ , 1]))
@@ -58,13 +60,15 @@ surv.bart <- function(
 
     post <- pbart(x.train=x.train, y.train=y.train, x.test=x.test,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset,
+                  binaryOffset=binaryOffset, ##M=M,
                   ntree=ntree, numcut=numcut,
-                  ndpost=ndpost, nskip=nskip,
-                  keepevery=keepevery, nkeeptrain=nkeeptrain,
-                  nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
-                  nkeeptreedraws=nkeeptreedraws, printevery=printevery,
+                  ndpost=ndpost, nskip=nskip, keepevery=keepevery,
+                  nkeeptrain=nkeeptrain, nkeeptest=nkeeptest,
+                  nkeeptestmean=nkeeptestmean, nkeeptreedraws=nkeeptreedraws,
+                  printevery=printevery,
                   treesaslists=treesaslists)
+
+    if(attr(post, 'class')!='pbart') return(post)
 
     post$binaryOffset <- binaryOffset
     post$id <- id
@@ -72,19 +76,19 @@ surv.bart <- function(
     post$K <- K
     post$tx.train <- x.train
 
-    if(keeptrainfits) {
-        post$surv.train <- 1-pnorm(post$yhat.train)
+    ## if(keeptrainfits) {
+    ##     post$surv.train <- 1-pnorm(post$yhat.train)
 
-        H <- nrow(x.train)/K ## the number of different settings
+    ##     H <- nrow(x.train)/K ## the number of different settings
 
-        for(h in 1:H) for(j in 2:K) {
-                l <- K*(h-1)+j
+    ##     for(h in 1:H) for(j in 2:K) {
+    ##             l <- K*(h-1)+j
 
-                post$surv.train[ , l] <- post$surv.train[ , l-1]*post$surv.train[ , l]
-                      }
+    ##             post$surv.train[ , l] <- post$surv.train[ , l-1]*post$surv.train[ , l]
+    ##                   }
 
-        post$surv.train.mean <- apply(post$surv.train, 2, mean)
-    }
+    ##     post$surv.train.mean <- apply(post$surv.train, 2, mean)
+    ## }
 
     if(length(x.test)>0) {
         post$tx.test <- x.test
@@ -100,6 +104,8 @@ surv.bart <- function(
 
         post$surv.test.mean <- apply(post$surv.test, 2, mean)
     }
+
+    attr(post, 'class') <- 'survbart'
 
     return(post)
 }

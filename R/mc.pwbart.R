@@ -21,7 +21,7 @@ mc.pwbart = function(
    treedraws,		#$treedraws from wbart
    mu=0,		#mean to add on
    mc.cores=2L,
-   transposed=FALSE,	
+   transposed=FALSE,
    nice=19L
 )
 {
@@ -33,28 +33,32 @@ mc.pwbart = function(
     p <- length(treedraws$cutpoints)
 
     if(p!=nrow(x.test))
-        stop(paste0('The number of columns in x.test must be equal to ', p))   
-        
+        stop(paste0('The number of columns in x.test must be equal to ', p))
+
+    mc.cores.detected <- detectCores()
+
+    if(!is.na(mc.cores.detected) && mc.cores>mc.cores.detected) mc.cores <- mc.cores.detected
+
     K <- ncol(x.test)
-    k <- K%/%mc.cores
+    k <- K%/%mc.cores-1
     j <- K
     for(i in 1:mc.cores) {
         if(i==mc.cores) h <- 1
         else h <- j-k
-        
-        parallel::mcparallel({psnice(value=nice); 
-            pwbart(x.test[ , h:j], treedraws, mu, 1, TRUE)},
+
+        parallel::mcparallel({psnice(value=nice);
+            pwbart(matrix(x.test[ , h:j], nrow=p, ncol=j-h+1), treedraws, mu, 1, TRUE)},
             silent=(i!=1))
         j <- h-1
     }
-    
+
     ## K <- ncol(x.test)
     ## k <- ceiling(K/mc.cores)
     ## h <- K-k
-    
+
     ## parallel::mcparallel({psnice(value=nice);
     ##     pwbart(trees, x.test[ , max(1, h):K], mu, 1, TRUE)})
-    
+
     ## if(mc.cores>1) for(i in 1:(mc.cores-1)) {
     ##     parallel::mcparallel({psnice(value=nice);
     ##         pwbart(trees, x.test[ , max(1, (h-k)):(h-1)], mu, 1, TRUE)},

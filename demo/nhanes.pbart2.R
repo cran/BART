@@ -1,0 +1,71 @@
+
+library(BART)
+
+data(arq)
+str(arq)
+arth <- as.matrix(arq)
+
+N <- length(arth[ , 'riagendr'])
+table(arth[ , 'riagendr'])
+summary(arth[ , 'bmxbmi'])
+
+post <- mc.pbart(x.train=arth[ , 5:10], y.train=arth[ , 3], mc.cores=5, seed=99)
+
+bmxbmi <- seq(15, 85, by=5)
+
+for(i in 1:2) for(j in 1:15) {
+                  x. <- arth[ , 5:10]
+                  x.[ , 'riagendr'] <- i
+                  x.[ , 'bmxbmi'] <- bmxbmi[j]
+                  if(i==1 && j==1) x.test <- x.
+                  else x.test <- rbind(x.test, x.)
+              }
+
+table(x.test[ , 'riagendr'])
+table(x.test[ , 'bmxbmi'])
+
+pred <- predict(post, newdata=x.test, mc.cores=5)
+
+prob <- pnorm(pred)
+
+##Friedman's partial dependence function
+pd1 <- matrix(nrow=1000, ncol=15)
+pd2 <- matrix(nrow=1000, ncol=15)
+for(j in 1:15) {
+    h <- (j-1)*N
+    pd1[ , j] <- apply(prob[ , h+1:N], 1, mean)
+    h <- h+N*15
+    pd2[ , j] <- apply(prob[ , h+1:N], 1, mean)
+}
+
+pd1.mean <- apply(pd1, 2, mean)
+pd2.mean <- apply(pd2, 2, mean)
+
+plot(bmxbmi, pd1.mean, type='l', col='blue',
+     ylim=0:1, xlab='BMI', ylab=expression(Phi(f(x))),
+     sub='Unweighted NHANES chronic neck pain: M(blue) vs. F(red)')
+lines(bmxbmi, pd2.mean, type='l', col='red')
+
+##incorporate survey weights into the posterior
+wt.pd1 <- matrix(nrow=1000, ncol=15)
+wt.pd2 <- matrix(nrow=1000, ncol=15)
+for(j in 1:15) {
+    h <- (j-1)*N
+    wt.pd1[ , j] <- prob[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
+    h <- h+N*15
+    wt.pd2[ , j] <- prob[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
+}
+
+wt.pd1.mean <- apply(wt.pd1, 2, mean)
+wt.pd2.mean <- apply(wt.pd2, 2, mean)
+plot(bmxbmi, wt.pd1.mean, type='l', col='blue',
+     ylim=0:1, xlab='BMI', ylab=expression(Phi(f(x))),
+     sub='Weighted NHANES chronic neck pain: M(blue) vs. F(red)')
+lines(bmxbmi, wt.pd2.mean, type='l', col='red')
+
+plot(bmxbmi, pd1.mean, type='l', col='blue',
+     ylim=c(0, 0.2), xlab='BMI', ylab=expression(Phi(f(x))),
+     sub='NHANES chronic neck pain: M(blue) vs. F(red)')
+lines(bmxbmi, pd2.mean, type='l', col='red')
+lines(bmxbmi, wt.pd1.mean, type='l', col='blue', lty=2)
+lines(bmxbmi, wt.pd2.mean, type='l', col='red', lty=2)

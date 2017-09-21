@@ -3,7 +3,7 @@
 \alias{crisk.bart}
 \alias{mc.crisk.bart}
 \description{
-Here we have implemented a simple and direct approach to utilize BART 
+Here we have implemented a simple and direct approach to utilize BART
 for competing risks that is very flexible, and is akin to discrete-time
 survival analysis.  Following the capabilities of BART, we allow for
 maximum flexibility in modeling the dependence of competing failure times on
@@ -48,12 +48,12 @@ crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
            x.test=matrix(0.0,0,0), x.test2=x.test,
            cond=NULL, k=2.0, power=2.0, base=.95,
            binaryOffset=NULL, binaryOffset2=NULL,
-           ntree=50, numcut=100, ndpost=10000, nskip=250,
+           ntree=50, numcut=100, ndpost=1000, nskip=250,
            keepevery = 10L,
-           nkeeptrain=ndpost\%/\%keepevery,
-           nkeeptest=ndpost\%/\%keepevery,
-           nkeeptestmean=ndpost\%/\%keepevery,
-           nkeeptreedraws=ndpost\%/\%keepevery,
+           nkeeptrain=ndpost,
+           nkeeptest=ndpost,
+           nkeeptestmean=ndpost,
+           nkeeptreedraws=ndpost,
            printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
            id=NULL,    ## crisk.bart only
            seed=99,    ## mc.crisk.bart only
@@ -67,12 +67,12 @@ mc.crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
               x.test=matrix(0.0,0,0), x.test2=x.test,
               cond=NULL, k=2.0, power=2.0, base=.95,
               binaryOffset=NULL, binaryOffset2=NULL,
-              ntree=50, numcut=100, ndpost=10000, nskip=250,
+              ntree=50, numcut=100, ndpost=1000, nskip=250,
               keepevery = 10L,
-              nkeeptrain=ndpost\%/\%keepevery,
-              nkeeptest=ndpost\%/\%keepevery,
-              nkeeptestmean=ndpost\%/\%keepevery,
-              nkeeptreedraws=ndpost\%/\%keepevery,
+              nkeeptrain=ndpost,
+              nkeeptest=ndpost,
+              nkeeptestmean=ndpost,
+              nkeeptreedraws=ndpost,
               printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
               id=NULL,    ## crisk.bart only
               seed=99,    ## mc.crisk.bart only
@@ -102,7 +102,7 @@ that the definition of \code{x.train} is dependent on whether
 
    \item{x.train2}{ Explanatory variables for training (in sample)
      data of cause 2.}
-   
+
    \item{y.train2}{
    Cause 2 binary response for training (in sample) data, i.e., failure
    from any cause besides the cause of interest which is cause 1.
@@ -129,7 +129,7 @@ that the definition of \code{x.train} is dependent on whether
 
     \item{x.test2}{
       Explanatory variables for test (out of sample) data of cause 2.}
-      
+
    \item{cond}{A vector of indices of \code{y.train} indicating censored subjects.}
    \item{k}{
    k is the number of prior standard deviations \eqn{f(t, x)} is away from +/-3.
@@ -155,7 +155,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{ntree}{
    The number of trees in the sum.
    }
- 
+
    \item{numcut}{
    The number of possible values of c (see usequants).
    If a single number if given, this is used for all variables.
@@ -169,7 +169,7 @@ that the definition of \code{x.train} is dependent on whether
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -203,13 +203,13 @@ that the definition of \code{x.train} is dependent on whether
    \item{keeptrainfits}{
    Whether to keep \code{yhat.train} or not.
    }
- 
+
    \item{treesaslists}{
      The default behavior is to return the trees as a text string.  If you
      specify \code{treesaslists=TRUE}, then the trees will be returned
      as a list as well.
    }
-   
+
    \item{id}{
      \code{crisk.bart} only: unique identifier added to returned list.
    }
@@ -221,7 +221,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{mc.cores}{
      \code{mc.crisk.bart} only: number of cores to employ in parallel.
    }
-   
+
    \item{nice}{
      \code{mc.crisk.bart} only: set the job niceness.  The default
      niceness is 19: niceness goes from 0 (highest) to 19 (lowest).
@@ -229,14 +229,15 @@ that the definition of \code{x.train} is dependent on whether
 }
 
 \value{
-  \code{crisk.bart} returns a list.  Besides the items listed
+  \code{crisk.bart} returns an object of type \code{criskbart} which is
+  essentially a list.  Besides the items listed
    below, the list has a \code{binaryOffset} component giving the value
    used, a \code{times} component giving the unique times, \code{K}
    which is the number of unique times, \code{tx.train} and
   \code{tx.test}, if any.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(t, x)}{f*(t, x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -244,7 +245,7 @@ that the definition of \code{x.train} is dependent on whether
    Burn-in is dropped.
    }
 
-   \item{yhat.test}{Same as \code{yhat.train} but now the x's are the rows of the test data.}   
+   \item{yhat.test}{Same as \code{yhat.train} but now the x's are the rows of the test data.}
    \item{surv.test}{test data fits for survival probability.}
    \item{surv.test.mean}{mean of \code{surv.test} over the posterior samples.}
    \item{prob.test}{The probability of suffering cause 1 which is
@@ -259,7 +260,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
    \item{cif.test.mean}{mean of \code{cif.test} columns for cause 1.}
    \item{cif.test2.mean}{mean of \code{cif.test2} columns for cause 2.}
-   \item{varcount}{a matrix with \code{(ndpost/keepevery)} rows and
+   \item{varcount}{a matrix with \code{ndpost} rows and
    \code{nrow(x.train)} columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
@@ -276,16 +277,18 @@ that the definition of \code{x.train} is dependent on whether
 Rodney Sparapani: \email{rsparapa@mcw.edu}
 }
 \seealso{
-\code{\link{crisk.pre.bart}}
+\code{\link{crisk.pre.bart}}, \code{\link{predict.criskbart}},
+   \code{\link{mc.crisk.pwbart}}
 }
 \examples{
 
 data(transplant)
-    
+
 pfit <- survfit(Surv(futime, event) ~ abo, transplant)
 
 # competing risks for type O
-plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 1))
+plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 1),
+       xlab='t (months)', ylab='Aalen-Johansen (AJ) CI(t)')
     legend(450, .4, c("Death", "Transplant", "Withdrawal"), col=1:3, lwd=2)
 
 delta <- (as.numeric(transplant$event)-1)
@@ -318,7 +321,7 @@ post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
                    nskip=5, ndpost=5, keepevery=1)
 
 \dontrun{
-## run one long MCMC chain in one process   
+## run one long MCMC chain in one process
 set.seed(99)
 post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
 ## in the interest of time, consider speeding it up by parallel processing
@@ -339,12 +342,13 @@ typeO.cif.mean <- apply(typeO.cif, 2, mean)
 typeO.cif.025 <- apply(typeO.cif, 2, quantile, probs=0.025)
 typeO.cif.975 <- apply(typeO.cif, 2, quantile, probs=0.975)
 
-plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8))
+plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
+       xlab='t (months)', ylab='CI(t)')
 points(c(0, post$times)*30.5, c(0, typeO.cif.mean), col=4, type='s', lwd=2)
 points(c(0, post$times)*30.5, c(0, typeO.cif.025), col=4, type='s', lwd=2, lty=2)
 points(c(0, post$times)*30.5, c(0, typeO.cif.975), col=4, type='s', lwd=2, lty=2)
-     legend(450, .4, c("Transplant(BART)", "Transplant(survfit)",
-                       "Death(survfit)", "Withdrawal(survfit)"),
+     legend(450, .4, c("Transplant(BART)", "Transplant(AJ)",
+                       "Death(AJ)", "Withdrawal(AJ)"),
             col=c(4, 2, 1, 3), lwd=2)
 
 }

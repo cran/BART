@@ -1,13 +1,13 @@
 \name{pbart}
-\title{BART for dichotomous outcomes}
+\title{BART for dichotomous outcomes with Normal latents}
 \alias{pbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For numeric response \eqn{y}, we have
 \eqn{y = f(x) + \epsilon}{y = f(x) + e},
-where \eqn{\epsilon \sim N(0,\sigma^2)}{e ~ N(0,sigma^2)}.\cr
+where \eqn{\epsilon \sim N(0, 1)}{e ~ N(0, 1)}.\cr
 For a binary response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
-denotes the standard normal cdf (probit link).
+denotes the standard Normal CDF (probit link).
 
 In both cases, \eqn{f} is the sum of many tree models.
 The goal is to have very flexible inference for the uknown
@@ -21,15 +21,13 @@ small amount to the overall fit.
 \usage{
 pbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   k=2.0,
-   power=2.0, base=.95,
-   binaryOffset=NULL,
+   k=2.0, power=2.0, base=.95,
+   binaryOffset=NULL, %M=1,
    ntree=200L, numcut=100L,
-   ndpost=1000L, nskip=100L,
-   keepevery=1L,
-   nkeeptrain=ndpost\%/\%keepevery, nkeeptest=ndpost\%/\%keepevery,
-   nkeeptestmean=ndpost\%/\%keepevery, nkeeptreedraws=ndpost\%/\%keepevery,
-   printevery=100, transposed=FALSE, treesaslists=FALSE
+   ndpost=1000L, nskip=100L, keepevery=1L,
+   nkeeptrain=ndpost, nkeeptest=ndpost,
+   nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+   printevery=100L, transposed=FALSE, treesaslists=FALSE
 )
 }
 \arguments{
@@ -46,7 +44,7 @@ pbart(
 
    \item{y.train}{
    Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (normal errors).\cr
+   If y is numeric a continous response model is fit (Normal errors).\cr
    If y is a factor (or just has values 0 and 1) then a binary response model
    with a probit link is fit.
    }
@@ -81,6 +79,12 @@ pbart(
    a probability other than .5.
    }
 
+   %% \item{M}{
+   %%   For large data sets, to efficiently sample \eqn{f} with Modified LISA MCMC
+   %%   divide your data into \eqn{M} shards.
+   %%   Defaults to 1 shard, i.e., plain BART.  See Entezari et al.
+   %% }
+
    \item{ntree}{
    The number of trees in the sum.
    }
@@ -98,7 +102,7 @@ pbart(
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -152,19 +156,22 @@ pbart(
 \details{
    BART is an Bayesian MCMC method.
    At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
+   \eqn{f | (x,y)}{f \| (x,y)} in the numeric \eqn{y} case
    and just \eqn{f} in the binary \eqn{y} case.
 
    Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
    from which fits and summaries may be extracted.  The output consists of values
-   \eqn{f^*(x)}{f*(x)} (and \eqn{\sigma^*}{sigma*} in the numeric case) where * denotes a particular draw.
+   \eqn{f^*(x)}{f*(x)}
+   %(and \eqn{\sigma^*}{sigma*} in the numeric case)
+   where * denotes a particular draw.
    The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
 }
 \value{
-   \code{pbart} returns a list. % assigned class \sQuote{bart}.
+   \code{pbart} returns an object of type \code{pbart} which is
+   essentially a list. % assigned class \sQuote{bart}.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -175,7 +182,7 @@ pbart(
    \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
    \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
@@ -185,7 +192,7 @@ pbart(
 
    Note that in the binary \eqn{y}, case yhat.train and yhat.test are
    \eqn{f(x)} + binaryOffset.  If you want draws of the probability
-   \eqn{P(Y=1 | x)} you need to apply the normal cdf (\code{pnorm})
+   \eqn{P(Y=1 | x)} you need to apply the Normal CDF (\code{pnorm})
    to these values.
 }
 \references{
@@ -197,6 +204,10 @@ Chipman, H., George, E., and McCulloch R. (2006)
    Bayesian Ensemble Learning.
    Advances in Neural Information Processing Systems 19,
    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+
+   Entezari, R., Craiu, R.V., and Rosenthal, J.S. (2017)
+   Likelihood Inflating Sampling Algorithm.
+   \url{https://arxiv.org/pdf/1605.02113.pdf}.
 
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
@@ -290,7 +301,7 @@ table(itr.pick)
 
 ## do arms 1 and 2 show treatment heterogeneity?
 diff. <- apply(post$prob.test[ , 2*N+(1:N)]-post$prob.test[ , N+(1:N)], 2, mean)
-plot(sort(diff.), type='h', main='ACTG175 trial: 50% CD4 decline from baseline at 96 weeks',
+plot(sort(diff.), type='h', main='ACTG175 trial: 50\% CD4 decline from baseline at 96 weeks',
      xlab='Arm 2 (1) Preferable to the Right (Left)', ylab='Prob.Diff.: Arms 2 - 1')
 
 library(rpart)
@@ -327,7 +338,7 @@ BART.itr.simp <- pwbart(test, post$treedraws)
 BART.itr.simp <- apply(pnorm(BART.itr.simp), 1, mean)
 
 plot(density(BART.itr), xlab='Value', xlim=c(0.475, 0.775), lwd=2,
-     main='ACTG175 trial: 50% CD4 decline from baseline at 96 weeks')
+     main='ACTG175 trial: 50\% CD4 decline from baseline at 96 weeks')
 lines(density(BART.itr.simp), col='brown', lwd=2)
 lines(density(all0), col='green', lwd=2)
 lines(density(all1), col='red', lwd=2)

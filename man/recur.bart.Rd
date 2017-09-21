@@ -45,11 +45,11 @@ response case, \eqn{f} is the sum of many tree models.  }
 recur.bart(x.train=matrix(0.0, 0L, 0L),
            y.train=NULL, times=NULL, delta=NULL,
            x.test=matrix(0.0,0,0), x.test.nogrid=FALSE,
-           k=2.0, power=2.0, base=0.95, binaryOffset=NULL,
-           ntree=50, numcut = 100L, ndpost=10000, nskip=250,
-           keepevery=10, nkeeptrain = ndpost\%/\%keepevery, 
-           nkeeptest=ndpost\%/\%keepevery, nkeeptestmean=ndpost\%/\%keepevery, 
-           nkeeptreedraws = ndpost\%/\%keepevery,
+           k=2.0, power=2.0, base=0.95, binaryOffset=NULL, %M=1,
+           ntree=50, numcut = 100L, ndpost=1000, nskip=250,
+           keepevery=10, nkeeptrain = ndpost,
+           nkeeptest=ndpost, nkeeptestmean=ndpost,
+           nkeeptreedraws = ndpost,
            printevery = 100L, treesaslists = FALSE, keeptrainfits = TRUE,
            seed=99,    ## mc.recur.bart only
            mc.cores=2, ## mc.recur.bart only
@@ -59,12 +59,12 @@ recur.bart(x.train=matrix(0.0, 0L, 0L),
 mc.recur.bart(x.train=matrix(0.0, 0L, 0L),
               y.train=NULL, times=NULL, delta=NULL,
               x.test=matrix(0.0,0,0), x.test.nogrid=FALSE,
-              k=2.0, power=2.0, base=0.95, binaryOffset=NULL,
-              ntree=50, numcut = 100L, ndpost=10000, nskip=250,
-              keepevery=10, nkeeptrain = ndpost\%/\%keepevery, 
-              nkeeptest=ndpost\%/\%keepevery, nkeeptestmean=ndpost\%/\%keepevery, 
-              nkeeptreedraws = ndpost\%/\%keepevery,
-              printevery = 100L, treesaslists = FALSE, keeptrainfits = TRUE, 
+              k=2.0, power=2.0, base=0.95, binaryOffset=NULL, %M=1,
+              ntree=50, numcut = 100L, ndpost=1000, nskip=250,
+              keepevery=10, nkeeptrain = ndpost,
+              nkeeptest=ndpost, nkeeptestmean=ndpost,
+              nkeeptreedraws = ndpost,
+              printevery = 100L, treesaslists = FALSE, keeptrainfits = TRUE,
               seed=99,    ## mc.recur.bart only
               mc.cores=2, ## mc.recur.bart only
               nice=19L    ## mc.recur.bart only
@@ -141,10 +141,16 @@ that the definition of \code{x.train} is dependent on whether
    \code{binaryOffset=0}.
    }
 
+   %% \item{M}{
+   %%   For large data sets, to efficiently sample \eqn{f} with Modified LISA MCMC
+   %%   divide your data into \eqn{M} shards.
+   %%   Defaults to 1 shard, i.e., plain BART.  See Entezari et al.
+   %% }
+
    \item{ntree}{
    The number of trees in the sum.
    }
- 
+
    \item{numcut}{
    The number of possible values of c (see usequants).
    If a single number if given, this is used for all variables.
@@ -158,7 +164,7 @@ that the definition of \code{x.train} is dependent on whether
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -200,7 +206,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{keeptrainfits}{
    Whether to keep \code{yhat.train} or not.
    }
- 
+
    \item{treesaslists}{
      The default behavior is to return the trees as a text string.  If you
      specify \code{treesaslists=TRUE}, then the trees will be returned
@@ -222,14 +228,15 @@ that the definition of \code{x.train} is dependent on whether
 }
 
 \value{
-  \code{recur.bart} returns a list.  Besides the items listed
+  \code{recur.bart} returns an object of type \code{recurbart} which is
+  essentially a list.  Besides the items listed
    below, the list has a \code{binaryOffset} component giving the value
    used, a \code{times} component giving the unique times, \code{K}
    which is the number of unique times, \code{tx.train} and
   \code{tx.test}, if any.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(t, x)}{f*(t, x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -246,7 +253,7 @@ that the definition of \code{x.train} is dependent on whether
    rows of the test data.}
    \item{cum.test}{The cumulative hazard function, \eqn{h(t|x)}, where x's are the
    rows of the test data.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
@@ -271,70 +278,70 @@ with supplement
 Rodney Sparapani: \email{rsparapa@mcw.edu}
 }
 \seealso{
-\code{\link{recur.pre.bart}}
+\code{\link{recur.pre.bart}}, \code{\link{predict.recurbart}},
+\code{\link{recur.pwbart}}, \code{\link{mc.recur.pwbart}}
 }
 \examples{
-    
+
 ## load 20 percent random sample
 data(xdm20.train)
 data(xdm20.test)
 data(ydm20.train)
 
 ##test BART with token run to ensure installation works
-set.seed(99)    
+set.seed(99)
 post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
                    nskip=5, ndpost=5, keepevery=1)
-    
+
 \dontrun{
-set.seed(99)    
+set.seed(99)
 post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train)
-## larger data sets can take some time so
-## if parallel processing is available, uncomment this block    
+## larger data sets can take some time so, if parallel processing
+## is available, submit this statement instead
 ## post <- mc.recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-##                      mc.cores=5, seed=99)
-    
-require(rplot)
+##                      mc.cores=8, seed=99)
+
+require(rpart)
 require(rpart.plot)
-    
+
 dss <- rpart(post$yhat.train.mean~xdm20.train)
 
 rpart.plot(dss)
-## notice that all splits in the tree
-## (except 1 at the bottom involving a small group)
+## for the 20 percent sample, notice that the top splits
+## involve cci_pvd and n
+## for the full data set, notice that all splits
 ## involve ca, cci_pud, cci_pvd, ins270 and n
+## (except one at the bottom involving a small group)
 
-## compare patients treated with insulin vs not   
+## compare patients treated with insulin (ins270=1) vs
+## not treated with insulin (ins270=0)
 N.train <- 50
 N.test <- 50
 K <- post$K ## 798 unique time points
 
-## only testing set, i.e., remove training set    
+## only testing set, i.e., remove training set
 xdm20.test. <- xdm20.test[N.train*K+(1:(N.test*K)), ]
 xdm20.test. <- rbind(xdm20.test., xdm20.test.)
 xdm20.test.[ , 'ins270'] <- rep(0:1, each=N.test*K)
 
-pred <- pwbart(xdm20.test., post$treedraws)
-## larger data sets such as these can take some time
-## if parallel processing is available, uncomment this block    
-## pred <- mc.pwbart(x.test., post$treedraws, mc.cores=5)
-
-pred.haz.test <- pnorm(pred)    
+## multiple threads will be utilized if available
+pred <- predict(post, xdm20.test., mc.cores=8)
 
 ## create Friedman's partial dependence function for the
 ## intensity/hazard by time and ins270
 NK.test <- N.test*K
-M <- nrow(pred.haz.test) ## number of MCMC samples, typically 1000
-    
+M <- nrow(pred$haz.test) ## number of MCMC samples, typically 1000
+
 RI <- matrix(0, M, K)
-    
-for(i in 1:N.test) 
-    RI <- RI+(pred.haz.test[ , (N.test+i-1)*K+1:K]/
-              pred.haz.test[ , (i-1)*K+1:K])/N.test
-    
+
+for(i in 1:N.test)
+    RI <- RI+(pred$haz.test[ , (N.test+i-1)*K+1:K]/
+              pred$haz.test[ , (i-1)*K+1:K])/N.test
+
 RI.lo <- apply(RI, 2, quantile, probs=0.025)
 RI.mu <- apply(RI, 2, mean)
 RI.hi <- apply(RI, 2, quantile, probs=0.975)
-    
+
 plot(post$times, RI.hi, type='l', lty=2, log='y',
      ylim=c(min(RI.lo, 1/RI.hi), max(1/RI.lo, RI.hi)),
      xlab='t', ylab='RI(t, x)',

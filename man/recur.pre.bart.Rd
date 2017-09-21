@@ -121,6 +121,7 @@ for(i in 1:N) {
     }
 }
 
+\dontrun{
 pre <- recur.pre.bart(times=times, delta=delta, x.train=x.train)
 
 J <- nrow(pre$tx.train)
@@ -197,7 +198,6 @@ pre$tx.test[which(is.na(pre$tx.test[ , 6])), 6] <- -2
 pre$tx.test <- rbind(pre$tx.test, pre$tx.test, pre$tx.test)
 pre$tx.test[ , 4] <- rep(1:3, each=J)
     
-\dontrun{
 set.seed(99)
 post <- recur.bart(y.train=pre$y.train, x.train=pre$tx.train, x.test=pre$tx.test)
 ## depending on your performance, you may want to run in parallel if available

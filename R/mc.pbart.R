@@ -28,7 +28,7 @@ mc.pbart <- function(
     keeptrainfits=TRUE, transposed=FALSE,
     treesaslists=FALSE,
     mc.cores = 2L, nice = 19L,
-    seed = 99L    
+    seed = 99L
 )
 {
     if(.Platform$OS.type!='unix')
@@ -42,7 +42,7 @@ mc.pbart <- function(
         x.train <- t(x.train)
         x.test <- t(x.test)
     }
-    
+
     mc.cores.detected <- detectCores()
 
     if(mc.cores>mc.cores.detected) mc.cores <- mc.cores.detected
@@ -50,21 +50,22 @@ mc.pbart <- function(
         ##                ',\n exceeds the number of cores detected via detectCores() ',
         ##                'which yields ', mc.cores.detected, ' .'))
 
-    mc.ndpost <- ((ndpost %/% mc.cores) %/% keepevery)*keepevery
+    mc.ndpost <- ceiling(ndpost/mc.cores)
+    ## mc.ndpost <- ((ndpost %/% mc.cores) %/% keepevery)*keepevery
 
-    while(mc.ndpost*mc.cores<ndpost) mc.ndpost <- mc.ndpost+keepevery
+    ## while(mc.ndpost*mc.cores<ndpost) mc.ndpost <- mc.ndpost+keepevery
 
-    mc.nkeep <- mc.ndpost %/% keepevery
-    
+    ## mc.nkeep <- mc.ndpost %/% keepevery
+
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
                   pbart(x.train=x.train, y.train=y.train, x.test=x.test,
                         k=k, power=power, base=base,
                         binaryOffset=binaryOffset,
                         ntree=ntree, numcut=numcut,
-                        ndpost=mc.ndpost, nskip=nskip,
-                        nkeeptrain=mc.nkeep, nkeeptest=mc.nkeep,
-                        nkeeptestmean=mc.nkeep, nkeeptreedraws=mc.nkeep,
+                        ndpost=mc.ndpost, nskip=nskip, keepevery=keepevery,
+                        ## nkeeptrain=mc.nkeep, nkeeptest=mc.nkeep,
+                        ## nkeeptestmean=mc.nkeep, nkeeptreedraws=mc.nkeep,
                         printevery=printevery, transposed=TRUE,
                         treesaslists=treesaslists)},
                   silent=(i!=1))
@@ -76,20 +77,22 @@ mc.pbart <- function(
 
     post <- post.list[[1]]
 
-    if(mc.cores==1) return(post)
+    if(mc.cores==1 | attr(post, 'class')!='pbart') return(post)
     else {
         p <- nrow(x.train)
 
-        old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
+        ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
         old.stop <- nchar(old.text)
-        
+
         post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
+                                    paste0(as.character(mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
+                                    ##paste0(as.character(mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
                                            as.character(p)),
                                     post$treedraws$trees)
-        
+
         keeptestfits <- length(x.test)>0
-    
+
         for(i in 2:mc.cores) {
             if(keeptrainfits) post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
 
@@ -97,7 +100,7 @@ mc.pbart <- function(
 
             post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
 
-            post$treedraws$trees <- paste0(post$treedraws$trees, 
+            post$treedraws$trees <- paste0(post$treedraws$trees,
                                            substr(post.list[[i]]$treedraws$trees, old.stop+2,
                                                   nchar(post.list[[i]]$treedraws$trees)))
 
@@ -110,6 +113,8 @@ mc.pbart <- function(
 
         if(length(post$yhat.test.mean)>0)
             post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
+
+        attr(post, 'class') <- 'pbart'
 
         return(post)
     }

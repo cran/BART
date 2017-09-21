@@ -13,7 +13,7 @@ In both cases, \eqn{f} is the sum of many tree models.
 The goal is to have very flexible inference for the uknown
 function \eqn{f}.
 
-In the spirit of \dQuote{ensemble models}, 
+In the spirit of \dQuote{ensemble models},
 each tree is constrained by a prior to be a weak learner
 so that it contributes a
 small amount to the overall fit.
@@ -32,7 +32,7 @@ mc.wbart(
    keeptrainfits=TRUE, transposed=FALSE,
    treesaslists = FALSE,
    mc.cores = 2L, nice = 19L,
-   seed = 99L    
+   seed = 99L
 )
 }
 \arguments{
@@ -43,7 +43,7 @@ mc.wbart(
    If a variable is a factor in a data frame, it is replaced with dummies.
    Note that q dummies are created if q>2 and
    one dummy is created if q=2, where q is the number of levels of the factor.
-   \code{pbart} will generate draws of \eqn{f(x)} for each \eqn{x}
+   \code{wbart} will generate draws of \eqn{f(x)} for each \eqn{x}
    which is a row of x.train.
    }
 
@@ -57,7 +57,7 @@ mc.wbart(
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
    Should have same structure as x.train.\cr
-   \code{pbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
+   \code{wbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
    }
 
    \item{sigest}{
@@ -109,9 +109,9 @@ mc.wbart(
    }
 
    \item{fmean}{
-   BART operates on \code{y.train} centered by \code{fmean}. 
+   BART operates on \code{y.train} centered by \code{fmean}.
    }
- 
+
    \item{w}{
    Vector of weights which multiply the variance.
    }
@@ -119,7 +119,7 @@ mc.wbart(
    \item{ntree}{
    The number of trees in the sum.
    }
-  
+
    \item{numcut}{
    The number of possible values of c (see usequants).
    If a single number if given, this is used for all variables.
@@ -131,9 +131,9 @@ mc.wbart(
    column of x.train.  If usequants is true, then  min(numcut, the number of unique values in the
    corresponding columns of x.train - 1) c values are used.
    }
- 
+
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -151,13 +151,13 @@ mc.wbart(
    \item{keeptrainfits}{
    Whether to keep \code{yhat.train} or not.
    }
-   
+
    \item{transposed}{
-   When running \code{pbart} in parallel, it is more memory-efficient
+   When running \code{wbart} in parallel, it is more memory-efficient
    to transpose \code{x.train} and \code{x.test}, if any, prior to
-   calling \code{mc.pbart}.
+   calling \code{mc.wbart}.
  }
- 
+
    \item{treesaslists}{
      The default behavior is to return the trees as a text string.  If you
      specify \code{treesaslists=TRUE}, then the trees will be returned
@@ -171,14 +171,14 @@ mc.wbart(
    \item{mc.cores}{
      Number of cores to employ in parallel.
    }
-   
+
    \item{nice}{
      Set the job niceness.  The default
      niceness is 19: niceness goes from 0 (highest) to 19 (lowest).
    }
 }
 \details{
-   BART is an Bayesian MCMC method. 
+   BART is an Bayesian MCMC method.
    At each MCMC interation, we produce a draw from the joint posterior
    \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
    and just \eqn{f} in the binary \eqn{y} case.
@@ -189,26 +189,27 @@ mc.wbart(
    The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
 }
 \value{
-   \code{mc.pbart} returns a list. % assigned class \sQuote{bart}.
+   \code{mc.wbart} returns an object of type \code{wbart} which is
+   essentially a list. % assigned class \sQuote{bart}.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
    and the \eqn{j^{th}}{j\^th} row of x.train.\cr
    Burn-in is dropped.
    }
-   
+
    \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
    \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
 
-   In addition the list 
+   In addition the list
    has a binaryOffset component giving the value used.
 
    Note that in the binary \eqn{y}, case yhat.train and yhat.test are
@@ -222,7 +223,7 @@ Chipman, H., George, E., and McCulloch R. (2010)
    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
 
 Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning. 
+   Bayesian Ensemble Learning.
    Advances in Neural Information Processing Systems 19,
    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 

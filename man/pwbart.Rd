@@ -65,53 +65,7 @@ mc.pwbart( x.test, treedraws, mu=0, mc.cores=2L, transposed=FALSE,
    The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
 }
 \value{
-   The \code{plot} method sets mfrow to c(1,2) and makes two plots.\cr
-   The first plot is the sequence of kept draws of \eqn{\sigma}{sigma}
-   including the burn-in draws.  Initially these draws will decline as BART finds fit
-   and then level off when the MCMC has burnt in.\cr
-   The second plot has \eqn{y} on the horizontal axis and posterior intervals for
-   the corresponding \eqn{f(x)} on the vertical axis.
-
-
-   \code{bart} returns a list assigned class \sQuote{bart}.
-   In the numeric \eqn{y} case, the list has components:
-
-   \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
-   Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
-   and each column corresponds to a row of x.train.
-   The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
-   and the \eqn{j^{th}}{j\^th} row of x.train.\cr
-   Burn-in is dropped.
-   }
-
-   \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
-   \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
-   \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{sigma}{post burn in draws of sigma, length = ndpost/keepevery.}
-   \item{first.sigma}{burn-in draws of sigma.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
-   Each row is for a draw. For each variable (corresponding to the columns),
-   the total count of the number of times
-   that variable is used in a tree decision rule (over all trees) is given.}
-
-   \item{sigest}{
-   The rough error standard deviation (\eqn{\sigma}{sigma}) used in the prior.
-   }
-
-   \item{y}{
-   The input dependent vector of values for the dependent variable.\cr
-   This is used in plot.bart.
-   }
-
-   In the binary \eqn{y} case, the returned list has the components
-   yhat.train, yhat.test, and varcount as above.  In addition the list
-   has a binaryOffset component giving the value used.
-
-   Note that in the binary \eqn{y}, case yhat.train and yhat.test are
-   \eqn{f(x)} + binaryOffset.  If you want draws of the probability
-   \eqn{P(Y=1 | x)} you need to apply the normal cdf (\code{pnorm})
-   to these values.
+  Returns a matrix of predictions corresponding to \code{x.test}.
 }
 \references{
 Chipman, H., George, E., and McCulloch R. (2010)
@@ -133,6 +87,7 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \seealso{
 \code{\link{wbart}}
+\code{\link{predict.wbart}}
 }
 \examples{
 ##simulate data (example from Friedman MARS paper)

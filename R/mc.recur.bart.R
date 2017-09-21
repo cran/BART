@@ -16,8 +16,6 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-## run BART with recurrent events in parallel
-
 mc.recur.bart <- function(
     x.train = matrix(0.0, 0L, 0L),
     y.train=NULL, times=NULL, delta=NULL,
@@ -25,13 +23,13 @@ mc.recur.bart <- function(
     x.test.nogrid = FALSE, ## you may not need the whole grid
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL,
+    binaryOffset = NULL, ##M=1,
     ntree = 50L, numcut = 100L,
-    ndpost = 10000L, nskip = 250L,
-    keepevery = 10L, 
-    nkeeptrain=ndpost%/%keepevery, nkeeptest=ndpost%/%keepevery,
-    nkeeptestmean=ndpost%/%keepevery, nkeeptreedraws=ndpost%/%keepevery,
-    printevery=100L, 
+    ndpost = 1000L, nskip = 250L,
+    keepevery = 10L,
+    nkeeptrain=ndpost, nkeeptest=ndpost,
+    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    printevery=100L,
     treesaslists=FALSE, keeptrainfits=TRUE,
     seed = 99L,    ## only used by mc.recur.bart
     mc.cores = 2L, ## ditto
@@ -58,20 +56,20 @@ mc.recur.bart <- function(
         }
     }
     else if(length(binaryOffset)==0) binaryOffset <- 0
-    
+
     H <- 1
     Mx <- 2^31-1
     Nx <- max(nrow(x.train), nrow(x.test))
-    
+
     if(Nx>Mx%/%ndpost) {
         H <- ceiling(ndpost / (Mx %/% Nx))
         ndpost <- ndpost %/% H
         ##nrow*ndpost>2Gi!
         ##due to the 2Gi limit in sendMaster, breaking run into H parts
-        ##this bug/feature is addressed in R-devel post 3.3.2
+        ##this bug/feature might be addressed in R-devel post 3.3.2
         ##i.e., the fix is NOT in R version 3.3.2
-        ##will revisit once this appears in an official R release
-        ##New Features entry for R-devel post 3.3.2    
+        ##will revisit once there is a fix in an official R release
+        ##New Features entry for R-devel post 3.3.2
 ## The unexported low-level functions in package parallel for passing
 ## serialized R objects to and from forked children now support long
 ## vectors on 64-bit platforms. This removes some limits on
@@ -85,13 +83,14 @@ mc.recur.bart <- function(
         ##                ',\n exceeds the number of cores detected via detectCores() ',
         ##                'which yields ', mc.cores.detected, ' .'))
 
-    mc.ndpost <- ((ndpost %/% mc.cores) %/% keepevery)*keepevery
+    mc.ndpost <- ceiling(ndpost/mc.cores)
+    ## mc.ndpost <- ((ndpost %/% mc.cores) %/% keepevery)*keepevery
 
-    while(mc.ndpost*mc.cores<ndpost) mc.ndpost <- mc.ndpost+keepevery
+    ## while(mc.ndpost*mc.cores<ndpost) mc.ndpost <- mc.ndpost+keepevery
 
-    mc.nkeep <- mc.ndpost %/% keepevery
+    ## mc.nkeep <- mc.ndpost %/% keepevery
 
-    post.list <- list() 
+    post.list <- list()
 
     for(h in 1:H) {
         for(i in 1:mc.cores) {
@@ -99,11 +98,11 @@ mc.recur.bart <- function(
                 recur.bart(x.train=x.train, y.train=y.train,
                            x.test=x.test, x.test.nogrid=x.test.nogrid,
                            k=k, power=power, base=base,
-                           binaryOffset=binaryOffset,
+                           binaryOffset=binaryOffset, ##M=M,
                            ntree=ntree, numcut=numcut,
                            ndpost=mc.ndpost, nskip=nskip,
-                           nkeeptrain=mc.nkeep, nkeeptest=mc.nkeep,
-                           nkeeptestmean=mc.nkeep, nkeeptreedraws=mc.nkeep,
+                           nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
+                           nkeeptestmean=mc.ndpost, nkeeptreedraws=mc.ndpost,
                            printevery=printevery, treesaslists=treesaslists)},
                 silent=(i!=1))
             ## to avoid duplication of output
@@ -113,26 +112,31 @@ mc.recur.bart <- function(
         post.list[[h]] <- parallel::mccollect()
     }
 
-    if(H==1 & mc.cores==1) return(post.list[[1]][[1]])
+    if((H==1 & mc.cores==1) | attr(post.list[[1]][[1]], 'class')!='recurbart') return(post.list[[1]][[1]])
     else {
         for(h in 1:H) for(i in mc.cores:1) {
             if(h==1 & i==mc.cores) {
                 post <- post.list[[1]][[mc.cores]]
-                
+
                 p <- ncol(x.train)
 
-                old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+                old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
+                ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
                 old.stop <- nchar(old.text)
-                
+
                 post$treedraws$trees <- sub(old.text,
-                                            paste0(as.character(H*mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
+                                            paste0(as.character(H*mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
+                                            ##paste0(as.character(H*mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
                                                    as.character(p)),
                                             post$treedraws$trees)
             }
             else {
                 post$yhat.train <- rbind(post$yhat.train, post.list[[h]][[i]]$yhat.train)
-                post$cum.train <- rbind(post$cum.train, post.list[[h]][[i]]$cum.train)
-                post$haz.train <- rbind(post$haz.train, post.list[[h]][[i]]$haz.train)
+
+                ## if(length(post$cum.train)>0) {
+                ##     post$cum.train <- rbind(post$cum.train, post.list[[h]][[i]]$cum.train)
+                ##     post$haz.train <- rbind(post$haz.train, post.list[[h]][[i]]$haz.train)
+                ## }
 
                 if(length(post$yhat.test)>0) {
                     post$yhat.test <- rbind(post$yhat.test, post.list[[h]][[i]]$yhat.test)
@@ -145,7 +149,7 @@ mc.recur.bart <- function(
 
                 post$varcount <- rbind(post$varcount, post.list[[h]][[i]]$varcount)
 
-                post$treedraws$trees <- paste0(post$treedraws$trees, 
+                post$treedraws$trees <- paste0(post$treedraws$trees,
                                                substr(post.list[[h]][[i]]$treedraws$trees, old.stop+2,
                                                       nchar(post.list[[h]][[i]]$treedraws$trees)))
 
@@ -158,14 +162,19 @@ mc.recur.bart <- function(
         }
 
         post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
-        post$cum.train.mean <- apply(post$cum.train, 2, mean)
-        post$haz.train.mean <- apply(post$haz.train, 2, mean)
+
+        ## if(length(post$cum.train)>0) {
+        ##     post$cum.train.mean <- apply(post$cum.train, 2, mean)
+        ##     post$haz.train.mean <- apply(post$haz.train, 2, mean)
+        ## }
 
         if(length(post$yhat.test)>0) {
             post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
             post$haz.test.mean <- apply(post$haz.test, 2, mean)
             if(!x.test.nogrid) post$cum.test.mean <- apply(post$cum.test, 2, mean)
         }
+
+        attr(post, 'class') <- 'recurbart'
 
         return(post)
     }

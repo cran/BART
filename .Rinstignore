@@ -1,0 +1,12 @@
+doc/.*[.]aux$
+doc/.*[.]log$
+doc/.*[.]nav$
+doc/.*[.]out$
+doc/.*[.]png$
+doc/.*[.]snm$
+doc/.*[.]tex$
+doc/.*[.]toc$
+doc/.*[.]R$
+inst/cxx-ex/.*[.]o$
+inst/cxx-ex/.*[.]out$
+demo/.*[.]pdf$

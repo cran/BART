@@ -16,8 +16,7 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-
-mc.wbart <- function( 
+mc.wbart <- function(
     x.train, y.train, x.test=matrix(0.0,0,0),
     sigest=NA, sigdf=3, sigquant=0.90,
     k=2.0,
@@ -54,12 +53,8 @@ mc.wbart <- function(
         ##                ',\n exceeds the number of cores detected via detectCores() ',
         ##                'which yields ', mc.cores.detected, ' .'))
 
-    mc.ndpost <- ((ndpost %/% mc.cores) %/% keepevery)*keepevery
+    mc.ndpost <- ceiling(ndpost/mc.cores)
 
-    while(mc.ndpost*mc.cores<ndpost) mc.ndpost <- mc.ndpost+keepevery
-
-    mc.nkeep <- mc.ndpost %/% keepevery
-    
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
                    wbart(x.train=x.train, y.train=y.train, x.test=x.test,
@@ -67,16 +62,14 @@ mc.wbart <- function(
                          k=k, power=power, base=base,
                          sigmaf=sigmaf, lambda=lambda, fmean=fmean, w=w,
                          ntree=ntree, numcut=numcut,
-                         ndpost=mc.ndpost, nskip=nskip,
-                         nkeeptrain=mc.nkeep, nkeeptest=mc.nkeep,
-                         nkeeptestmean=mc.nkeep, nkeeptreedraws=mc.nkeep,
+                         ndpost=mc.ndpost, nskip=nskip, keepevery=keepevery,
                          printevery=printevery, transposed=TRUE,
                          treesaslists=treesaslists)},
                    silent=(i!=1))
                    ## to avoid duplication of output
                    ## capture stdout from first posterior only
     }
-    
+
     post.list <- parallel::mccollect()
 
     post <- post.list[[1]]
@@ -87,16 +80,16 @@ mc.wbart <- function(
     ##     sigma.beg <- 1+sigma.len-mc.ndpost
     ##     post$sigma <- post$sigma[sigma.beg:sigma.len]
     ## }
-   
-    if(mc.cores==1) return(post)
-    else {    
+
+    if(mc.cores==1 | attr(post, 'class')!='wbart') return(post)
+    else {
         p <- nrow(x.train)
 
-        old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
         old.stop <- nchar(old.text)
-        
+
         post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
+                                    paste0(as.character(mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
                                            as.character(p)),
                                     post$treedraws$trees)
 
@@ -106,12 +99,12 @@ mc.wbart <- function(
             if(length(post$yhat.test)>0)
                 post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
 
-            ## if(sigma.len>0) 
+            ## if(sigma.len>0)
             ##     post$sigma <- c(post$sigma, post.list[[i]]$sigma[sigma.beg:sigma.len])
 
             post$sigma <- c(post$sigma, post.list[[i]]$sigma)
 
-            post$treedraws$trees <- paste0(post$treedraws$trees, 
+            post$treedraws$trees <- paste0(post$treedraws$trees,
                                            substr(post.list[[i]]$treedraws$trees, old.stop+2,
                                                   nchar(post.list[[i]]$treedraws$trees)))
 
@@ -120,13 +113,15 @@ mc.wbart <- function(
 
             if(length(post$varcount)>0) post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
         }
-        
+
         if(length(post$yhat.train.mean)>0)
             post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
 
         if(length(post$yhat.test.mean)>0)
             post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
-        
+
+        attr(post, 'class') <- 'wbart'
+
         return(post)
     }
 }

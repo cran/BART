@@ -44,13 +44,13 @@ response case, \eqn{f} is the sum of many tree models.  }
 
 surv.bart( x.train=matrix(0.0,0,0),
            y.train=NULL, times=NULL, delta=NULL, x.test=matrix(0.0,0,0),
-           k=2.0, power=2.0, base=.95, binaryOffset=NULL,
-           ntree=50, numcut=100, ndpost=10000, nskip=250,
+           k=2.0, power=2.0, base=.95, binaryOffset=NULL, %M=1,
+           ntree=50, numcut=100, ndpost=1000, nskip=250,
            keepevery = 10L,
-           nkeeptrain=ndpost\%/\%keepevery,
-           nkeeptest=ndpost\%/\%keepevery,
-           nkeeptestmean=ndpost\%/\%keepevery,
-           nkeeptreedraws=ndpost\%/\%keepevery,
+           nkeeptrain=ndpost,
+           nkeeptest=ndpost,
+           nkeeptestmean=ndpost,
+           nkeeptreedraws=ndpost,
            printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
            id=NULL,    ## surv.bart only
            seed=99,    ## mc.surv.bart only
@@ -60,13 +60,13 @@ surv.bart( x.train=matrix(0.0,0,0),
 
 mc.surv.bart( x.train=matrix(0.0,0,0),
               y.train=NULL, times=NULL, delta=NULL, x.test=matrix(0.0,0,0),
-              k=2.0, power=2.0, base=.95, binaryOffset=NULL,
-              ntree=50, numcut=100, ndpost=10000, nskip=250,
+              k=2.0, power=2.0, base=.95, binaryOffset=NULL, %M=1,
+              ntree=50, numcut=100, ndpost=1000, nskip=250,
               keepevery = 10L,
-              nkeeptrain=ndpost\%/\%keepevery,
-              nkeeptest=ndpost\%/\%keepevery,
-              nkeeptestmean=ndpost\%/\%keepevery,
-              nkeeptreedraws=ndpost\%/\%keepevery,
+              nkeeptrain=ndpost,
+              nkeeptest=ndpost,
+              nkeeptestmean=ndpost,
+              nkeeptreedraws=ndpost,
               printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
               id=NULL,    ## surv.bart only
               seed=99,    ## mc.surv.bart only
@@ -140,12 +140,18 @@ that the definition of \code{x.train} is dependent on whether
    \code{binaryOffset=0}.
    }
 
+   %% \item{M}{
+   %%   For large data sets, to efficiently sample \eqn{f} with Modified LISA MCMC
+   %%   divide your data into \eqn{M} shards.
+   %%   Defaults to 1 shard, i.e., plain BART.  See Entezari et al.
+   %% }
+
    \item{ntree}{
    The number of trees in the sum.
    }
 
    \item{ndpost}{
-   The number of posterior draws after burn in, ndpost/keepevery will actually be returned.
+   The number of posterior draws returned.
    }
 
    \item{nskip}{
@@ -194,7 +200,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{nkeeptreedraws}{
    Number of MCMC iterations to be returned for tree draws.
    }
- 
+
    \item{treesaslists}{
      The default behavior is to return the trees as a text string.  If you
      specify \code{treesaslists=TRUE}, then the trees will be returned
@@ -212,7 +218,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{mc.cores}{
      \code{mc.surv.bart} only: number of cores to employ in parallel.
    }
-   
+
    \item{nice}{
      \code{mc.surv.bart} only: set the job niceness.  The default
      niceness is 19: niceness goes from 0 (highest) to 19 (lowest).
@@ -220,14 +226,15 @@ that the definition of \code{x.train} is dependent on whether
 }
 
 \value{
-  \code{surv.bart} returns a list.  Besides the items listed
+  \code{surv.bart} returns an object of type \code{survbart} which is
+  essentially a list.  Besides the items listed
    below, the list has a \code{binaryOffset} component giving the value
    used, a \code{times} component giving the unique times, \code{K}
    which is the number of unique times, \code{tx.train} and
   \code{tx.test}, if any.
 
    \item{yhat.train}{
-   A matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   A matrix with ndpost rows and nrow(x.train) columns.
    Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
    and each column corresponds to a row of x.train.
    The \eqn{(i,j)} value is \eqn{f^*(t, x)}{f*(t, x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
@@ -240,7 +247,7 @@ that the definition of \code{x.train} is dependent on whether
    \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
    \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
    \item{surv.test.mean}{mean of surv.test columns.}
-   \item{varcount}{a matrix with (ndpost/keepevery) rows and nrow(x.train) columns.
+   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
