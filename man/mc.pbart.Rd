@@ -21,14 +21,16 @@ small amount to the overall fit.
 \usage{
 mc.pbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   k=2.0,
-   power=2.0, base=.95,
+   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   xinfo=matrix(0.0,0,0), usequants=FALSE,
+   cont=FALSE, rm.const=TRUE,
+   k=2.0, power=2.0, base=.95,
    binaryOffset=0,
-   ntree=200L, numcut=100L,
+   ntree=50L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L, printevery=100,
    keeptrainfits=TRUE, transposed=FALSE,
-   treesaslists = FALSE,
+%   treesaslists = FALSE,
    mc.cores = 2L, nice = 19L,
    seed = 99L
 )
@@ -57,6 +59,31 @@ mc.pbart(
    Should have same structure as x.train.\cr
    \code{pbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
    }
+
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates under consideration.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}  
 
    \item{k}{
    For numeric y,
@@ -124,11 +151,11 @@ mc.pbart(
    calling \code{mc.pbart}.
  }
 
-   \item{treesaslists}{
-     The default behavior is to return the trees as a text string.  If you
-     specify \code{treesaslists=TRUE}, then the trees will be returned
-     as a list as well.
-   }
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 
    \item{seed}{
      Setting the seed required for reproducible MCMC.
@@ -168,8 +195,8 @@ mc.pbart(
    }
 
    \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
-   \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
-   \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
+   %% \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
+   %% \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
    \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
@@ -195,7 +222,12 @@ Chipman, H., George, E., and McCulloch R. (2006)
 
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
-        \emph{The Annals of Statistics}, \bold{19}, 1--67.
+   \emph{The Annals of Statistics}, \bold{19}, 1--67.
+
+Linero, A.R. (2016)
+  Bayesian regression trees for high dimensional prediction and variable
+  selection. \emph{JASA},
+  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
 }
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
@@ -227,15 +259,15 @@ if(.Platform$OS.type=='unix') {
 set.seed(99)
 pf = pbart(X,y,Xp)
 
-plot(f(Xp), pf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
-     xlab='True f(x)', ylab='BART f(x)')
-lines(c(-4, 4), c(-4, 4))
+## plot(f(Xp), pf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
+##      xlab='True f(x)', ylab='BART f(x)')
+## lines(c(-4, 4), c(-4, 4))
 
 mf = mc.pbart(X,y,Xp, mc.cores=4, seed=99)
 
-plot(f(Xp), mf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
-     xlab='True f(x)', ylab='BART f(x)')
-lines(c(-4, 4), c(-4, 4))
+## plot(f(Xp), mf$yhat.test.mean, xlim=c(-4, 4), ylim=c(-4, 4),
+##      xlab='True f(x)', ylab='BART f(x)')
+## lines(c(-4, 4), c(-4, 4))
 
 par(mfrow=c(2,2))
 
@@ -255,9 +287,9 @@ lines(xp,qpl[1,],col='green',lty=1)
 lines(xp,qpl[2,],col='green',lty=1)
 title(main='BART::mc.pbart f(x) with 0.95 intervals')
 
-plot(pf$yhat.test.mean,apply(mf$yhat.test,2,mean),xlab='BART::pbart',ylab='BART::mc.pbart')
-abline(0,1,col='red')
-title(main="BART::pbart f(x) vs. BART::mc.pbart f(x)")
+## plot(pf$yhat.test.mean,apply(mf$yhat.test,2,mean),xlab='BART::pbart',ylab='BART::mc.pbart')
+## abline(0,1,col='red')
+## title(main="BART::pbart f(x) vs. BART::mc.pbart f(x)")
 }
 }
 \keyword{nonparametric}

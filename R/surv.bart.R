@@ -21,21 +21,31 @@ surv.bart <- function(
     x.train = matrix(0.0, 0L, 0L),
     y.train=NULL, times=NULL, delta=NULL,
     x.test = matrix(0.0, 0L, 0L),
+    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0.0,0,0), usequants=FALSE,
+    cont=FALSE, rm.const=TRUE, type='pbart',
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL, ##M=1,
+    binaryOffset = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L, keepevery = 10L,
     nkeeptrain=ndpost, nkeeptest=ndpost,
-    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    ##nkeeptestmean=ndpost,
+    nkeeptreedraws=ndpost,
     printevery=100L,
-    treesaslists=FALSE, keeptrainfits=TRUE,
+    ##treesaslists=FALSE,
+    keeptrainfits=TRUE,
     id = NULL,     ## only used by surv.bart
     seed = 99L,    ## only used by mc.surv.bart
     mc.cores = 2L, ## ditto
     nice=19L       ## ditto
 )
 {
+    x.train <- bartModelMatrix(x.train)
+    x.test <- bartModelMatrix(x.test)
+
+    if(length(rho)==0) rho=ncol(x.train)
+
     if(length(y.train)==0) {
         pre <- surv.pre.bart(times, delta, x.train, x.test)
 
@@ -58,49 +68,63 @@ surv.bart <- function(
         K     <- length(times)
     }
 
-    post <- pbart(x.train=x.train, y.train=y.train, x.test=x.test,
+    if(type=='pbart') call <- pbart
+    else if(type=='lbart') {
+        binaryOffset <- 0
+        call <- lbart
+    }
+
+    post <- call(x.train=x.train, y.train=y.train, x.test=x.test,
+                 sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                  xinfo=xinfo, usequants=usequants,
+                  cont=cont, rm.const=rm.const,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset, ##M=M,
+                  binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip, keepevery=keepevery,
                   nkeeptrain=nkeeptrain, nkeeptest=nkeeptest,
-                  nkeeptestmean=nkeeptestmean, nkeeptreedraws=nkeeptreedraws,
-                  printevery=printevery,
-                  treesaslists=treesaslists)
+                  ##nkeeptestmean=nkeeptestmean,
+                  nkeeptreedraws=nkeeptreedraws,
+                  printevery=printevery)
 
-    if(attr(post, 'class')!='pbart') return(post)
+    if(type!=attr(post, 'class')) return(post)
 
     post$binaryOffset <- binaryOffset
     post$id <- id
     post$times <- times
     post$K <- K
     post$tx.train <- x.train
+    post$type <- type
 
     ## if(keeptrainfits) {
-    ##     post$surv.train <- 1-pnorm(post$yhat.train)
+    ##      post$surv.train <- 1-post$prob.train
 
-    ##     H <- nrow(x.train)/K ## the number of different settings
+    ##      H <- nrow(x.train)/K ## the number of different settings
 
-    ##     for(h in 1:H) for(j in 2:K) {
-    ##             l <- K*(h-1)+j
+    ##      for(h in 1:H)
+    ##          for(j in 2:K) {
+    ##              l <- K*(h-1)+j
 
-    ##             post$surv.train[ , l] <- post$surv.train[ , l-1]*post$surv.train[ , l]
-    ##                   }
+    ##              post$surv.train[ , l] <- post$surv.train[ , l-1]*post$surv.train[ , l]
+    ##          }
 
-    ##     post$surv.train.mean <- apply(post$surv.train, 2, mean)
+    ##      post$surv.train.mean <- apply(post$surv.train, 2, mean)
     ## }
 
     if(length(x.test)>0) {
         post$tx.test <- x.test
         H <- nrow(x.test)/K ## the number of different settings
 
-        post$surv.test <- 1-pnorm(post$yhat.test)
+        post$surv.test <- 1-post$prob.test
+        ## if(type=='pbart') post$surv.test <- 1-pnorm(post$yhat.test)
+        ## else if(type=='lbart') post$surv.test <- 1-plogis(post$yhat.test)
 
-        for(h in 1:H) for(j in 2:K) {
+        for(h in 1:H)
+            for(j in 2:K) {
                 l <- K*(h-1)+j
 
                 post$surv.test[ , l] <- post$surv.test[ , l-1]*post$surv.test[ , l]
-                      }
+            }
 
         post$surv.test.mean <- apply(post$surv.test, 2, mean)
     }

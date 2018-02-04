@@ -25,7 +25,7 @@ pwbart = function(
    nice=19L             #mc.pwbart only	
 )
 {
-if(!transposed) x.test <- t(x.test)
+if(!transposed) x.test <- t(bartModelMatrix(x.test))
 
 p <- length(treedraws$cutpoints)
 

@@ -8,7 +8,7 @@ ex <- is.na(ACTG175$cd496)
 table(ex)
 
 ## inclusion criteria are CD4 counts between 200 and 500
-ACTG175$cd40 <- min(500, max(250, ACTG175$cd40))
+ACTG175$cd40 <- min(500, max(200, ACTG175$cd40))
 
 ## calculate relative CD4 decline
 y <- ((ACTG175$cd496-ACTG175$cd40)/ACTG175$cd40)[!ex]
@@ -25,6 +25,7 @@ table(y, ACTG175$arms[!ex])/
 
 ## drop unneeded and unwanted variables
 ## 1: 'pidnum' patient ID number
+##10: 'zprior' zidovudine use prior to treatment initiation
 ##14: 'str2' which will be handled by strat1 below
 ##15: 'strat' which will be handled by strat1-strat3 below
 ##17: 'treat' handled by arm0-arm3 below
@@ -36,7 +37,7 @@ table(y, ACTG175$arms[!ex])/
 ##25: 'cens' indicator of observing the event in days
 ##26: 'days' number of days until the primary endpoint
 ##27: 'arms' handled by arm0-arm3 below
-train <- as.matrix(ACTG175)[!ex, -c(1, 14:15, 17, 18, 20:22, 24:27)]
+train <- as.matrix(ACTG175)[!ex, -c(1, 10, 14:15, 17, 18, 20:22, 24:27)]
 train <- cbind(1*(ACTG175$strat[!ex]==1), 1*(ACTG175$strat[!ex]==2),
                1*(ACTG175$strat[!ex]==3), train)
 dimnames(train)[[2]][1:3] <- paste0('strat', 1:3)
@@ -75,6 +76,7 @@ table(itr.pick)
 
 ## do arms 1 and 2 show treatment heterogeneity?
 diff. <- apply(post$prob.test[ , 2*N+(1:N)]-post$prob.test[ , N+(1:N)], 2, mean)
+
 plot(sort(diff.), type='h', main='ACTG175 trial: 50% CD4 decline from baseline at 96 weeks',
      xlab='Arm 2 (1) Preferable to the Right (Left)', ylab='Prob.Diff.: Arms 2 - 1')
 
@@ -84,9 +86,9 @@ library(rpart.plot)
 ## make data frame for nicer names in the plot
 var <- as.data.frame(train[ , -(1:4)])
 
-dss <- rpart(diff. ~ var$age+var$gender+var$race+var$wtkg+var$cd40+var$cd80+
+dss <- rpart(diff. ~ var$age+var$gender+var$race+var$wtkg+var$cd80+
                  var$karnof+var$symptom+var$hemo+var$homo+var$drugs+var$z30+
-                 var$zprior+var$oprior+var$strat1+var$strat2+var$strat3,
+                 var$oprior+var$strat1+var$strat2+var$strat3,
              method='anova', control=rpart.control(cp=0.1))
 rpart.plot(dss, type=3, extra=101)
 
@@ -102,7 +104,7 @@ all3 <- apply(post$prob.test[ , 3*N+(1:N)], 1, mean)
 ## BART ITR
 BART.itr <- apply(post$prob.test[ , c(N+which(itr.pick==1), 2*N+which(itr.pick==2))], 1, mean)
 
-test <- train
+test <- train[ , -20]
 test[ , 1:4] <- 0
 test[test[ , 5]==0, 2] <- 1
 test[test[ , 5]==1, 3] <- 1

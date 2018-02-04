@@ -1,8 +1,9 @@
 \name{predict.wbart}
 \title{Predicting new observations with a previously fitted BART model}
 \alias{predict.wbart}
-\alias{predict.pbart}
-\alias{predict.lbart}
+%\alias{predict.pbart}
+%\alias{predict.lbart}
+%\alias{predict.mbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For a numeric response \eqn{y}, we have
@@ -20,13 +21,13 @@ small amount to the overall fit.
 }
 \usage{
 \method{predict}{wbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
-\method{predict}{pbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
-\method{predict}{lbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
+%\method{predict}{pbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
+%\method{predict}{lbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
+%\method{predict}{mbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
 }
 \arguments{
    \item{object}{
-     \code{object} returned from previous BART fit with \code{wbart}, \code{mc.wbart},
-     \code{pbart}, \code{mc.pbart} or \code{lbart}.
+     \code{object} returned from previous BART fit.
    }
 
    \item{newdata}{
@@ -81,9 +82,12 @@ Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
 Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \seealso{
-\code{\link{wbart}}, \code{\link{mc.wbart}}, \code{\link{pbart}},
-\code{\link{mc.pbart}}, \code{\link{lbart}},
-\code{\link{pwbart}}, \code{\link{mc.pwbart}}, \code{\link{mc.cores.openmp}}
+  \code{\link{wbart}}, \code{\link{mc.wbart}},
+%  \code{\link{pbart}}, \code{\link{mc.pbart}},
+%  \code{\link{lbart}}, \code{\link{mc.lbart}},
+%  \code{\link{mbart}}, \code{\link{mc.mbart}},
+  \code{\link{pwbart}}, \code{\link{mc.pwbart}},
+  \code{\link{mc.cores.openmp}}
 }
 \examples{
 ##simulate data (example from Friedman MARS paper)

@@ -19,16 +19,18 @@ small amount to the overall fit.
 \usage{
 wbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
+   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   xinfo=matrix(0.0,0,0), usequants=FALSE,
+   cont=FALSE, rm.const=TRUE,
    sigest=NA, sigdf=3, sigquant=.90,
-   k=2.0,
-   power=2.0, base=.95,
+   k=2.0, power=2.0, base=.95,
    sigmaf=NA, lambda=NA,
    fmean=mean(y.train), w=rep(1,length(y.train)),
    ntree=200L, numcut=100L,
    ndpost=1000L, nskip=100L, keepevery=1L,
    nkeeptrain=ndpost, nkeeptest=ndpost,
    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
-   printevery=100L, transposed=FALSE, treesaslists=FALSE
+   printevery=100L, transposed=FALSE %, treesaslists=FALSE
 )
 }
 \arguments{
@@ -57,6 +59,31 @@ wbart(
    \code{wbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
    }
 
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates under consideration.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}
+  
    \item{sigest}{
    The prior for the error variance  (\eqn{\sigma^2}{sigma\^2}) is inverted chi-squared
    (the standard conditionally conjugate prior).
@@ -110,7 +137,7 @@ wbart(
    }
 
    \item{w}{
-   Vector of weights which multiply the variance.
+   Vector of weights which multiply the standard deviation.
    }
 
    \item{ntree}{
@@ -171,11 +198,11 @@ wbart(
    calling \code{mc.wbart}.
    }
 
-   \item{treesaslists}{
-     The default behavior is to return the trees as a text string.  If you
-     specify \code{treesaslists=TRUE}, then the trees will be returned
-     as a list as well.
-   }
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 }
 \details{
    BART is an Bayesian MCMC method.
@@ -235,7 +262,12 @@ Chipman, H., George, E., and McCulloch R. (2006)
 
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
-        \emph{The Annals of Statistics}, \bold{19}, 1--67.
+   \emph{The Annals of Statistics}, \bold{19}, 1--67.
+
+Linero, A.R. (2016)
+  Bayesian regression trees for high dimensional prediction and variable
+  selection. \emph{JASA},
+  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
 }
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr

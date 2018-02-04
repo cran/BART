@@ -6,7 +6,7 @@ Recurrent event data contained in \eqn{(t_1,\delta_1, ..., t_k,\delta_k, x)} mus
 suitable for the BART model; see \code{recur.bart} for more details.
 }
 \usage{
-recur.pre.bart( times, delta, x.train=NULL, probs=c(0.15, 0.15), baseline=FALSE )
+recur.pre.bart( times, delta, tstop=NULL, x.train=NULL, last.value=TRUE )
 }
 \arguments{
    \item{times}{
@@ -17,36 +17,48 @@ recur.pre.bart( times, delta, x.train=NULL, probs=c(0.15, 0.15), baseline=FALSE 
      Matrix of event indicators: 1 is an event while 0 is censored.\cr
    }
 
+   \item{tstop}{ For non-instantaneous events, this the matrix of event
+     stop times, i.e., between \code{times[i, j]} and \code{tstop[i, j]}
+     subject \code{i} is not in the risk set for a recurrent event.
+     N.B. This is NOT for counting process notation. \cr }
+   
    \item{x.train}{
    Explanatory variables for training (in sample) data.\cr
    If provided, must be a matrix
    with (as usual) rows corresponding to observations and columns to variables.\cr
    }
 
-   \item{probs}{ \code{tx.test} is generated from \code{x.train} in a
-     similar fashion to \code{tx.train}.  However, observations beyond
-     censoring contain \code{NA} for columns two and three containing
-     \eqn{v(t)} and \eqn{N(t-)} respectively.  In order to preform
-     prediction with \code{tx.test}, then these missing values need to be
-     handled accordingly.  We provide an automated method for this which
-     is returned as \code{X.base}.  It would be difficult to provide an
-     efficient method that randomly generates \eqn{v(t)} and \eqn{N(t-)}
-     since they are structurally dependent.  Rather, we
-     deterministically generate them in such a fashion that they define
-     a "middle" baseline, i.e. the median \eqn{N(t-)} as a function of
-     \eqn{t} for non-censored subjects (calculated from \code{tx.train});
-     the median is adjusted upward as the censoring increases with time
-     (if it does at all) to a maximum value controlled by the second
-     argument contained in \code{probs} since otherwise the "low" risk
-     subjects would be over-represented.  Each subject's previous value
-     is carried forward unless their computed sojourn time (which is a
-     function of the generated \eqn{N(t-)}) is longer than the the
-     median \eqn{v(t)} as a function of \eqn{t} (which is also
-     calculated from \code{tx.train}); the median is adjusted downward as
-     the censoring increases with time (if it does at all) to a maximum
-     value controlled by the first argument contained in \code{probs}. }
+   \item{last.value}{If \code{last.value=TRUE}, then the sojourn time,
+     \code{v}, and the number of previous events, \code{N}, are carried
+     forward assuming that no new events occur beyond censoring.
+     If \code{last.value=FALSE}, then these variables are coded \code{NA}
+     for easy identification allowing replacement with the desired values.
+   }
+   
+   %% \item{probs}{ \code{tx.test} is generated from \code{x.train} in a
+   %%   similar fashion to \code{tx.train}.  However, observations beyond
+   %%   censoring contain \code{NA} for columns two and three containing
+   %%   \eqn{v(t)} and \eqn{N(t-)} respectively.  In order to preform
+   %%   prediction with \code{tx.test}, then these missing values need to be
+   %%   handled accordingly.  We provide an automated method for this which
+   %%   is returned as \code{X.base}.  It would be difficult to provide an
+   %%   efficient method that randomly generates \eqn{v(t)} and \eqn{N(t-)}
+   %%   since they are structurally dependent.  Rather, we
+   %%   deterministically generate them in such a fashion that they define
+   %%   a "middle" baseline, i.e. the median \eqn{N(t-)} as a function of
+   %%   \eqn{t} for non-censored subjects (calculated from \code{tx.train});
+   %%   the median is adjusted upward as the censoring increases with time
+   %%   (if it does at all) to a maximum value controlled by the second
+   %%   argument contained in \code{probs} since otherwise the "low" risk
+   %%   subjects would be over-represented.  Each subject's previous value
+   %%   is carried forward unless their computed sojourn time (which is a
+   %%   function of the generated \eqn{N(t-)}) is longer than the the
+   %%   median \eqn{v(t)} as a function of \eqn{t} (which is also
+   %%   calculated from \code{tx.train}); the median is adjusted downward as
+   %%   the censoring increases with time (if it does at all) to a maximum
+   %%   value controlled by the first argument contained in \code{probs}. }
 
-   \item{baseline}{experimental feature: still needs work}
+   %% \item{baseline}{experimental feature: still needs work}
 }
 
 \value{
@@ -57,19 +69,25 @@ Besides the items listed below, the list has
    \item{y.train}{A vector of binary responses.}
    \item{tx.train}{A matrix with the rows of the training data.}
    \item{tx.test}{Generated from \code{x.train} (see discussion above included in
-     the argument \code{probs}).}
-   \item{X.base}{Generated from \code{x.train} (see discussion above included in
-     the argument \code{probs}).}
-   \item{sojourn}{Generated from \code{x.train} (see discussion above included in
-     the argument \code{probs}).}
-   \item{pattern}{Generated from \code{x.train} (see discussion above included in
-     the argument \code{probs}).}
+     the argument \code{last.value}).}
+   %% \item{X.base}{Generated from \code{x.train} (see discussion above included in
+   %%   the argument \code{probs}).}
+   %% \item{sojourn}{Generated from \code{x.train} (see discussion above included in
+   %%   the argument \code{probs}).}
+   %% \item{pattern}{Generated from \code{x.train} (see discussion above included in
+   %%   the argument \code{probs}).}
 }
 \references{
 Sparapani, Rein, Tarima, Jackson, Meurer (2017).  Nonparametric recurrent
 events analysis with BART and an application to the hospital admissions
 of patients with diabetes.  MCW Biostatistics Technical Report 64
 \url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
+
+Xu, Daniels and Winterstein.  Sequential BART for imputation of missing
+covariates.  Biostatistics 2016 doi: 10.1093/biostatistics/kxw009
+with supplement
+\url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
+
 }
 \author{
 Rodney Sparapani: \email{rsparapa@mcw.edu}
@@ -84,22 +102,22 @@ subset <- -which(bladder1$stop==0)
 bladder0 <- bladder1[subset, ]
 id <- unique(sort(bladder0$id))
 N <- length(id)
-K <- max(bladder0$enum)
+L <- max(bladder0$enum)
 
-times <- matrix(0, nrow=N, ncol=K)
+times <- matrix(0, nrow=N, ncol=L)
 dimnames(times)[[1]] <- paste0(id)
 
-delta <- matrix(0, nrow=N, ncol=K)
+delta <- matrix(0, nrow=N, ncol=L)
 dimnames(delta)[[1]] <- paste0(id)
 
-x.train <- matrix(NA, nrow=N, ncol=2*K+1) ## add time-dependent cols too
+x.train <- matrix(NA, nrow=N, ncol=3+2*L) ## add time-dependent cols too
 dimnames(x.train)[[1]] <- paste0(id)
-dimnames(x.train)[[2]] <- c('rx', rep(c('number', 'size'), K))
+dimnames(x.train)[[2]] <- c('Pl', 'B6', 'Th', rep(c('number', 'size'), L))
 
 for(i in 1:N) {
     h <- id[i]
 
-    for(j in 1:K) {
+    for(j in 1:L) {
         k <- which(bladder0$id==h & bladder0$enum==j)
 
         if(length(k)==1) {
@@ -107,159 +125,131 @@ for(i in 1:N) {
             delta[i, j] <- (bladder0$status[k]==1)*1
 
             if(j==1) {
-                x.train[i, 1] <- as.numeric(bladder0$treatment[k])
-                x.train[i, 2] <- bladder0$number[k]
-                x.train[i, 3] <- bladder0$size[k]
+                x.train[i, 1] <- as.numeric(bladder0$treatment[k])==1
+                x.train[i, 2] <- as.numeric(bladder0$treatment[k])==2
+                x.train[i, 3] <- as.numeric(bladder0$treatment[k])==3
+                x.train[i, 4] <- bladder0$number[k]
+                x.train[i, 5] <- bladder0$size[k]
             }
             else if(delta[i, j]==1) {
                 if(bladder0$rtumor[k]!='.')
-                    x.train[i, 2*j] <- as.numeric(bladder0$rtumor[k])
+                    x.train[i, 2*j+2] <- as.numeric(bladder0$rtumor[k])
                 if(bladder0$rsize[k]!='.')
-                    x.train[i, 2*j+1] <- as.numeric(bladder0$rsize[k])
+                    x.train[i, 2*j+3] <- as.numeric(bladder0$rsize[k])
             }
         }
     }
 }
 
-\dontrun{
 pre <- recur.pre.bart(times=times, delta=delta, x.train=x.train)
 
 J <- nrow(pre$tx.train)
-
 for(j in 1:J) {
     if(pre$tx.train[j, 3]>0) {
-        pre$tx.train[j, 5] <- pre$tx.train[j, 5+pre$tx.train[j, 3]*2]
-        pre$tx.train[j, 6] <- pre$tx.train[j, 6+pre$tx.train[j, 3]*2]
+        pre$tx.train[j, 7] <- pre$tx.train[j, 7+pre$tx.train[j, 3]*2]
+        pre$tx.train[j, 8] <- pre$tx.train[j, 8+pre$tx.train[j, 3]*2]
     }
 }
+pre$tx.train <- pre$tx.train[ , 1:8]
 
-pre$tx.train <- pre$tx.train[ , 1:6]
-
-## tx.test is a little more work since you also need to set v and N
-J <- nrow(pre$tx.test)
-
-for(j in 1:J) {
-    if(is.na(pre$tx.test[j, 3])) {
-        pre$tx.test[j, 2] <- pre$tx.test[j, 1]-t.
-        pre$tx.test[j, 3] <- N.
-    }
-    else if(pre$tx.test[j, 1]==1) {
-        t. <- 0
-        N. <- 0
-    }
-    else if(pre$tx.test[j, 3]>N.) {
-        t. <- pre$tx.test[j, 1]
-        N. <- pre$tx.test[j, 3]
-        pre$tx.test[j, 5] <- pre$tx.test[j, 5+pre$tx.test[j, 3]*2]
-        pre$tx.test[j, 6] <- pre$tx.test[j, 6+pre$tx.test[j, 3]*2]
+K <- pre$K
+NK <- N*K
+for(j in 1:NK) {
+    if(pre$tx.test[j, 3]>0) {
+        pre$tx.test[j, 7] <- pre$tx.test[j, 7+pre$tx.test[j, 3]*2]
+        pre$tx.test[j, 8] <- pre$tx.test[j, 8+pre$tx.test[j, 3]*2]
     }
 }
+pre$tx.test <- pre$tx.test[ , 1:8]
 
-pre$tx.test <- pre$tx.test[ , 1:6]
 
-## since BART is essentially a nonparametric function, handling
-## missing data can, in certain circumstances, be as easy as creating
-## a missing "category" for continuous and ordinal variables
-## in the bladder1 ex, both number and size are recorded as integers
-## from 1 to 8 so a reasonable missing category might be 0 or 9
-## however, we really want to create a generous amount of
-## separation between observed and missing data to give BART a
-## reasonable chance of splitting between them; but, perhaps, not too
-## generous otherwise you may sacrfice performance within the
-## observed data range; the usual caveats apply and it is always
-## a good idea to explore more sophisticated methods (see below)    
-pre$tx.train[which(is.na(pre$tx.train[ , 5])), 5] <- -2
-pre$tx.train[which(is.na(pre$tx.train[ , 6])), 6] <- -2
-pre$tx.test[which(is.na(pre$tx.test[ , 5])), 5] <- -2
-pre$tx.test[which(is.na(pre$tx.test[ , 6])), 6] <- -2
-    
-## or impute missing data via your favorite method
-## such as Sequential BART (see ref above)
-## library(MASS)
-## library(Rlab)
-## library(msm)
-## source('~/sequential_bart/load-pbart.R')
+## in bladder1 both number and size are recorded as integers
+## from 1 to 8 however they are often missing for recurrences
+## at baseline there are no missing and 1 is the mode of both
+pre$tx.train[which(is.na(pre$tx.train[ , 7])), 7] <- 1
+pre$tx.train[which(is.na(pre$tx.train[ , 8])), 8] <- 1
+pre$tx.test[which(is.na(pre$tx.test[ , 7])), 7] <- 1
+pre$tx.test[which(is.na(pre$tx.test[ , 8])), 8] <- 1
+
+## it is a good idea to explore more sophisticated methods
+## such as imputing the missing data with Sequential BART
+## Xu, Daniels and Winterstein.  Sequential BART for imputation of missing
+## covariates.  Biostatistics 2016 doi: 10.1093/biostatistics/kxw009
+## http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1
+## https://cran.r-project.org/package=sbart
+## library(sbart)
 ## set.seed(21)
-## train <- BartMI(bartmpicstem, xx=pre$tx.train, yy=NULL, datatype=rep(0, 6),
+## train <- seqBART(xx=pre$tx.train, yy=NULL, datatype=rep(0, 6),
 ##                type=0, numskip=20, burn=1000)
 ## coarsen the imputed data same way as observed example data
-## train$imputed5[which(train$imputed5[ , 5]<1), 5] <- 1
-## train$imputed5[which(train$imputed5[ , 5]>8), 5] <- 8
-## train$imputed5[ , 5] <- round(train$imputed5[ , 5])
-## train$imputed5[which(train$imputed5[ , 6]<1), 6] <- 1
-## train$imputed5[which(train$imputed5[ , 6]>8), 6] <- 8
-## train$imputed5[ , 6] <- round(train$imputed5[ , 6])
-## pre$tx.train <- train$imputed5
-## dimnames(pre$tx.train)[[2]] <- c('t', 'v', 'N', 'rx', 'number', 'size')
+## train$imputed5[which(train$imputed5[ , 7]<1), 7] <- 1
+## train$imputed5[which(train$imputed5[ , 7]>8), 7] <- 8
+## train$imputed5[ , 7] <- round(train$imputed5[ , 7])
+## train$imputed5[which(train$imputed5[ , 8]<1), 8] <- 1
+## train$imputed5[which(train$imputed5[ , 8]>8), 8] <- 8
+## train$imputed5[ , 8] <- round(train$imputed5[ , 8])
 
 ## for Friedman's partial dependence, we need to estimate the whole cohort
 ## at each treatment assignment (and, average over those)
-## Pl treatment=1, B6 treatment=2, Th treatment=3
 pre$tx.test <- rbind(pre$tx.test, pre$tx.test, pre$tx.test)
-pre$tx.test[ , 4] <- rep(1:3, each=J)
-    
-set.seed(99)
-post <- recur.bart(y.train=pre$y.train, x.train=pre$tx.train, x.test=pre$tx.test)
+pre$tx.test[ , 4] <- c(rep(1, NK), rep(0, 2*NK))          ## Pl
+pre$tx.test[ , 5] <- c(rep(0, NK), rep(1, NK), rep(0, NK))## B6
+pre$tx.test[ , 6] <- c(rep(0, 2*NK), rep(1, NK))          ## Th
+
+\dontrun{
+## set.seed(99)
+## post <- recur.bart(y.train=pre$y.train, x.train=pre$tx.train, x.test=pre$tx.test)
 ## depending on your performance, you may want to run in parallel if available
-## post <- mc.recur.bart(y.train=pre$y.train, x.train=pre$tx.train, 
-##                       x.test=pre$tx.test, mc.cores=5, seed=99)
+post <- mc.recur.bart(y.train=pre$y.train, x.train=pre$tx.train,
+                      x.test=pre$tx.test, mc.cores=8, seed=99)
 
-K <- post$K
-M <- 1000
-haz.Pl <- matrix(0, nrow=M, ncol=K)
-haz.B6 <- matrix(0, nrow=M, ncol=K)
-haz.Th <- matrix(0, nrow=M, ncol=K)
+M <- nrow(post$yhat.test)
+RI.B6.Pl <- matrix(0, nrow=M, ncol=K)
+RI.Th.Pl <- matrix(0, nrow=M, ncol=K)
+RI.Th.B6 <- matrix(0, nrow=M, ncol=K)
 
-for(i in 1:N) {
-    j <- (i-1)*K+1:K
-    haz.Pl <- haz.Pl+post$haz.test[1:M, j]/N
-    haz.B6 <- haz.B6+post$haz.test[1:M, j+N*K]/N
-    haz.Th <- haz.Th+post$haz.test[1:M, j+N*K*2]/N
+for(j in 1:K) {
+    h <- seq(j, NK, K)
+    RI.B6.Pl[ , j] <- apply(post$prob.test[ , h+NK]/
+                            post$prob.test[ , h], 1, mean)
+    RI.Th.Pl[ , j] <- apply(post$prob.test[ , h+2*NK]/
+                            post$prob.test[ , h], 1, mean)
+    RI.Th.B6[ , j] <- apply(post$prob.test[ , h+2*NK]/
+                            post$prob.test[ , h+NK], 1, mean)
 }
 
-haz.Pl.mu <- apply(haz.Pl, 2, mean)
-haz.B6.mu <- apply(haz.B6, 2, mean)
-haz.Th.mu <- apply(haz.Th, 2, mean)
+RI.B6.Pl.mu <- apply(RI.B6.Pl, 2, mean)
+RI.B6.Pl.025 <- apply(RI.B6.Pl, 2, quantile, probs=0.025)
+RI.B6.Pl.975 <- apply(RI.B6.Pl, 2, quantile, probs=0.975)
 
-plot(post$times, haz.Pl.mu, type='l',
-     main='bladder1 ex: Placebo (black), B6 (red), Thiotepa (blue)',
-     ylab=expression(lambda(t)), xlab='t (months)',
-     ylim=c(0, max(c(haz.Pl.mu, haz.B6.mu, haz.Th.mu))))
-points(post$times, haz.B6.mu, type='l', col='red')
-points(post$times, haz.Th.mu, type='l', col='blue')
+RI.Th.Pl.mu <- apply(RI.Th.Pl, 2, mean)
+RI.Th.Pl.025 <- apply(RI.Th.Pl, 2, quantile, probs=0.025)
+RI.Th.Pl.975 <- apply(RI.Th.Pl, 2, quantile, probs=0.975)
 
-plot(post$times, apply(1*((haz.Th/haz.Pl) < 1), 2, mean),
-     type='l', ylim=c(0, 1),
-     main='bladder1 ex: Thiotepa vs. Placebo',
-     ylab=expression(P(RR(t)<1)), xlab='t (months)')
-     points(c(0, max(post$times)), c(0.5, 0.5), type='l', col='gray')
+RI.Th.B6.mu <- apply(RI.Th.B6, 2, mean)
+RI.Th.B6.025 <- apply(RI.Th.B6, 2, quantile, probs=0.025)
+RI.Th.B6.975 <- apply(RI.Th.B6, 2, quantile, probs=0.975)
 
-rr.Th.Pl.mu <- apply(haz.Th/haz.Pl, 2, mean)
-rr.Th.Pl.lo <- apply(haz.Th/haz.Pl, 2, quantile, probs=0.25)
-rr.Th.Pl.up <- apply(haz.Th/haz.Pl, 2, quantile, probs=0.75)
-plot(post$times, rr.Th.Pl.mu, type='l', log='y',
-     main='bladder1 ex: Thiotepa vs. Placebo with 0.5 CI',
-     ylab=expression(RR(t)), xlab='t (months)', ylim=c(0.625, 1.6))
-points(post$times, rr.Th.Pl.lo, type='l', col='gray')
-points(post$times, rr.Th.Pl.up, type='l', col='gray')
-points(c(0, max(post$times)), c(1, 1), type='l')
+plot(post$times, RI.Th.Pl.mu, col='blue',
+     log='y', main='Bladder cancer ex: Thiotepa vs. Placebo',
+     type='l', ylim=c(0.1, 10), ylab='RI(t)', xlab='t (months)')
+lines(post$times, RI.Th.Pl.025, col='red')
+lines(post$times, RI.Th.Pl.975, col='red')
+abline(h=1)
 
-rr.Th.B6.mu <- apply(haz.Th/haz.B6, 2, mean)
-rr.Th.B6.lo <- apply(haz.Th/haz.B6, 2, quantile, probs=0.25)
-rr.Th.B6.up <- apply(haz.Th/haz.B6, 2, quantile, probs=0.75)
-plot(post$times, rr.Th.B6.mu, type='l', log='y',
-     main='bladder1 ex: Thiotepa vs. Vitamin B6 with 0.5 CI',
-     ylab=expression(RR(t)), xlab='t (months)', ylim=c(0.625, 1.6))
-points(post$times, rr.Th.B6.lo, type='l', col='gray')
-points(post$times, rr.Th.B6.up, type='l', col='gray')
-points(c(0, max(post$times)), c(1, 1), type='l')
+plot(post$times, RI.B6.Pl.mu, col='blue',
+     log='y', main='Bladder cancer ex: Vitamin B6 vs. Placebo',
+     type='l', ylim=c(0.1, 10), ylab='RI(t)', xlab='t (months)')
+lines(post$times, RI.B6.Pl.025, col='red')
+lines(post$times, RI.B6.Pl.975, col='red')
+abline(h=1)
 
-plot(post$times, apply(1*((haz.Th/haz.B6) < 1), 2, mean),
-     type='l', ylim=c(0, 1),
-     main='bladder1 ex: Thiotepa vs. Vitamin B6',
-     ylab=expression(P(RR(t)<1)), xlab='t (months)')
-     points(c(0, max(post$times)), c(0.5, 0.5), type='l', col='gray')
-
+plot(post$times, RI.Th.B6.mu, col='blue',
+     log='y', main='Bladder cancer ex: Thiotepa vs. Vitamin B6',
+     type='l', ylim=c(0.1, 10), ylab='RI(t)', xlab='t (months)')
+lines(post$times, RI.Th.B6.025, col='red')
+lines(post$times, RI.Th.B6.975, col='red')
+abline(h=1)
 
 }
 }

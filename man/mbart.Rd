@@ -20,12 +20,19 @@ small amount to the overall fit.
 }
 \usage{
 mbart(
-   x.train, y.train, 
-   k=2.0,
-   power=2.0, base=.95,
-   %%binaryOffset=NULL,
-   ntree=200L, numcut=100L,
-   ndpost=1000L, nskip=100L
+   x.train, y.train, x.test=matrix(0.0,0,0),
+   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   xinfo=matrix(0.0,0,0), usequants=FALSE,
+   cont=FALSE, rm.const=TRUE, tau.interval=0.95,
+   k=2.0, power=2.0, base=.95, 
+   binaryOffset=0,
+   ntree=50L, numcut=100L,
+   ndpost=1000L, nskip=100L,
+   keepevery=1L,
+   nkeeptrain=ndpost, nkeeptest=ndpost,
+   %nkeeptestmean=ndpost,
+   nkeeptreedraws=ndpost,
+   printevery=100L, transposed=FALSE %, treesaslists=FALSE
 )
 }
 \arguments{
@@ -36,7 +43,7 @@ mbart(
    If a variable is a factor in a data frame, it is replaced with dummies.
    Note that q dummies are created if q>2 and
    one dummy is created if q=2, where q is the number of levels of the factor.
-   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x}
+   \code{lbart} will generate draws of \eqn{f(x)} for each \eqn{x}
    which is a row of x.train.
    }
 
@@ -47,6 +54,41 @@ mbart(
    with a logit link is fit.
    }
 
+   \item{x.test}{
+   Explanatory variables for test (out of sample) data.\cr
+   Should have same structure as x.train.\cr
+   \code{lbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
+   }
+
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates under consideration.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}
+
+   \item{tau.interval}{
+     The width of the interval to scale the variance for the terminal
+     leaf values.}
+   
    \item{k}{
    For numeric y,
    k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
@@ -64,6 +106,9 @@ mbart(
    Base parameter for tree prior.
    }
 
+   \item{binaryOffset}{
+   Currently fixed at zero, but might be relaxed RSN.}
+   
    %% \item{binaryOffset}{
    %% Used for binary \eqn{y}.\cr
    %% The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
@@ -94,6 +139,50 @@ mbart(
    \item{nskip}{
    Number of MCMC iterations to be treated as burn in.
    }
+
+   \item{nkeeptrain}{
+   Number of MCMC iterations to be returned for train data.
+   }
+
+   \item{nkeeptest}{
+   Number of MCMC iterations to be returned for test data.
+   }
+
+   %% \item{nkeeptestmean}{
+   %% Number of MCMC iterations to be returned for test mean.
+   %% }
+
+   \item{nkeeptreedraws}{
+   Number of MCMC iterations to be returned for tree draws.
+   }
+
+   \item{keepevery}{
+   Every keepevery draw is kept to be returned to the user.
+   }
+
+   \item{printevery}{
+   As the MCMC runs, a message is printed every printevery draws.
+   }
+
+   %% \item{keepevery}{
+   %% Every keepevery draw is kept to be returned to the user.\cr
+   %% A \dQuote{draw} will consist of values of the error standard deviation (\eqn{\sigma}{sigma})
+   %% and \eqn{f^*(x)}{f*(x)}
+   %% at \eqn{x} = rows from the train(optionally) and test data, where \eqn{f^*}{f*} denotes
+   %% the current draw of \eqn{f}.
+   %% }
+
+   \item{transposed}{
+   When running \code{lbart} in parallel, it is more memory-efficient
+   to transpose \code{x.train} and \code{x.test}, if any, prior to
+   calling \code{mc.lbart}.
+   }
+
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 
 }
 \details{
@@ -158,6 +247,99 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \seealso{
 \code{\link{lbart}}
+}
+\examples{
+
+##simulate from Friedman's five-dimensional test function
+##Friedman JH. Multivariate adaptive regression splines
+##(with discussion and a rejoinder by the author).
+##Annals of Statistics 1991; 19:1-67.
+
+f = function(x) #only the first 5 matter
+    sin(pi*x[ , 1]*x[ , 2]) + 2*(x[ , 3]-.5)^2+x[ , 4]+0.5*x[ , 5]-1.5
+
+sigma = 1.0  # y~Logistic(f(x), sigma)
+P = 5        # number of covariates
+N = 2500
+C = 3        # number of categories
+M = 5^P
+
+x <- seq(0, 1, length.out=5)
+x.test <- matrix(nrow=M, ncol=P)
+dimnames(x.test)[[2]] <- paste0('x', 1:5)
+h <- 1
+for(x5 in x)
+    for(x4 in x)
+        for(x3 in x)
+            for(x2 in x)
+                for(x1 in x) {
+                    x.test[h, ] <- c(x1, x2, x3, x4, x5)
+                    h <- h+1
+                }
+Ey.test = f(x.test)
+
+set.seed(12)
+x.train=matrix(runif(N*P), N, P)
+dimnames(x.train)[[2]] <- paste0('x', 1:5)
+Ey.train = f(x.train)
+y.train=rlogis(N, Ey.train, sigma)
+
+i <- y.train > -1
+j <- y.train > 1
+
+y.train[!i] <- 1
+y.train[i] <- 2
+y.train[j] <- 3
+
+table(y.train)
+##test BART with token run to ensure installation works
+## set.seed(99)
+## post = mbart(x.train, y.train, x.test,
+##              nskip=1, ndpost=1, keepevery=1)
+
+\dontrun{ 
+## set.seed(99)
+## post = mbart(x.train, y.train, x.test)
+
+post = mc.mbart(x.train, y.train, x.test, mc.cores=8, seed=99)
+
+h <- seq(1, C*N, by=C)
+
+print(cor(post$prob.train.mean[h], plogis(-1, Ey.train, sigma))^2)
+print(cor(post$prob.train.mean[h+1], plogis(1, Ey.train, sigma)-plogis(-1, Ey.train, sigma))^2)
+print(cor(post$prob.train.mean[h+2], plogis(1, Ey.train, sigma, 0))^2)
+
+plot(plogis(-1, Ey.train, sigma), post$prob.train.mean[h], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=1)', ylab='Est. P(y=1)')
+abline(0, 1)
+
+plot(plogis(1, Ey.train, sigma)-plogis(-1, Ey.train, sigma), post$prob.train.mean[h+1], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=2)', ylab='Est. P(y=2)')
+abline(0, 1)
+
+plot(plogis(1, Ey.train, sigma, 0), post$prob.train.mean[h+2], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=3)', ylab='Est. P(y=3)')
+abline(0, 1)
+
+h <- seq(1, C*M, by=C)
+
+print(cor(post$prob.test.mean[h], plogis(-1, Ey.test, sigma))^2)
+print(cor(post$prob.test.mean[h+1], plogis(1, Ey.test, sigma)-plogis(-1, Ey.test, sigma))^2)
+print(cor(post$prob.test.mean[h+2], plogis(1, Ey.test, sigma, 0))^2)
+
+plot(plogis(-1, Ey.test, sigma), post$prob.test.mean[h], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=1)', ylab='Est. P(y=1)')
+abline(0, 1)
+
+plot(plogis(1, Ey.test, sigma)-plogis(-1, Ey.test, sigma), post$prob.test.mean[h+1], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=2)', ylab='Est. P(y=2)')
+abline(0, 1)
+
+plot(plogis(1, Ey.test, sigma, 0), post$prob.test.mean[h+2], pch='.',
+     xlim=0:1, ylim=0:1, xlab='Known P(y=3)', ylab='Est. P(y=3)')
+abline(0, 1)
+
+}
 }
 \keyword{nonparametric}
 \keyword{tree}

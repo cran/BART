@@ -24,21 +24,27 @@ surv.pwbart(
                 x.test,
                 treedraws,
                 binaryOffset=0,
-                mc.cores=1L, transposed=FALSE, nice=19L
+                mc.cores=1L,
+                type='pbart',
+                transposed=FALSE, nice=19L
               )
 
 mc.surv.pwbart(
                 x.test,
                 treedraws,
                 binaryOffset=0,
-                mc.cores=2L, transposed=FALSE, nice=19L
+                mc.cores=2L,
+                type='pbart',
+                transposed=FALSE, nice=19L
               )
 
 mc.recur.pwbart(
                 x.test,
                 treedraws,
                 binaryOffset=0,
-                mc.cores=2L, transposed=FALSE, nice=19L
+                mc.cores=2L, 
+                type='pbart',
+                transposed=FALSE, nice=19L
                )
 
 }
@@ -58,7 +64,10 @@ mc.recur.pwbart(
 
    \item{mc.cores}{
    Number of threads to utilize.
-   }
+ }
+ 
+   \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
+     Holmes-Held, \code{'lbart'}. }
 
    \item{transposed}{
    When running \code{pwbart} or \code{mc.pwbart} in parallel, it is more memory-efficient

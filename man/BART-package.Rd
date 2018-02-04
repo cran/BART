@@ -3,7 +3,8 @@
 \alias{BART}
 \docType{package}
 \title{
-  Bayesian Additive Regression Trees (BART) provide flexible nonparametric modeling of covariates for continuous, binary and time-to-event outcomes.
+  Bayesian Additive Regression Trees (BART) provide flexible nonparametric 
+  modeling of covariates for continuous, binary, categorical and time-to-event outcomes.
 }
 \description{
   Efficient and reliable software is critical to the successful usage of the BART
@@ -11,23 +12,19 @@
   engine provided here is written in C++ for reasons of speed and
   maintainability; the source code is easy to read and modify while
   still being relatively efficient computationally.  This package brings
-  together R functions for a variety of outcomes in one go: continuous,
-  dichotomous and time-to-event with right censoring.
+  together R functions for a variety of outcomes: continuous,
+  dichotomous, categorical and time-to-event with right censoring.
 }
 \details{
-For continuous outcomes, use the \code{wbart}/\code{mc.wbart}
-function(s). 
-For dichotomous outcomes, use the \code{pbart}/\code{mc.pbart}
-function(s). 
-For time-to-event outcomes, use the \code{surv.bart}/\code{mc.surv.bart}
-function(s). 
-For competing risk outcomes, use the \code{crisk.bart}/\code{mc.crisk.bart}
-function(s). 
-For recurrent event outcomes, use the \code{recur.bart}/\code{mc.recur.bart}
-function(s). 
+For continuous outcomes, use the \code{wbart}/\code{mc.wbart} function(s). 
+For dichotomous outcomes, use the \code{pbart}/\code{mc.pbart} or
+\code{lbart}/\code{mc.lbart} function(s). 
+For categorical outcomes, use the \code{mbart}/\code{mc.mbart} function(s). 
+For survival outcomes, use the \code{surv.bart}/\code{mc.surv.bart} function(s). 
+For competing risk outcomes, use the \code{crisk.bart}/\code{mc.crisk.bart} function(s). 
+For recurrent event outcomes, use the \code{recur.bart}/\code{mc.recur.bart} function(s). 
 For convenience, these functions return the trees (so that you can make
-predictions without fitting the model simultaneously) via the
-\code{pwbart}/\code{mc.pwbart} function(s).
+predictions without fitting the model simultaneously) via the \code{predict} function.
 }
 \author{
 Robert McCulloch \email{robert.e.mcculloch@gmail.com}\cr

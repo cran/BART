@@ -2,14 +2,12 @@
 
 rm -rf src/Makevars.win
 
-for i in R/gap.bart.R R/mc.gap.bart.R src/gap_bart.cpp inst/cxx-ex/gap_bart.cpp \
-	 README src/TAGS src/BROWSE demo/*.pdf inst/cxx-ex/*.o inst/cxx-ex/*.out \
-	 inst/doc/*.R inst/doc/*.png inst/doc/*.aux inst/doc/*.log inst/doc/*.nav \
-	 inst/doc/*.out inst/doc/*.snm inst/doc/*.tex inst/doc/*.toc \
-	 inst/doc/*.pdf inst/doc/*.Rmd
-	 # inst/doc/ChipGeor*.pdf inst/doc/EnteCrai17.pdf inst/doc/Line16*.pdf \
-	 # inst/doc/LineYang17.pdf inst/doc/Murr17.pdf inst/doc/PratChip13.pdf \
-	 # inst/doc/SparLoga16.pdf inst/doc/XuDani16*.pdf inst/doc/BBC.Rmd
+for i in README src/TAGS src/BROWSE demo/*.pdf inst/cxx-ex/*.o inst/cxx-ex/*.out \
+	 demo/myeloid.multi.state.R vignettes/wbart.Rmd vignettes/jss.* \
+	 vignettes/*.aux vignettes/*.bbl vignettes/*.blg vignettes/*.log vignettes/*.out \
+	 vignettes/*.tex vignettes/*.tpt vignettes/*.pdf vignettes/*.md  vignettes/*.html  \
+	 R/dpm*bart.R man/dpm*bart.Rd src/*dp*.* inst/cxx-ex/*dp*.* demo/fat.tail.dpm*.R \
+	 inst/bootcamp/*
 do
     if [ -f $i ]
        then rm -rf $i

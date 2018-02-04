@@ -43,15 +43,20 @@ response case, \eqn{f} is the sum of many tree models.  }
 \usage{
 
 surv.bart( x.train=matrix(0.0,0,0),
-           y.train=NULL, times=NULL, delta=NULL, x.test=matrix(0.0,0,0),
-           k=2.0, power=2.0, base=.95, binaryOffset=NULL, %M=1,
+           y.train=NULL, times=NULL, delta=NULL,
+           x.test=matrix(0.0,0,0),
+           sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+           xinfo=matrix(0.0,0,0), usequants=FALSE,
+           cont=FALSE, rm.const=TRUE, type='pbart',
+           k=2.0, power=2.0, base=.95, binaryOffset=NULL, 
            ntree=50, numcut=100, ndpost=1000, nskip=250,
            keepevery = 10L,
            nkeeptrain=ndpost,
            nkeeptest=ndpost,
-           nkeeptestmean=ndpost,
+           %nkeeptestmean=ndpost,
            nkeeptreedraws=ndpost,
-           printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
+           printevery=100L, %treesaslists=FALSE,
+           keeptrainfits=TRUE,
            id=NULL,    ## surv.bart only
            seed=99,    ## mc.surv.bart only
            mc.cores=2, ## mc.surv.bart only
@@ -59,15 +64,20 @@ surv.bart( x.train=matrix(0.0,0,0),
          )
 
 mc.surv.bart( x.train=matrix(0.0,0,0),
-              y.train=NULL, times=NULL, delta=NULL, x.test=matrix(0.0,0,0),
-              k=2.0, power=2.0, base=.95, binaryOffset=NULL, %M=1,
+              y.train=NULL, times=NULL, delta=NULL,
+              x.test=matrix(0.0,0,0),
+              sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+              xinfo=matrix(0.0,0,0), usequants=FALSE,
+              cont=FALSE, rm.const=TRUE, type='pbart',
+              k=2.0, power=2.0, base=.95, binaryOffset=NULL, 
               ntree=50, numcut=100, ndpost=1000, nskip=250,
               keepevery = 10L,
               nkeeptrain=ndpost,
               nkeeptest=ndpost,
-              nkeeptestmean=ndpost,
+              %nkeeptestmean=ndpost,
               nkeeptreedraws=ndpost,
-              printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
+              printevery=100L, %treesaslists=FALSE,
+              keeptrainfits=TRUE,
               id=NULL,    ## surv.bart only
               seed=99,    ## mc.surv.bart only
               mc.cores=2, ## mc.surv.bart only
@@ -112,6 +122,34 @@ that the definition of \code{x.train} is dependent on whether
    \code{surv.bart} will generate draws of \eqn{f(t, x)} for each \eqn{x} which is a row of x.test.
    }
 
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates under consideration.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}
+
+   \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
+     Holmes-Held, \code{'lbart'}. }
+   
    \item{k}{
    k is the number of prior standard deviations \eqn{f(t, x)} is away from +/-3.
    The bigger k is, the more conservative the fitting will be.
@@ -193,19 +231,19 @@ that the definition of \code{x.train} is dependent on whether
    Number of MCMC iterations to be returned for test data.
    }
 
-   \item{nkeeptestmean}{
-   Number of MCMC iterations to be returned for test mean.
-   }
+   %% \item{nkeeptestmean}{
+   %% Number of MCMC iterations to be returned for test mean.
+   %% }
 
    \item{nkeeptreedraws}{
    Number of MCMC iterations to be returned for tree draws.
    }
 
-   \item{treesaslists}{
-     The default behavior is to return the trees as a text string.  If you
-     specify \code{treesaslists=TRUE}, then the trees will be returned
-     as a list as well.
-   }
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 
    \item{id}{
      \code{surv.bart} only: unique identifier added to returned list.
@@ -260,7 +298,13 @@ that the definition of \code{x.train} is dependent on whether
 \references{
   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+   \emph{Statistics in Medicine}, \bold{16:2741-53}
+   <doi:10.1002/sim.6893>.
+   
+Linero, A.R. (2016)
+  Bayesian regression trees for high dimensional prediction and variable
+  selection. \emph{JASA},
+  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
 }
 \author{
 Rodney Sparapani: \email{rsparapa@mcw.edu}
@@ -273,112 +317,93 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}
 ## load survival package for the advanced lung cancer example
 data(lung)
 
-group <- -which(is.na(lung[ , 7])) ## remove missing row for ph.karno
-times <- lung[group, 2]   ##lung$time
-delta <- lung[group, 3]-1 ##lung$status: 1=censored, 2=dead
-                          ##delta: 0=censored, 1=dead
+N <- length(lung$status)
 
-## this study reports time in days rather than months like other studies
-## coarsening from days to months will reduce the computational burden
-times <- ceiling(times/30)
+table(lung$ph.karno, lung$pat.karno)
 
-summary(times)
+## if physician's KPS unavailable, then use the patient's
+h <- which(is.na(lung$ph.karno))
+lung$ph.karno[h] <- lung$pat.karno[h]
+
+times <- lung$time
+delta <- lung$status-1 ##lung$status: 1=censored, 2=dead
+##delta: 0=censored, 1=dead
+
+## this study reports time in days rather than weeks or months
+## coarsening from days to weeks or months will reduce the computational burden
+##times <- ceiling(times/30)
+times <- ceiling(times/7)  ## weeks
+
+table(times)
 table(delta)
 
-x.train <- as.matrix(lung[group, c(4, 5, 7)]) ## matrix of observed covariates
+## matrix of observed covariates
+x.train <- cbind(lung$sex, lung$age, lung$ph.karno)
 
-## lung$age:        Age in years
 ## lung$sex:        Male=1 Female=2
+## lung$age:        Age in years
 ## lung$ph.karno:   Karnofsky performance score (dead=0:normal=100:by=10)
 ##                  rated by physician
 
-dimnames(x.train)[[2]] <- c('age(yr)', 'M(1):F(2)', 'ph.karno(0:100:10)')
+dimnames(x.train)[[2]] <- c('M(1):F(2)', 'age(39:82)', 'ph.karno(50:100:10)')
 
-summary(x.train[ , 1])
-table(x.train[ , 2])
+table(x.train[ , 1])
+summary(x.train[ , 2])
 table(x.train[ , 3])
-
-x.test <- matrix(nrow=84, ncol=3) ## matrix of covariate scenarios
-
-dimnames(x.test)[[2]] <- dimnames(x.train)[[2]]
-
-i <- 1
-
-for(age in 5*(9:15)) for(sex in 1:2) for(ph.karno in 10*(5:10)) {
-    x.test[i, ] <- c(age, sex, ph.karno)
-    i <- i+1
-}
 
 ##test BART with token run to ensure installation works
 set.seed(99)
-post <- surv.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
-                   nskip=5, ndpost=5, keepevery=1)
+post <- surv.bart(x.train=x.train, times=times, delta=delta,
+                  nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
 ## run one long MCMC chain in one process
-set.seed(99)
-post <- surv.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
+## set.seed(99)
+## post <- surv.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
+
 ## in the interest of time, consider speeding it up by parallel processing
 ## run "mc.cores" number of shorter MCMC chains in parallel processes
-## post <- mc.surv.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
-##                      mc.cores=5, seed=99)
+post <- mc.surv.bart(x.train=x.train, times=times, delta=delta,
+                     mc.cores=8, seed=99)
 
-##saveRDS(object=post, file='post.rds')
-## you can save time by reading in the posterior
-## instead of re-generating it every time
-## post <- readRDS(file='post.rds')
+pre <- surv.pre.bart(times=times, delta=delta, x.train=x.train,
+                     x.test=x.train)
 
-## let's look at some survival curves
-## first, a younger group with a healthier KPS
-## age 50 with KPS=90: males and females
-## males: row 17, females: row 23
-x.test[c(17, 23), ]
+K <- pre$K
+M <- nrow(post$yhat.train)
 
-low.risk.males <- 16*post$K+1:post$K ## K=unique times including censoring
+pre$tx.test <- rbind(pre$tx.test, pre$tx.test)
+pre$tx.test[ , 2] <- c(rep(1, N*K), rep(2, N*K))
+## sex pushed to col 2, since time is always in col 1
 
-low.risk.females <- 22*post$K+1:post$K
+pred <- predict(post, newdata=pre$tx.test, mc.cores=8)
 
-## second, an older group with a poor KPS
-## age 70 with KPS=60: males and females
-x.test[c(62, 68), ]
+pd <- matrix(nrow=M, ncol=2*K)
 
-high.risk.males <- 61*post$K+1:post$K
+for(j in 1:K) {
+    h <- seq(j, N*K, by=K)
+    pd[ , j] <- apply(pred$surv.test[ , h], 1, mean)
+    pd[ , j+K] <- apply(pred$surv.test[ , h+N*K], 1, mean)
+}
 
-high.risk.females <- 67*post$K+1:post$K
+pd.mu  <- apply(pd, 2, mean)
+pd.025 <- apply(pd, 2, quantile, probs=0.025)
+pd.975 <- apply(pd, 2, quantile, probs=0.975)
 
-old.par <- par(mfrow=c(2, 2))
+males <- 1:K
+females <- males+K
 
-plot(post$times, post$surv.test.mean[low.risk.males], type='s', col='blue',
-     main='Age 50 with KPS=90',
-     xlab='t', ylab='S(t)', ylim=c(0, 1))
-points(post$times, post$surv.test.mean[low.risk.females], type='s', col='red')
+plot(c(0, pre$times), c(1, pd.mu[males]), type='s', col='blue',
+     ylim=0:1, ylab='S(t, x)', xlab='t (weeks)',
+     main=paste('Advanced Lung Cancer ex. (BART::lung)',
+                "Friedman's partial dependence function",
+                'Male (blue) vs. Female (red)', sep='\n'))
+lines(c(0, pre$times), c(1, pd.025[males]), col='blue', type='s', lty=2)
+lines(c(0, pre$times), c(1, pd.975[males]), col='blue', type='s', lty=2)
+lines(c(0, pre$times), c(1, pd.mu[females]), col='red', type='s')
+lines(c(0, pre$times), c(1, pd.025[females]), col='red', type='s', lty=2)
+lines(c(0, pre$times), c(1, pd.975[females]), col='red', type='s', lty=2)
 
-plot(post$times, post$surv.test.mean[high.risk.males], type='s', col='blue',
-     main='Age 70 with KPS=60',
-     xlab='t', ylab='S(t)', ylim=c(0, 1))
-points(post$times, post$surv.test.mean[high.risk.females], type='s', col='red')
-
-plot(post$times, post$surv.test.mean[low.risk.males], type='s', col='blue',
-     main='Males',
-     xlab='t', ylab='S(t)', ylim=c(0, 1))
-points(post$times, post$surv.test.mean[high.risk.males], type='s')
-
-plot(post$times, post$surv.test.mean[low.risk.females], type='s', col='red',
-     main='Females',
-     xlab='t', ylab='S(t)', ylim=c(0, 1))
-points(post$times, post$surv.test.mean[high.risk.females], type='s')
-
-par(old.par)
-
-## calculate 95% credible interval
-credible95 <- apply(post$surv.test[ , low.risk.females], 2, quantile,
-                    probs=c(0.025, 0.975))
-
-plot(post$times, post$surv.test.mean[low.risk.females], type='s', col='red',
-     main='Females aged 50/KPS=90',
-     xlab='t', ylab='S(t)', ylim=c(0, 1))
-points(post$times, credible95[1, ], type='s')
-points(post$times, credible95[2, ], type='s')
 
 }
 }

@@ -21,11 +21,12 @@ recur.pwbart <- function(
    treedraws,		#$treedraws for from surv.bart/mc.surv.bart
    binaryOffset=0,	#mean to add on
    mc.cores=1L,
+   type='pbart',
    transposed=FALSE,
    nice=19L             # mc.surv.pwbart only
 )
 {
-    if(!transposed) x.test <- t(x.test)
+    if(!transposed) x.test <- t(bartModelMatrix(x.test))
 
     p <- length(treedraws$cutpoints)
 
@@ -38,7 +39,6 @@ recur.pwbart <- function(
 
     if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
 
-    pred$binaryOffset <- binaryOffset
     x.test <- t(x.test)
     pred$tx.test <- x.test
     times <- unique(sort(x.test[ , 1]))
@@ -46,7 +46,10 @@ recur.pwbart <- function(
     K <- length(times)
     pred$K <- K
 
-    pred$haz.test <- pnorm(pred$yhat.test)
+    if(type=='pbart') pred$prob.test <- pnorm(pred$yhat.test)
+    else if(type=='lbart') pred$prob.test <- plogis(pred$yhat.test)
+
+    pred$haz.test <- pred$prob.test
     pred$cum.test <- pred$haz.test
 
     H <- nrow(x.test)
@@ -61,6 +64,11 @@ recur.pwbart <- function(
         }
     }
 
+    pred$prob.test.mean <- apply(pred$prob.test, 2, mean)
+    pred$haz.test.mean <- apply(pred$haz.test, 2, mean)
+    pred$cum.test.mean <- apply(pred$cum.test, 2, mean)
+    
+    pred$binaryOffset <- binaryOffset
     attr(pred, 'class') <- 'recurbart'
 
     return(pred)

@@ -28,7 +28,7 @@ mc.pwbart = function(
     if(.Platform$OS.type!='unix')
         stop('parallel::mcparallel/mccollect do not exist on windows')
 
-    if(!transposed) x.test <- t(x.test)
+    if(!transposed) x.test <- t(bartModelMatrix(x.test))
 
     p <- length(treedraws$cutpoints)
 

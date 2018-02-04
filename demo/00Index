@@ -1,13 +1,27 @@
-aids.itr.pbart	   AIDS example for individualized treatment rules with BART
+aids.itr.pbart	   AIDS example for individualized treatment rules with probit BART
+aids.itr.lbart	   AIDS example for individualized treatment rules with logit BART
+bladder.recur.bart	   Bladder cancer example for recurrent events with BART
+c.surv.bart	   BART and the concordance probability
+cal.recur.bart	   Interval coverage calibration for recurrent events with BART
 cube.pbart	   x-cubed example for binary outcomes with BART
-friedman.wbart     Friedman's five dimensional test function and multi-threading with BART   
+data.recur.pre.bart	   Data construction for recurrent events with BART
+ex.mbart	   Example for multinomial BART
+exp.recur.bart	   Proportional intensity for recurrent events with BART
+friedman.wbart     Friedman's five dimensional test function and multi-threading with BART
 geweke.pbart1 	   Geweke diagnostics for binary outcomes with BART part 1
 geweke.pbart2 	   Geweke diagnostics for binary outcomes with BART part 2
 geweke.pbart3 	   Geweke diagnostics for binary outcomes with BART part 3
+geweke.recur.bart	   Geweke diagnostics for recurrent events with BART
+geweke.rs.pbart    Geweke diagnostics for binary outcomes with BART and random sampling
 geweke.surv.bart   Geweke diagnostics for survival analysis with BART
 geweke.lung.surv.bart   Geweke diagnostics for advanced lung cancer survival analysis with BART
 dm.recur.bart	   Diabetes and hospital admission example for recurrent events with BART
 liver.crisk.bart   Liver transplant example for competing risks with BART
-lung.surv.bart	   Lung cancer example for survival analysis with BART
+lung.surv.bart	   Lung cancer example for survival analysis with probit BART
+lung.surv.lbart	   Lung cancer example for survival analysis with logit BART
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
+np.recur.bart	   Nonproportional intensity for recurrent events with BART
+sparse.lbart	   Dirichlet sparsity prior with logistic BART
+sparse.pbart	   Dirichlet sparsity prior with probit BART
+sparse.wbart	   Dirichlet sparsity prior with continuous BART

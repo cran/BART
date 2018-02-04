@@ -19,14 +19,17 @@
 
 mc.pbart <- function(
     x.train, y.train, x.test = matrix(0.0, 0L, 0L),
+    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0.0,0,0), usequants=FALSE,
+    cont=FALSE, rm.const=TRUE,
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
     binaryOffset = 0,
-    ntree=200L, numcut=100L,
+    ntree=50L, numcut=100L,
     ndpost=1000L, nskip=100L,
     keepevery=1L, printevery=100L,
     keeptrainfits=TRUE, transposed=FALSE,
-    treesaslists=FALSE,
+##    treesaslists=FALSE,
     mc.cores = 2L, nice = 19L,
     seed = 99L
 )
@@ -39,8 +42,15 @@ mc.pbart <- function(
     parallel::mc.reset.stream()
 
     if(!transposed) {
-        x.train <- t(x.train)
-        x.test <- t(x.test)
+        temp = bartModelMatrix(x.train, numcut, usequants=usequants,
+                               cont=cont, xinfo=xinfo, rm.const=rm.const)
+        x.train = t(temp$X)
+        numcut = temp$numcut
+        xinfo = temp$xinfo
+        if(length(x.test)>0)
+            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        rm.const <- temp$rm.const
+        rm(temp)
     }
 
     mc.cores.detected <- detectCores()
@@ -60,14 +70,16 @@ mc.pbart <- function(
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
                   pbart(x.train=x.train, y.train=y.train, x.test=x.test,
+                        sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                        xinfo=xinfo,
                         k=k, power=power, base=base,
                         binaryOffset=binaryOffset,
                         ntree=ntree, numcut=numcut,
                         ndpost=mc.ndpost, nskip=nskip, keepevery=keepevery,
                         ## nkeeptrain=mc.nkeep, nkeeptest=mc.nkeep,
                         ## nkeeptestmean=mc.nkeep, nkeeptreedraws=mc.nkeep,
-                        printevery=printevery, transposed=TRUE,
-                        treesaslists=treesaslists)},
+                        printevery=printevery, transposed=TRUE)},
+                        ##treesaslists=treesaslists)},
                   silent=(i!=1))
                   ## to avoid duplication of output
                   ## capture stdout from first posterior only
@@ -79,7 +91,10 @@ mc.pbart <- function(
 
     if(mc.cores==1 | attr(post, 'class')!='pbart') return(post)
     else {
-        p <- nrow(x.train)
+        p <- nrow(x.train[ , post$rm.const])
+
+        ## if(length(rm.const)==0) rm.const <- 1:p
+        ## post$rm.const <- rm.const
 
         old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
         ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
@@ -94,25 +109,35 @@ mc.pbart <- function(
         keeptestfits <- length(x.test)>0
 
         for(i in 2:mc.cores) {
-            if(keeptrainfits) post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
+            if(keeptrainfits) {
+                post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
+                post$prob.train <- rbind(post$prob.train, post.list[[i]]$prob.train)
+            }
 
-            if(keeptestfits) post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
+            if(keeptestfits) {
+                post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
+                post$prob.test <- rbind(post$prob.test, post.list[[i]]$prob.test)
+            }
 
             post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
+            post$varprob <- rbind(post$varprob, post.list[[i]]$varprob)
 
             post$treedraws$trees <- paste0(post$treedraws$trees,
                                            substr(post.list[[i]]$treedraws$trees, old.stop+2,
                                                   nchar(post.list[[i]]$treedraws$trees)))
 
-            if(treesaslists) post$treedraws$lists <-
-                                 c(post$treedraws$lists, post.list[[i]]$treedraws$lists)
+            ## if(treesaslists) post$treedraws$lists <-
+            ##                      c(post$treedraws$lists, post.list[[i]]$treedraws$lists)
         }
 
-        if(length(post$yhat.train.mean)>0)
-            post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
+        ## if(length(post$yhat.train.mean)>0)
+        ##     post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
 
-        if(length(post$yhat.test.mean)>0)
-            post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
+        ## if(length(post$yhat.test.mean)>0)
+        ##     post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
+
+        post$varcount.mean <- apply(post$varcount, 2, mean)
+        post$varprob.mean <- apply(post$varprob, 2, mean)
 
         attr(post, 'class') <- 'pbart'
 

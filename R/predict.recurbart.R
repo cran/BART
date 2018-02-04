@@ -18,7 +18,7 @@
 
 predict.recurbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...) {
 
-    if(class(newdata) != "matrix") stop("newdata must be a matrix")
+    ##if(class(newdata) != "matrix") stop("newdata must be a matrix")
 
     p <- length(object$treedraws$cutpoints)
 
@@ -34,6 +34,7 @@ predict.recurbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.open
     else call <- mc.recur.pwbart
 
     return(call(newdata, object$treedraws, mc.cores=mc.cores,
-                binaryOffset=object$binaryOffset, ...))
+                binaryOffset=object$binaryOffset,
+                type=object$type, ...))
 }
 

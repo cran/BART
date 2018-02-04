@@ -90,6 +90,7 @@ public:
    size_t depth();  //depth of a node
    char ntype(); //node type t:top, b:bot, n:no grandchildren i:interior (t can be b)
    bool isnog();
+   size_t getbadcut(size_t v);
 #ifndef NoRcpp   
   Rcpp::List tree2list(xinfo& xi, double center=0., double scale=1.); // create an efficient list from a single tree
   //tree list2tree(Rcpp::List&, xinfo& xi); // create a tree from a list and an xinfo  

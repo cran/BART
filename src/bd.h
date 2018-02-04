@@ -25,6 +25,7 @@
 #include "treefuns.h"
 #include "bartfuns.h"
 
-bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen);
+bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma,
+	std::vector<size_t>& nv, std::vector<double>& pv, bool aug, rn& gen);
 
 #endif

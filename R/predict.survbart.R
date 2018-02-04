@@ -16,9 +16,10 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-predict.survbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...) {
+predict.survbart <- function(object, newdata, mc.cores=1, 
+                             openmp=(mc.cores.openmp()>0), ...) {
 
-    if(class(newdata) != "matrix") stop("newdata must be a matrix")
+    ##if(class(newdata) != "matrix") stop("newdata must be a matrix")
 
     p <- length(object$treedraws$cutpoints)
 
@@ -34,6 +35,6 @@ predict.survbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openm
     else call <- mc.surv.pwbart
 
     return(call(newdata, object$treedraws, mc.cores=mc.cores,
-                binaryOffset=object$binaryOffset, ...))
+                binaryOffset=object$binaryOffset, type=object$type, ...))
 }
 

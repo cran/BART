@@ -18,19 +18,19 @@
 
 wbart=function(
 x.train, y.train, x.test=matrix(0.0,0,0),
+sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+xinfo=matrix(0.0,0,0), usequants=FALSE,
+cont=FALSE, rm.const=TRUE,
 sigest=NA, sigdf=3, sigquant=.90,
-k=2.0,
-power=2.0, base=.95,
-sigmaf=NA,
-lambda=NA,
+k=2.0, power=2.0, base=.95,
+sigmaf=NA, lambda=NA,
 fmean=mean(y.train),
 w=rep(1,length(y.train)),
 ntree=200L, numcut=100L,
 ndpost=1000L, nskip=100L, keepevery=1L,
 nkeeptrain=ndpost, nkeeptest=ndpost,
 nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
-printevery=100L, transposed=FALSE,
-treesaslists=FALSE
+printevery=100L, transposed=FALSE
 )
 {
 #--------------------------------------------------
@@ -38,15 +38,27 @@ treesaslists=FALSE
 n = length(y.train)
 
 if(!transposed) {
-    x.train = t(x.train)
-    x.test = t(x.test)
+    temp = bartModelMatrix(x.train, numcut, usequants=usequants,
+                           cont=cont, xinfo=xinfo, rm.const=rm.const)
+    x.train = t(temp$X)
+    numcut = temp$numcut
+    xinfo = temp$xinfo
+    if(length(x.test)>0)
+            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+    rm.const <- temp$rm.const
+    rm(temp)
 }
+else rm.const <- NULL
 
 if(n!=ncol(x.train))
     stop('The length of y.train and the number of rows in x.train must be identical')
 
 p = nrow(x.train)
 np = ncol(x.test)
+if(length(rho)==0) rho=p
+if(length(rm.const)==0) rm.const <- 1:p
+
+##if(p>1 & length(numcut)==1) numcut=rep(numcut, p)
 
 y.train = y.train-fmean
 #--------------------------------------------------
@@ -87,7 +99,7 @@ if(is.na(lambda)) {
 }
 
 if(is.na(sigmaf)) {
-   tau=(max(y.train)-min(y.train))/(2*k*sqrt(ntree));
+   tau=(max(y.train)-min(y.train))/(2*k*sqrt(ntree))
 } else {
    tau = sigmaf/sqrt(ntree)
 }
@@ -111,19 +123,31 @@ res = .Call("cwbart",
             lambda,
             sigest,
             w,
+            sparse,
+            a,
+            b,
+            rho,
+            augment,
             nkeeptrain,
             nkeeptest,
             nkeeptestmean,
             nkeeptreedraws,
             printevery,
-            treesaslists
+            xinfo
 )
 res$mu = fmean
 res$yhat.train.mean = res$yhat.train.mean+fmean
 res$yhat.train = res$yhat.train+fmean
 res$yhat.test.mean = res$yhat.test.mean+fmean
 res$yhat.test = res$yhat.test+fmean
+if(nkeeptreedraws>0)
+    names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
+    dimnames(res$varcount)[[2]] = dimnames(x.train)[[1]]
+    dimnames(res$varprob)[[2]] = dimnames(x.train)[[1]]
 ##res$nkeeptreedraws=nkeeptreedraws
+    res$varcount.mean <- apply(res$varcount, 2, mean)
+    res$varprob.mean <- apply(res$varprob, 2, mean)
+    res$rm.const <- rm.const
 attr(res, 'class') <- 'wbart'
 return(res)
 }

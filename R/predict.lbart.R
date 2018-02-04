@@ -18,7 +18,7 @@
 
 predict.lbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...) {
 
-    if(class(newdata) != "matrix") stop("newdata must be a matrix")
+    ##if(class(newdata) != "matrix") stop("newdata must be a matrix")
 
     p <- length(object$treedraws$cutpoints)
 
@@ -33,6 +33,16 @@ predict.lbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()
     if(.Platform$OS.type != "unix" || openmp || mc.cores==1) call <- pwbart
     else call <- mc.pwbart
 
-    return(call(newdata, object$treedraws, mc.cores=mc.cores, mu=object$binaryOffset, ...))
+    ##return(call(newdata, object$treedraws, mc.cores=mc.cores, mu=object$binaryOffset, ...))
+
+    pred <- list(yhat.test=call(newdata, object$treedraws, mc.cores=mc.cores,
+                                mu=object$binaryOffset, ...))
+
+    pred$prob.test <- plogis(pred$yhat.test)
+    pred$prob.test.mean <- apply(pred$prob.test, 2, mean)
+    pred$binaryOffset <- object$binaryOffset
+    attr(pred, 'class') <- 'lbart'
+
+    return(pred)
 }
 

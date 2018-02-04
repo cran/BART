@@ -19,7 +19,8 @@
 
 #include "bd.h"
 
-bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen)
+bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, 
+	std::vector<size_t>& nv, std::vector<double>& pv, bool aug, rn& gen)
 {
    tree::npv goodbots;  //nodes we could birth at (split on)
    double PBx = getpb(x,xi,pi,goodbots); //prob of a birth at x
@@ -31,7 +32,7 @@ bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen)
       tree::tree_p nx; //bottom node
       size_t v,c; //variable and cutpoint
       double pr; //part of metropolis ratio from proposal and prior
-      bprop(x,xi,pi,goodbots,PBx,nx,v,c,pr,gen);
+      bprop(x,xi,pi,goodbots,PBx,nx,v,c,pr,nv,pv,aug,gen);
 
       //--------------------------------------------------
       //compute sufficient statistics
@@ -62,6 +63,7 @@ bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen)
          mul = drawnodemu(nl,syl,pi.tau,sigma,gen);
          mur = drawnodemu(nr,syr,pi.tau,sigma,gen);
          x.birthp(nx,v,c,mul,mur);
+	 nv[v]++;
          return true;
       } else {
          return false;
@@ -94,6 +96,7 @@ bool bd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen)
       double mu;
       if(log(gen.uniform()) < lalpha) {
          mu = drawnodemu(nl+nr,syl+syr,pi.tau,sigma,gen);
+	 nv[nx->getv()]--;
          x.deathp(nx,mu);
          return true;
       } else {

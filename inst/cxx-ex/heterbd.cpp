@@ -19,7 +19,8 @@
 
 #include "heterbd.h"
 
-bool heterbd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double *sigma, rn& gen)
+bool heterbd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double *sigma, 
+	     std::vector<size_t>& nv, std::vector<double>& pv, bool aug, rn& gen)
 {
    tree::npv goodbots;  //nodes we could birth at (split on)
    double PBx = getpb(x,xi,pi,goodbots); //prob of a birth at x
@@ -31,7 +32,7 @@ bool heterbd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double *sigma, rn& gen)
       tree::tree_p nx; //bottom node
       size_t v,c; //variable and cutpoint
       double pr; //part of metropolis ratio from proposal and prior
-      bprop(x,xi,pi,goodbots,PBx,nx,v,c,pr,gen);
+      bprop(x,xi,pi,goodbots,PBx,nx,v,c,pr,nv,pv,aug,gen);
 
       //--------------------------------------------------
       //compute sufficient statistics
@@ -63,6 +64,7 @@ bool heterbd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double *sigma, rn& gen)
          mul = heterdrawnodemu(bl,Ml,pi.tau,gen);
          mur = heterdrawnodemu(br,Mr,pi.tau,gen);
          x.birthp(nx,v,c,mul,mur);
+	 nv[v]++;
          return true;
       } else {
          return false;
@@ -96,6 +98,7 @@ bool heterbd(tree& x, xinfo& xi, dinfo& di, pinfo& pi, double *sigma, rn& gen)
       double mu;
       if(log(gen.uniform()) < lalpha) {
          mu = heterdrawnodemu(bl+br,Ml+Mr,pi.tau,gen);
+	 nv[nx->getv()]--;
          x.deathp(nx,mu);
          return true;
       } else {

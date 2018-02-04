@@ -88,7 +88,7 @@ data(ydm20.train)
 ##test BART with token run to ensure installation works
 set.seed(99)
 post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-                   nskip=5, ndpost=5, keepevery=1)
+                   nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
 set.seed(99)

@@ -18,8 +18,8 @@
 
 predict.criskbart <- function(object, newdata, newdata2, mc.cores=1, openmp=(mc.cores.openmp()>0), ...) {
 
-    if(class(newdata) != "matrix") stop("newdata must be a matrix")
-    if(class(newdata2) != "matrix") stop("newdata2 must be a matrix")
+    ## if(class(newdata) != "matrix") stop("newdata must be a matrix")
+    ## if(class(newdata2) != "matrix") stop("newdata2 must be a matrix")
 
     p <- length(object$treedraws$cutpoints)
 

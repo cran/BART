@@ -18,27 +18,38 @@
 
 lbart=function(
 x.train, y.train, x.test=matrix(0.0,0,0),
+sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+xinfo=matrix(0.0,0,0), usequants=FALSE,
+cont=FALSE, rm.const=TRUE, tau.interval=0.95,
 k=2.0, power=2.0, base=.95,
-##binaryOffset=NULL, ##M=1,
+binaryOffset=0,
 ntree=200L, numcut=100L,
 ndpost=1000L, nskip=100L,
 keepevery=1L,
 nkeeptrain=ndpost, nkeeptest=ndpost,
-nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
-printevery=100, transposed=FALSE,
-treesaslists=FALSE
+#nkeeptestmean=ndpost,
+nkeeptreedraws=ndpost,
+printevery=100, transposed=FALSE
+##treesaslists=FALSE
 )
 {
 #--------------------------------------------------
 #data
 n = length(y.train)
 
-binaryOffset <- 0 ## lbart currently has no binaryOffset
-##else binaryOffset=qnorm(mean(y.train))
+if(binaryOffset!=0)
+    stop('binaryOffset not supported by lbart')
 
 if(!transposed) {
-    x.train = t(x.train)
-    x.test = t(x.test)
+    temp = bartModelMatrix(x.train, numcut, usequants=usequants,
+                           cont=cont, xinfo=xinfo, rm.const=rm.const)
+    x.train = t(temp$X)
+    numcut = temp$numcut
+    xinfo = temp$xinfo
+    if(length(x.test)>0)
+            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+    rm.const <- temp$rm.const
+    rm(temp)
 }
 
 if(n!=ncol(x.train))
@@ -46,6 +57,12 @@ if(n!=ncol(x.train))
 
 p = nrow(x.train)
 np = ncol(x.test)
+if(length(rho)==0) rho <- p
+if(length(rm.const)==0) rm.const <- 1:p
+
+if(tau.interval>0.5) tau.interval=1-tau.interval
+
+tau=qlogis(1-0.5*tau.interval)/(k*sqrt(ntree))
 
 #--------------------------------------------------
 #set  nkeeps for thinning
@@ -57,10 +74,10 @@ if((nkeeptest!=0) & ((ndpost %% nkeeptest) != 0)) {
    nkeeptest=ndpost
    cat('*****nkeeptest set to ndpost\n')
 }
-if((nkeeptestmean!=0) & ((ndpost %% nkeeptestmean) != 0)) {
-   nkeeptestmean=ndpost
-   cat('*****nkeeptestmean set to ndpost\n')
-}
+## if((nkeeptestmean!=0) & ((ndpost %% nkeeptestmean) != 0)) {
+##    nkeeptestmean=ndpost
+##    cat('*****nkeeptestmean set to ndpost\n')
+## }
 if((nkeeptreedraws!=0) & ((ndpost %% nkeeptreedraws) != 0)) {
    nkeeptreedraws=ndpost
    cat('*****nkeeptreedraws set to ndpost\n')
@@ -104,25 +121,52 @@ res = .Call("clbart",
             power,
             base,
             binaryOffset,
-            3/(k*sqrt(ntree)),
-            ##M,
-            #nu,
-            #lambda,
-            #sigest,
-            #w,
+            tau,
+            sparse,
+            a,
+            b,
+            rho,
+            augment,
             nkeeptrain,
             nkeeptest,
-            nkeeptestmean,
+            #nkeeptestmean,
             nkeeptreedraws,
             printevery,
-            treesaslists
+            ##treesaslists,
+            xinfo
 )
-##res$binaryOffset=binaryOffset
-res$yhat.train.mean = res$yhat.train.mean+binaryOffset
-res$yhat.train = res$yhat.train+binaryOffset
-res$yhat.test.mean = res$yhat.test.mean+binaryOffset
-res$yhat.test = res$yhat.test+binaryOffset
-##res$nkeeptreedraws=nkeeptreedraws
+
+if(nkeeptrain>0) {
+    ##res$yhat.train.mean <- NULL
+    ##res$yhat.train.mean = res$yhat.train.mean+binaryOffset
+    res$yhat.train = res$yhat.train+binaryOffset
+    res$prob.train = plogis(res$yhat.train)
+    res$prob.train.mean <- apply(res$prob.train, 2, mean)
+} else {
+    res$yhat.train <- NULL
+    ##res$yhat.train.mean <- NULL
+}
+
+if(np>0) {
+    ##res$yhat.test.mean <- NULL
+    ##res$yhat.test.mean = res$yhat.test.mean+binaryOffset
+    res$yhat.test = res$yhat.test+binaryOffset
+    res$prob.test = plogis(res$yhat.test)
+    res$prob.test.mean <- apply(res$prob.test, 2, mean)
+} else {
+    res$yhat.test <- NULL
+    ##res$yhat.test.mean <- NULL
+}
+
+if(nkeeptreedraws>0)
+    names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
+
+dimnames(res$varcount)[[2]] = dimnames(x.train)[[1]]
+dimnames(res$varprob)[[2]] = dimnames(x.train)[[1]]
+res$varcount.mean <- apply(res$varcount, 2, mean)
+res$varprob.mean <- apply(res$varprob, 2, mean)
+res$binaryOffset=binaryOffset
+res$rm.const <- rm.const
 attr(res, 'class') <- 'lbart'
 return(res)
 }

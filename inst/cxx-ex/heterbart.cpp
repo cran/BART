@@ -34,9 +34,10 @@ void heterbart::draw(double *sigma, rn& gen)
          allfit[k] = allfit[k]-ftemp[k];
          r[k] = y[k]-allfit[k];
       }
-      heterbd(t[j],xi,di,pi,sigma,gen);
+      heterbd(t[j],xi,di,pi,sigma,nv,pv,aug,gen);
       heterdrmu(t[j],xi,di,pi,sigma,gen);
       fit(t[j],xi,p,n,x,ftemp);
       for(size_t k=0;k<n;k++) allfit[k] += ftemp[k];
    }
+   if(dartOn) draw_s(gen);
 }

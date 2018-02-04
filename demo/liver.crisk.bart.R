@@ -14,16 +14,15 @@ plot(pfit[4,], xscale=7, xmax=735, col=1:3, lwd=2, ylim=c(0, 1),
 ##     legend(450, .4, c("Death", "Transplant", "Withdrawal"), col=1:3, lwd=2)
 
 delta <- (as.numeric(transplant$event)-1)
-
+## recode so that delta=1 is cause of interest; delta=2 otherwise
 delta[delta==1] <- 4
 delta[delta==2] <- 1
 delta[delta>1] <- 2
 table(delta, transplant$event)
 
-times <- ceiling(transplant$futime/7) ## weeks
+times <- pmax(1, ceiling(transplant$futime/7)) ## weeks
+##times <- pmax(1, ceiling(transplant$futime/30.5)) ## months
 table(times)
-## table(1+floor(transplant$futime/30.5)) ## months
-## times <- 1+floor(transplant$futime/30.5)
 
 typeO <- 1*(transplant$abo=='O')
 typeA <- 1*(transplant$abo=='A')
@@ -33,11 +32,8 @@ table(typeA, typeO)
 
 x.train <- cbind(typeO, typeA, typeB, typeAB)
 
-N <- nrow(x.train)
-
-x.test <- x.train
-
-x.test[1:N, 1:4] <- matrix(c(1, 0, 0, 0), nrow=N, ncol=4, byrow=TRUE)
+x.test <- cbind(1, 0, 0, 0)
+dimnames(x.test)[[2]] <- dimnames(x.train)[[2]]
 
 ## run one long MCMC chain in one process
 ## set.seed(99)
@@ -50,16 +46,9 @@ post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
 
 K <- post$K
 
-typeO.cif <- matrix(0, nrow=nrow(post$cif.test), ncol=K)
-
-for(i in 1:N) for(j in 1:K) {
-                  h <- (i-1)*K+j
-                  typeO.cif[ , j] <- typeO.cif[ , j]+ post$cif.test[ , h]/N
-                  }
-
-typeO.cif.mean <- apply(typeO.cif, 2, mean)
-typeO.cif.025 <- apply(typeO.cif, 2, quantile, probs=0.025)
-typeO.cif.975 <- apply(typeO.cif, 2, quantile, probs=0.975)
+typeO.cif.mean <- apply(post$cif.test, 2, mean)
+typeO.cif.025 <- apply(post$cif.test, 2, quantile, probs=0.025)
+typeO.cif.975 <- apply(post$cif.test, 2, quantile, probs=0.975)
 
 plot(pfit[4,], xscale=7, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
        xlab='t (weeks)', ylab='CI(t)')

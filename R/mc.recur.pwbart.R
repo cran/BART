@@ -21,6 +21,7 @@ mc.recur.pwbart <- function(
    treedraws,		#$treedraws for from recur.bart/mc.recur.bart
    binaryOffset=0,	#mean to add on
    mc.cores=2L,
+   type='pbart',
    transposed=FALSE,
    nice=19L
 )
@@ -28,7 +29,7 @@ mc.recur.pwbart <- function(
     if(.Platform$OS.type!='unix')
         stop('parallel::mcparallel/mccollect do not exist on windows')
 
-    if(!transposed) x.test <- t(x.test)
+    if(!transposed) x.test <- t(bartModelMatrix(x.test))
 
     p <- length(treedraws$cutpoints)
 
@@ -64,13 +65,16 @@ mc.recur.pwbart <- function(
 
     if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
 
-    if(mc.cores>1) for(i in 2:mc.cores)
-                       pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])
+    if(mc.cores>1)
+        for(i in 2:mc.cores)
+            pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])
 
     H <- nrow(x.test)/K ## the number of different settings
 
-    pred$haz.test <- pnorm(pred$yhat.test)
+    if(type=='pbart') pred$prob.test <- pnorm(pred$yhat.test)
+    else if(type=='lbart') pred$prob.test <- plogis(pred$yhat.test)
 
+    pred$haz.test <- pred$prob.test
     pred$cum.test <- pred$haz.test
 
     H <- nrow(x.test)
@@ -85,7 +89,7 @@ mc.recur.pwbart <- function(
         }
     }
 
-##    pred$yhat.test.mean <- apply(pred$yhat.test, 2, mean)
+    pred$yhat.prob.mean <- apply(pred$yhat.prob, 2, mean)
     pred$haz.test.mean <- apply(pred$haz.test, 2, mean)
     pred$cum.test.mean <- apply(pred$cum.test, 2, mean)
 

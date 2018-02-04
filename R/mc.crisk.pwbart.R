@@ -38,8 +38,8 @@ mc.crisk.pwbart <- function(
         stop('number of rows in x.test and x.test2 must be equal')
 
     if(!transposed) {
-        x.test <- t(x.test)
-        x.test2 <- t(x.test2)
+        x.test <- t(bartModelMatrix(x.test))
+        x.test2 <- t(bartModelMatrix(x.test2))
     }
 
     p <- length(treedraws$cutpoints)

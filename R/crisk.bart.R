@@ -21,8 +21,11 @@ crisk.bart <- function(
     x.train=matrix(0.0, 0L, 0L), y.train=NULL,
     x.train2=x.train, y.train2=NULL,
     times=NULL, delta=NULL,
-    x.test=matrix(0.0, 0L, 0L), x.test2=x.test,
-    cond=NULL, k = 2.0, ## BEWARE: do NOT use k for other purposes below
+    x.test=matrix(0.0, 0L, 0L), x.test2=x.test, cond=NULL,
+    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
+    xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
+    cont=FALSE, rm.const=TRUE, type='pbart',
+    k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
     binaryOffset = NULL,
     binaryOffset2 = NULL,
@@ -30,15 +33,26 @@ crisk.bart <- function(
     ndpost = 1000L, nskip = 250L,
     keepevery = 10L,
     nkeeptrain=ndpost, nkeeptest=ndpost,
-    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    ##nkeeptestmean=ndpost,
+    nkeeptreedraws=ndpost,
     printevery=100L,
-    treesaslists=FALSE, keeptrainfits=TRUE,
+    ##treesaslists=FALSE,
+    keeptrainfits=TRUE,
     id = NULL,
     seed=99,    ## mc.crisk.bart only
     mc.cores=2, ## mc.crisk.bart only
     nice=19L    ## mc.crisk.bart only
 )
 {
+
+    x.train2 <- bartModelMatrix(x.train2)
+    x.test2 <- bartModelMatrix(x.test2)
+    x.train <- bartModelMatrix(x.train)
+    x.test <- bartModelMatrix(x.test)
+
+    if(length(rho)==0) rho=ncol(x.train)
+    if(length(rho2)==0) rho2=ncol(x.train2)
+
     if(length(y.train)==0) {
         pre <- crisk.pre.bart(times, delta, x.train, x.test, x.train2, x.test2)
 
@@ -70,30 +84,74 @@ crisk.bart <- function(
         K     <- length(times)
     }
 
-    post <- pbart(x.train=x.train, y.train=y.train, x.test=x.test,
+    if(length(xinfo)==0) {
+        temp = bartModelMatrix(x.train2[cond, ], numcut, usequants=usequants,
+                               cont=cont, xinfo=xinfo, rm.const=rm.const)
+        x.train2 = t(temp$X)
+        numcut2 = temp$numcut
+        xinfo2 = temp$xinfo
+        if(length(x.test2)>0)
+            x.test2 = t(bartModelMatrix(x.test2[ , temp$rm.const]))
+        rm.const2 <- temp$rm.const
+        rm(temp)
+
+        temp = bartModelMatrix(x.train, numcut, usequants=usequants,
+                               cont=cont, xinfo=xinfo, rm.const=rm.const)
+        x.train = t(temp$X)
+        numcut = temp$numcut
+        xinfo = temp$xinfo
+        if(length(x.test)>0)
+            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        rm.const <- temp$rm.const
+        rm(temp)
+
+        xinfo2[1, ] <- xinfo[1, ] ## same time grid
+        transposed <- TRUE
+    }
+    else {
+        x.train2=as.matrix(x.train2[cond, ])
+        rm.const <- 1:ncol(x.train)
+        rm.const2 <- 1:ncol(x.train2)
+        transposed <- FALSE
+    }
+
+    if(type=='pbart') call <- pbart
+    else if(type=='lbart') {
+        binaryOffset <- 0
+        call <- lbart
+    }
+
+    post <- call(x.train=x.train, y.train=y.train, x.test=x.test,
+                 sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                  xinfo=xinfo, usequants=usequants,
+                  cont=cont, rm.const=rm.const,
                   k=k, power=power, base=base,
                   binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip,
                   keepevery=keepevery, nkeeptrain=0,
-                  nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
+                  nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
                   nkeeptreedraws=nkeeptreedraws, printevery=printevery,
-                  treesaslists=treesaslists)
+                  transposed=transposed) #, treesaslists=treesaslists)
 
-    if(attr(post, 'class')!='pbart') return(post)
+    if(type!=attr(post, 'class')) return(post)
 
-    post2 <- pbart(x.train=as.matrix(x.train2[cond, ]),
+    ##post2 <- call(x.train=as.matrix(x.train2[cond, ]),
+    post2 <- call(x.train=x.train2,
                    y.train=y.train2[cond], x.test=x.test2,
+                   sparse=sparse, a=a, b=b, augment=augment, rho=rho2,
+                   xinfo=xinfo2, usequants=usequants,
+                   cont=cont, rm.const=rm.const,
                    k=k, power=power, base=base,
                    binaryOffset=binaryOffset2,
-                   ntree=ntree, numcut=numcut,
+                   ntree=ntree, numcut=numcut2,
                    ndpost=ndpost, nskip=nskip,
                    keepevery=keepevery, nkeeptrain=0,
-                   nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
+                   nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
                    nkeeptreedraws=nkeeptreedraws, printevery=printevery,
-                   treesaslists=treesaslists)
+                   transposed=transposed) #, treesaslists=treesaslists)
 
-    if(attr(post2, 'class')!='pbart') return(post2)
+    if(type!=attr(post2, 'class')) return(post2)
 
     post$binaryOffset <- binaryOffset
     post$binaryOffset2 <- binaryOffset2
@@ -102,9 +160,15 @@ crisk.bart <- function(
     post$K <- K
     post$tx.train <- x.train
     post$tx.train2 <- x.train2
+    post$type <- type
     post$cond <- cond
     post$treedraws2 <- post2$treedraws
     post$varcount2 <- post2$varcount
+    post$varcount2.mean <- post2$varcount.mean
+    post$varprob2 <- post2$varprob
+    post$varprob2.mean <- post2$varprob.mean
+    post$rm.const <- rm.const
+    post$rm.const2 <- rm.const2
     post$yhat.train <- NULL
     post$yhat.train.mean <- NULL
 
@@ -115,8 +179,16 @@ crisk.bart <- function(
 
         post$yhat.test2 <- post2$yhat.test
 
-        post$prob.test <- pnorm(post$yhat.test)
-        post$prob.test2 <- pnorm(post$yhat.test2)
+        post$prob.test2 <- post2$prob.test
+        ## if(type=='pbart') {
+        ##     post$prob.test <- pnorm(post$yhat.test)
+        ##     post$prob.test2 <- pnorm(post$yhat.test2)
+        ## }
+        ## else if(type=='lbart') {
+        ##     post$prob.test <- plogis(post$yhat.test)
+        ##     post$prob.test2 <- plogis(post$yhat.test2)
+        ## }
+
         post$surv.test <- (1-post$prob.test)*(1-post$prob.test2)
         post$prob.test2 <- (1-post$prob.test)*post$prob.test2
         post$cif.test <- post$prob.test

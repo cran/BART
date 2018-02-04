@@ -45,16 +45,20 @@ response case, \eqn{f} is the sum of many tree models.  }
 crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
            x.train2=x.train, y.train2=NULL,
            times=NULL, delta=NULL,
-           x.test=matrix(0.0,0,0), x.test2=x.test,
-           cond=NULL, k=2.0, power=2.0, base=.95,
+           x.test=matrix(0.0,0,0), x.test2=x.test, cond=NULL,
+           sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
+           xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
+           cont=FALSE, rm.const=TRUE, type='pbart',
+           k=2.0, power=2.0, base=.95,
            binaryOffset=NULL, binaryOffset2=NULL,
            ntree=50, numcut=100, ndpost=1000, nskip=250,
            keepevery = 10L,
            nkeeptrain=ndpost,
            nkeeptest=ndpost,
-           nkeeptestmean=ndpost,
+           %nkeeptestmean=ndpost,
            nkeeptreedraws=ndpost,
-           printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
+           printevery=100L, %treesaslists=FALSE,
+           keeptrainfits=TRUE,
            id=NULL,    ## crisk.bart only
            seed=99,    ## mc.crisk.bart only
            mc.cores=2, ## mc.crisk.bart only
@@ -64,16 +68,20 @@ crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
 mc.crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
               x.train2=x.train, y.train2=NULL,
               times=NULL, delta=NULL,
-              x.test=matrix(0.0,0,0), x.test2=x.test,
-              cond=NULL, k=2.0, power=2.0, base=.95,
+              x.test=matrix(0.0,0,0), x.test2=x.test, cond=NULL,
+              sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
+              xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
+              cont=FALSE, rm.const=TRUE, type='pbart',
+              k=2.0, power=2.0, base=.95,
               binaryOffset=NULL, binaryOffset2=NULL,
               ntree=50, numcut=100, ndpost=1000, nskip=250,
               keepevery = 10L,
               nkeeptrain=ndpost,
               nkeeptest=ndpost,
-              nkeeptestmean=ndpost,
+              %nkeeptestmean=ndpost,
               nkeeptreedraws=ndpost,
-              printevery=100L, treesaslists=FALSE, keeptrainfits=TRUE,
+              printevery=100L, %treesaslists=FALSE,
+              keeptrainfits=TRUE,
               id=NULL,    ## crisk.bart only
               seed=99,    ## mc.crisk.bart only
               mc.cores=2, ## mc.crisk.bart only
@@ -131,6 +139,39 @@ that the definition of \code{x.train} is dependent on whether
       Explanatory variables for test (out of sample) data of cause 2.}
 
    \item{cond}{A vector of indices of \code{y.train} indicating censored subjects.}
+
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates in \code{x.train}.}
+   \item{rho2}{Sparse parameter: typically \eqn{rho2=p} where \eqn{p} is the
+     number of covariates  in \code{x.train2}.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{xinfo2}{ Cause 2 cutpoints. }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}
+
+   \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
+     Holmes-Held, \code{'lbart'}. }
+   
    \item{k}{
    k is the number of prior standard deviations \eqn{f(t, x)} is away from +/-3.
    The bigger k is, the more conservative the fitting will be.
@@ -188,9 +229,9 @@ that the definition of \code{x.train} is dependent on whether
    Number of MCMC iterations to be returned for test data.
    }
 
-   \item{nkeeptestmean}{
-   Number of MCMC iterations to be returned for test mean.
-   }
+   %% \item{nkeeptestmean}{
+   %% Number of MCMC iterations to be returned for test mean.
+   %% }
 
    \item{nkeeptreedraws}{
    Number of MCMC iterations to be returned for tree draws.
@@ -204,11 +245,11 @@ that the definition of \code{x.train} is dependent on whether
    Whether to keep \code{yhat.train} or not.
    }
 
-   \item{treesaslists}{
-     The default behavior is to return the trees as a text string.  If you
-     specify \code{treesaslists=TRUE}, then the trees will be returned
-     as a list as well.
-   }
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 
    \item{id}{
      \code{crisk.bart} only: unique identifier added to returned list.
@@ -272,6 +313,11 @@ that the definition of \code{x.train} is dependent on whether
   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
    \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+   
+Linero, A.R. (2016)
+  Bayesian regression trees for high dimensional prediction and variable
+  selection. \emph{JASA},
+  \url{http://dx.doi.org/10.1080/01621459.2016.1264957} 
 }
 \author{
 Rodney Sparapani: \email{rsparapa@mcw.edu}
@@ -318,38 +364,41 @@ x.test[1:N, 1:4] <- matrix(c(1, 0, 0, 0), nrow=N, ncol=4, byrow=TRUE)
 ##test BART with token run to ensure installation works
 set.seed(99)
 post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
-                   nskip=5, ndpost=5, keepevery=1)
+                   nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
+
 ## run one long MCMC chain in one process
-set.seed(99)
-post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
+## set.seed(99)
+## post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
+
 ## in the interest of time, consider speeding it up by parallel processing
 ## run "mc.cores" number of shorter MCMC chains in parallel processes
-## post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
-##                       seed=99, mc.cores=5)
+post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test,
+                      seed=99, mc.cores=8)
 
 K <- post$K
 
-typeO.cif <- matrix(0, nrow=nrow(post$cif.test), ncol=K)
+typeO.cif.mean <- apply(post$cif.test, 2, mean)
+typeO.cif.025 <- apply(post$cif.test, 2, quantile, probs=0.025)
+typeO.cif.975 <- apply(post$cif.test, 2, quantile, probs=0.975)
 
-for(i in 1:N) for(j in 1:K) {
-                  h <- (i-1)*K+j
-                  typeO.cif[ , j] <- typeO.cif[ , j]+ post$cif.test[ , h]/N
-                  }
-
-typeO.cif.mean <- apply(typeO.cif, 2, mean)
-typeO.cif.025 <- apply(typeO.cif, 2, quantile, probs=0.025)
-typeO.cif.975 <- apply(typeO.cif, 2, quantile, probs=0.975)
-
-plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
-       xlab='t (months)', ylab='CI(t)')
-points(c(0, post$times)*30.5, c(0, typeO.cif.mean), col=4, type='s', lwd=2)
-points(c(0, post$times)*30.5, c(0, typeO.cif.025), col=4, type='s', lwd=2, lty=2)
-points(c(0, post$times)*30.5, c(0, typeO.cif.975), col=4, type='s', lwd=2, lty=2)
+plot(pfit[4,], xscale=7, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
+       xlab='t (weeks)', ylab='CI(t)')
+points(c(0, post$times)*7, c(0, typeO.cif.mean), col=4, type='s', lwd=2)
+points(c(0, post$times)*7, c(0, typeO.cif.025), col=4, type='s', lwd=2, lty=2)
+points(c(0, post$times)*7, c(0, typeO.cif.975), col=4, type='s', lwd=2, lty=2)
      legend(450, .4, c("Transplant(BART)", "Transplant(AJ)",
                        "Death(AJ)", "Withdrawal(AJ)"),
             col=c(4, 2, 1, 3), lwd=2)
+## plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
+##        xlab='t (months)', ylab='CI(t)')
+## points(c(0, post$times)*30.5, c(0, typeO.cif.mean), col=4, type='s', lwd=2)
+## points(c(0, post$times)*30.5, c(0, typeO.cif.025), col=4, type='s', lwd=2, lty=2)
+## points(c(0, post$times)*30.5, c(0, typeO.cif.975), col=4, type='s', lwd=2, lty=2)
+##      legend(450, .4, c("Transplant(BART)", "Transplant(AJ)",
+##                        "Death(AJ)", "Withdrawal(AJ)"),
+##             col=c(4, 2, 1, 3), lwd=2)
 
 }
 }

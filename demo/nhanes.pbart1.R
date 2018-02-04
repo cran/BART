@@ -40,11 +40,19 @@ for(j in 1:15) {
 
 pd1.mean <- apply(pd1, 2, mean)
 pd2.mean <- apply(pd2, 2, mean)
+pd1.025 <- apply(pd1, 2, quantile, probs=0.025)
+pd2.025 <- apply(pd2, 2, quantile, probs=0.025)
+pd1.975 <- apply(pd1, 2, quantile, probs=0.975)
+pd2.975 <- apply(pd2, 2, quantile, probs=0.975)
 
 plot(bmxbmi, pd1.mean, type='l', col='blue',
      ylim=0:1, xlab='BMI', ylab=expression(Phi(f(x))),
      sub='Unweighted NHANES chronic low-back/buttock pain: M(blue) vs. F(red)')
+lines(bmxbmi, pd1.025, type='l', col='blue', lty=2)
+lines(bmxbmi, pd1.975, type='l', col='blue', lty=2)
 lines(bmxbmi, pd2.mean, type='l', col='red')
+lines(bmxbmi, pd2.025, type='l', col='red', lty=2)
+lines(bmxbmi, pd2.975, type='l', col='red', lty=2)
 
 ##incorporate survey weights into the posterior
 wt.pd1 <- matrix(nrow=1000, ncol=15)

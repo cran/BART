@@ -45,12 +45,16 @@ response case, \eqn{f} is the sum of many tree models.  }
 recur.bart(x.train=matrix(0.0, 0L, 0L),
            y.train=NULL, times=NULL, delta=NULL,
            x.test=matrix(0.0,0,0), x.test.nogrid=FALSE,
-           k=2.0, power=2.0, base=0.95, binaryOffset=NULL, %M=1,
+           sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+           xinfo=matrix(0.0,0,0), usequants=FALSE,
+           cont=FALSE, rm.const=TRUE, type='pbart',
+           k=2.0, power=2.0, base=0.95, binaryOffset=NULL, 
            ntree=50, numcut = 100L, ndpost=1000, nskip=250,
            keepevery=10, nkeeptrain = ndpost,
-           nkeeptest=ndpost, nkeeptestmean=ndpost,
+           nkeeptest=ndpost, %nkeeptestmean=ndpost,
            nkeeptreedraws = ndpost,
-           printevery = 100L, treesaslists = FALSE, keeptrainfits = TRUE,
+           printevery = 100L, %treesaslists = FALSE,
+           keeptrainfits = TRUE,
            seed=99,    ## mc.recur.bart only
            mc.cores=2, ## mc.recur.bart only
            nice=19L    ## mc.recur.bart only
@@ -59,12 +63,16 @@ recur.bart(x.train=matrix(0.0, 0L, 0L),
 mc.recur.bart(x.train=matrix(0.0, 0L, 0L),
               y.train=NULL, times=NULL, delta=NULL,
               x.test=matrix(0.0,0,0), x.test.nogrid=FALSE,
-              k=2.0, power=2.0, base=0.95, binaryOffset=NULL, %M=1,
+              sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+              xinfo=matrix(0.0,0,0), usequants=FALSE,
+              cont=FALSE, rm.const=TRUE, type='pbart',
+              k=2.0, power=2.0, base=0.95, binaryOffset=NULL,
               ntree=50, numcut = 100L, ndpost=1000, nskip=250,
               keepevery=10, nkeeptrain = ndpost,
-              nkeeptest=ndpost, nkeeptestmean=ndpost,
+              nkeeptest=ndpost, %nkeeptestmean=ndpost,
               nkeeptreedraws = ndpost,
-              printevery = 100L, treesaslists = FALSE, keeptrainfits = TRUE,
+              printevery = 100L, %treesaslists = FALSE, 
+              keeptrainfits = TRUE,
               seed=99,    ## mc.recur.bart only
               mc.cores=2, ## mc.recur.bart only
               nice=19L    ## mc.recur.bart only
@@ -113,6 +121,34 @@ that the definition of \code{x.train} is dependent on whether
      \code{x.test}.  If so, then for performance reasons, you can set this argument to \code{TRUE}.
    }
 
+   \item{sparse}{Whether to perform variable selection based on a
+     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
+     \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
+   \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
+     \eqn{b=1}.}
+   \item{rho}{Sparse parameter: typically \eqn{rho=p} where \eqn{p} is the
+     number of covariates under consideration.}
+   \item{augment}{Whether data augmentation is to be performed in sparse
+     variable selection.}
+   
+   \item{xinfo}{ You can provide the cutpoints to BART or let BART
+     choose them for you.  To provide them, use the \code{xinfo}
+     argument to specify a list (matrix) where the items (rows) are the
+     covariates and the contents of the items (columns) are the
+     cutpoints.  }
+
+   \item{usequants}{ If \code{usequants=FALSE}, then the
+    cutpoints in \code{xinfo} are generated uniformly; otherwise,
+    if \code{TRUE}, uniform quantiles are used for the cutpoints. }
+   
+   \item{cont}{ Whether or not to assume all variables are continuous.}
+
+   \item{rm.const}{ Whether or not to remove constant variables.}
+
+   \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
+     Holmes-Held, \code{'lbart'}. }
+   
    \item{k}{
    k is the number of prior standard deviations \eqn{f(t, x)} is away from +/-3.
    The bigger k is, the more conservative the fitting will be.
@@ -179,9 +215,9 @@ that the definition of \code{x.train} is dependent on whether
    Number of MCMC iterations to be returned for test data.
    }
 
-   \item{nkeeptestmean}{
-   Number of MCMC iterations to be returned for test mean.
-   }
+   %% \item{nkeeptestmean}{
+   %% Number of MCMC iterations to be returned for test mean.
+   %% }
 
    \item{nkeeptreedraws}{
    Number of MCMC iterations to be returned for tree draws.
@@ -207,11 +243,11 @@ that the definition of \code{x.train} is dependent on whether
    Whether to keep \code{yhat.train} or not.
    }
 
-   \item{treesaslists}{
-     The default behavior is to return the trees as a text string.  If you
-     specify \code{treesaslists=TRUE}, then the trees will be returned
-     as a list as well.
-   }
+   %% \item{treesaslists}{
+   %%   The default behavior is to return the trees as a text string.  If you
+   %%   specify \code{treesaslists=TRUE}, then the trees will be returned
+   %%   as a list as well.
+   %% }
 
    \item{seed}{
      \code{mc.recur.bart} only: seed required for reproducible MCMC.
@@ -269,10 +305,10 @@ events analysis with BART and an application to the hospital admissions
 of patients with diabetes.  MCW Biostatistics Technical Report 64
 \url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
 
-Xu, Daniels and Winterstein.  Sequential BART for imputation of missing
-covariates.  Biostatistics 2016 doi: 10.1093/biostatistics/kxw009
-with supplement
-\url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
+Linero, A.R. (2016)
+  Bayesian regression trees for high dimensional prediction and variable
+  selection. \emph{JASA},
+  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
  }
 \author{
 Rodney Sparapani: \email{rsparapa@mcw.edu}
@@ -291,19 +327,23 @@ data(ydm20.train)
 ##test BART with token run to ensure installation works
 set.seed(99)
 post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-                   nskip=5, ndpost=5, keepevery=1)
+                   nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
-set.seed(99)
-post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train)
+
+## set.seed(99)
+## post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+##                    keeptrainfits=TRUE)
+
 ## larger data sets can take some time so, if parallel processing
 ## is available, submit this statement instead
-## post <- mc.recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-##                      mc.cores=8, seed=99)
+post <- mc.recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+                      keeptrainfits=TRUE, mc.cores=8, seed=99)
 
 require(rpart)
 require(rpart.plot)
 
+post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
 dss <- rpart(post$yhat.train.mean~xdm20.train)
 
 rpart.plot(dss)
@@ -315,28 +355,27 @@ rpart.plot(dss)
 
 ## compare patients treated with insulin (ins270=1) vs
 ## not treated with insulin (ins270=0)
-N.train <- 50
-N.test <- 50
+N <- 50 ## 50 training patients and 50 validation patients
 K <- post$K ## 798 unique time points
+NK <- 50*K
 
 ## only testing set, i.e., remove training set
-xdm20.test. <- xdm20.test[N.train*K+(1:(N.test*K)), ]
+xdm20.test. <- xdm20.test[NK+1:NK, post$rm.const]
 xdm20.test. <- rbind(xdm20.test., xdm20.test.)
-xdm20.test.[ , 'ins270'] <- rep(0:1, each=N.test*K)
+xdm20.test.[ , 'ins270'] <- rep(0:1, each=NK)
 
 ## multiple threads will be utilized if available
 pred <- predict(post, xdm20.test., mc.cores=8)
 
 ## create Friedman's partial dependence function for the
-## intensity/hazard by time and ins270
-NK.test <- N.test*K
-M <- nrow(pred$haz.test) ## number of MCMC samples, typically 1000
-
+## relative intensity for ins270 by time
+M <- nrow(pred$haz.test) ## number of MCMC samples
 RI <- matrix(0, M, K)
-
-for(i in 1:N.test)
-    RI <- RI+(pred$haz.test[ , (N.test+i-1)*K+1:K]/
-              pred$haz.test[ , (i-1)*K+1:K])/N.test
+for(j in 1:K) {
+    h <- seq(j, NK, by=K)
+    RI[ , j] <- apply(pred$haz.test[ , h+NK]/
+                      pred$haz.test[ , h], 1, mean)
+}
 
 RI.lo <- apply(RI, 2, quantile, probs=0.025)
 RI.mu <- apply(RI, 2, mean)

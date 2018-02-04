@@ -27,6 +27,7 @@
 //--------------------------------------------------
 //make xinfo = cutpoints
 void makexinfo(size_t p, size_t n, double *x, xinfo& xi, size_t nc);
+void makexinfo(size_t p, size_t n, double *x, xinfo& xi, int* nc);
 //--------------------------------------------------
 //compute prob of a birth, goodbots will contain all the good bottom nodes
 double getpb(tree& t, xinfo& xi, pinfo& pi, tree::npv& goodbots);
@@ -50,7 +51,7 @@ void allsuff(tree& x, xinfo& xi, dinfo& di, tree::npv& bnv, std::vector<size_t>&
 void drmu(tree& t, xinfo& xi, dinfo& di, pinfo& pi, double sigma, rn& gen);
 //--------------------------------------------------
 //birth proposal
-void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree::tree_p& nx, size_t& v, size_t& c, double& pr, rn& gen);
+void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree::tree_p& nx, size_t& v, size_t& c, double& pr, std::vector<size_t>& nv, std::vector<double>& pv, bool aug, rn& gen);
 //--------------------------------------------------
 // death proposal
 void dprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree::tree_p& nx, double& pr, rn& gen);

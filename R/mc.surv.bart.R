@@ -22,15 +22,20 @@ mc.surv.bart <- function(
     x.train = matrix(0.0, 0L, 0L),
     y.train=NULL, times=NULL, delta=NULL,
     x.test = matrix(0.0, 0L, 0L),
+    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0.0,0,0), usequants=FALSE,
+    cont=FALSE, rm.const=TRUE, type='pbart',
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL, ##M=1,
+    binaryOffset = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L, keepevery = 10L,
     nkeeptrain=ndpost, nkeeptest=ndpost,
-    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    ##nkeeptestmean=ndpost,
+    nkeeptreedraws=ndpost,
     printevery=100L,
-    treesaslists=FALSE, keeptrainfits=TRUE,
+    ##treesaslists=FALSE,
+    keeptrainfits=TRUE,
     id = NULL,     ## only used by surv.bart
     seed = 99L,    ## only used by mc.surv.bart
     mc.cores = 2L, ## ditto
@@ -43,6 +48,9 @@ mc.surv.bart <- function(
     RNGkind("L'Ecuyer-CMRG")
     set.seed(seed)
     parallel::mc.reset.stream()
+
+    x.train <- bartModelMatrix(x.train)
+    x.test <- bartModelMatrix(x.test)
 
     if(length(y.train)==0) {
         pre <- surv.pre.bart(times, delta, x.train, x.test)
@@ -94,13 +102,17 @@ mc.surv.bart <- function(
         for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
               surv.bart(x.train=x.train, y.train=y.train, x.test=x.test,
+                        sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                        xinfo=xinfo, usequants=usequants,
+                        cont=cont, rm.const=rm.const, type=type,
                         k=k, power=power, base=base,
-                        binaryOffset=binaryOffset, ##M=M,
+                        binaryOffset=binaryOffset,
                         ntree=ntree, numcut=numcut,
                         ndpost=mc.ndpost, nskip=nskip, keepevery=keepevery,
                         nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
-                        nkeeptestmean=mc.ndpost, nkeeptreedraws=mc.ndpost,
-                        printevery=printevery, treesaslists=treesaslists)},
+                        ##nkeeptestmean=mc.ndpost,
+                        nkeeptreedraws=mc.ndpost,
+                        printevery=printevery)},
               silent=(i!=1))
               ## to avoid duplication of output
               ## capture stdout from first posterior only
@@ -115,7 +127,7 @@ mc.surv.bart <- function(
             if(h==1 & i==mc.cores) {
                 post <- post.list[[1]][[mc.cores]]
 
-                p <- ncol(x.train)
+                p <- ncol(x.train[ , post$rm.const])
 
                 old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
                 ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
@@ -128,41 +140,46 @@ mc.surv.bart <- function(
                                             post$treedraws$trees)
             }
             else {
-                if(keeptrainfits) post$yhat.train <- rbind(post$yhat.train, post.list[[h]][[i]]$yhat.train)
+                if(keeptrainfits) {
+                    post$yhat.train <- rbind(post$yhat.train, post.list[[h]][[i]]$yhat.train)
+                    post$prob.train <- rbind(post$prob.train, post.list[[h]][[i]]$prob.train)
+                    ##post$surv.train <- rbind(post$surv.train, post.list[[h]][[i]]$surv.train)
+                }
 
-                if(length(post$surv.train)>0)
-                    post$surv.train <- rbind(post$surv.train, post.list[[h]][[i]]$surv.train)
-
-                if(length(post$yhat.test)>0)
+                if(length(x.test)>0) {
                     post$yhat.test <- rbind(post$yhat.test, post.list[[h]][[i]]$yhat.test)
-
-                if(length(post$surv.test)>0)
+                    post$prob.test <- rbind(post$prob.test, post.list[[h]][[i]]$prob.test)
                     post$surv.test <- rbind(post$surv.test, post.list[[h]][[i]]$surv.test)
+                }
 
                 post$varcount <- rbind(post$varcount, post.list[[h]][[i]]$varcount)
+                post$varprob <- rbind(post$varprob, post.list[[h]][[i]]$varprob)
 
                 post$treedraws$trees <- paste0(post$treedraws$trees,
                                                substr(post.list[[h]][[i]]$treedraws$trees, old.stop+2,
                                                       nchar(post.list[[h]][[i]]$treedraws$trees)))
 
-                if(treesaslists) post$treedraws$lists <-
-                                     c(post$treedraws$lists, post.list[[h]][[i]]$treedraws$lists)
-                }
+                ## if(treesaslists) post$treedraws$lists <-
+                ##                      c(post$treedraws$lists, post.list[[h]][[i]]$treedraws$lists)
+            }
 
             post.list[[h]][[i]] <- NULL
             }
 
-        if(length(post$yhat.train.mean)>0)
-            post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
+        ## if(length(post$yhat.train.mean)>0)
+        ##     post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
 
-        if(length(post$surv.train.mean)>0)
-            post$surv.train.mean <- apply(post$surv.train, 2, mean)
+        ## if(keeptrainfits)
+        ##     post$surv.train.mean <- apply(post$surv.train, 2, mean)
 
-        if(length(post$yhat.test.mean)>0)
-            post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
+        ## if(length(post$yhat.test.mean)>0)
+        ##     post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
 
-        if(length(post$surv.test.mean)>0)
+        if(length(x.test)>0)
             post$surv.test.mean <- apply(post$surv.test, 2, mean)
+
+        post$varcount.mean <- apply(post$varcount, 2, mean)
+        post$varprob.mean <- apply(post$varprob, 2, mean)
 
         attr(post, 'class') <- 'survbart'
 

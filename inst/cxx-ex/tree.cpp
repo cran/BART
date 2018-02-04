@@ -386,6 +386,14 @@ void tree::deathp(tree_p nb, double theta)
    nb->theta=theta;
 }
 
+size_t tree::getbadcut(size_t v){
+  tree_p par=this->getp();
+  if(par->getv()==v)
+    return par->getc();
+  else
+    return par->getbadcut(v);
+}
+
 #ifndef NoRcpp   
 // instead of returning y.test, let's return trees
 // this conveniently avoids the need for x.test

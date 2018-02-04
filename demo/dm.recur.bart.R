@@ -6,16 +6,19 @@ data(xdm20.train)
 data(xdm20.test)
 data(ydm20.train)
 
-set.seed(99)
-post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train)
+## set.seed(99)
+## post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+##                    keeptrainfits=TRUE)
+
 ## larger data sets can take some time so, if parallel processing
 ## is available, submit this statement instead
-## post <- mc.recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-##                      mc.cores=8, seed=99)
+post <- mc.recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+                      keeptrainfits=TRUE, mc.cores=8, seed=99)
 
 require(rpart)
 require(rpart.plot)
 
+post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
 dss <- rpart(post$yhat.train.mean~xdm20.train)
 
 rpart.plot(dss)
@@ -27,28 +30,27 @@ rpart.plot(dss)
 
 ## compare patients treated with insulin (ins270=1) vs
 ## not treated with insulin (ins270=0)
-N.train <- 50
-N.test <- 50
+N <- 50 ## 50 training patients and 50 validation patients
 K <- post$K ## 798 unique time points
+NK <- 50*K
 
 ## only testing set, i.e., remove training set
-xdm20.test. <- xdm20.test[N.train*K+(1:(N.test*K)), ]
+xdm20.test. <- xdm20.test[NK+1:NK, post$rm.const]
 xdm20.test. <- rbind(xdm20.test., xdm20.test.)
-xdm20.test.[ , 'ins270'] <- rep(0:1, each=N.test*K)
+xdm20.test.[ , 'ins270'] <- rep(0:1, each=NK)
 
 ## multiple threads will be utilized if available
 pred <- predict(post, xdm20.test., mc.cores=8)
 
 ## create Friedman's partial dependence function for the
-## intensity/hazard by time and ins270
-NK.test <- N.test*K
-M <- nrow(pred$haz.test) ## number of MCMC samples, typically 1000
-
+## relative intensity for ins270 by time
+M <- nrow(pred$haz.test) ## number of MCMC samples
 RI <- matrix(0, M, K)
-
-for(i in 1:N.test)
-    RI <- RI+(pred$haz.test[ , (N.test+i-1)*K+1:K]/
-              pred$haz.test[ , (i-1)*K+1:K])/N.test
+for(j in 1:K) {
+    h <- seq(j, NK, by=K)
+    RI[ , j] <- apply(pred$haz.test[ , h+NK]/
+                      pred$haz.test[ , h], 1, mean)
+}
 
 RI.lo <- apply(RI, 2, quantile, probs=0.025)
 RI.mu <- apply(RI, 2, mean)

@@ -21,11 +21,12 @@ surv.pwbart <- function(
    treedraws,		#$treedraws for from surv.bart/mc.surv.bart
    binaryOffset=0,	#mean to add on
    mc.cores=1L,
+   type='pbart',
    transposed=FALSE,
    nice=19L             # mc.surv.pwbart only
 )
 {
-    if(!transposed) x.test <- t(x.test)
+    if(!transposed) x.test <- t(bartModelMatrix(x.test))
 
     p <- length(treedraws$cutpoints)
 
@@ -38,7 +39,6 @@ surv.pwbart <- function(
 
     if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
 
-    pred$binaryOffset <- binaryOffset
     x.test <- t(x.test)
     pred$tx.test <- x.test
     times <- unique(sort(x.test[ , 1]))
@@ -48,16 +48,21 @@ surv.pwbart <- function(
 
     H <- nrow(x.test)/K ## the number of different settings
 
-    pred$surv.test <- 1-pnorm(pred$yhat.test)
+    if(type=='pbart') pred$prob.test <- pnorm(pred$yhat.test)
+    else if(type=='lbart') pred$prob.test <- plogis(pred$yhat.test)
 
-    for(h in 1:H) for(j in 2:K) {
+    pred$surv.test <- 1-pred$prob.test
+
+    for(h in 1:H)
+        for(j in 2:K) {
                       l <- K*(h-1)+j
 
                       pred$surv.test[ , l] <- pred$surv.test[ , l-1]*pred$surv.test[ , l]
-                  }
+        }
 
     pred$surv.test.mean <- apply(pred$surv.test, 2, mean)
 
+    pred$binaryOffset <- binaryOffset
     attr(pred, 'class') <- 'survbart'
 
     return(pred)

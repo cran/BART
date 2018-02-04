@@ -1,8 +1,30 @@
+Changes and New Features in 1.4 (2018-02-02):
+
+        * fixed library bloat on Linux with strip
+
+	* x.train and x.test can be supplied as data.frames
+	  which contain factors as stated in the documentation
+
+	* cutpoints now based on data itself, i.e., binary or
+	  ordinal covariates.  Similarly, you can request 
+	  quantiles via the usequants setting. 
+
+	* sparse variable selection now available with the
+	  sparse=TRUE argument; see the documentation
+
+	* new vignettes
+
+	* new function, mc.lbart, for Logistic BART in parallel
+
+	* mbart updated to equivalent functionality as other functions
+
+	* new function, mc.mbart, for Multinomial BART in parallel
+
 Changes and New Features in 1.3 (2017-09-18):
 
-	* wbart/mc.wbart/pbart/mc.pbart/surv.bart/mc.surv.bart/
-	  crisk.bart/mc.crisk.bart/recur.bart/mc.recur.bart
-	  now return ndpost values rather ndpost/keepevery
+        * new examples in demo directory
+
+	* return ndpost values rather ndpost/keepevery
 
 	* for calling BART directly from C++, you can
 	  now use the RNG provided by Rmath or the STL random class
@@ -24,7 +46,9 @@ Changes and New Features in 1.2 (2017-04-30):
 	  see new header rn.h and the example in cxx-ex
 
 Changes and New Features in 1.1 (2017-04-13):
+
 	* No user visible changes: bug-fix release
 
 Changes and New Features in 1.0 (2017-04-07):
+
 	* First release on CRAN

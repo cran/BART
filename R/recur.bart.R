@@ -22,21 +22,31 @@ recur.bart <- function(
     y.train=NULL, times=NULL, delta=NULL,
     x.test = matrix(0.0, 0L, 0L),
     x.test.nogrid = FALSE, ## you may not need the whole grid
+    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0.0,0,0), usequants=FALSE,
+    cont=FALSE, rm.const=TRUE, type='pbart',
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = NULL, ##M=1,
+    binaryOffset = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L,
     keepevery = 10L,
     nkeeptrain=ndpost, nkeeptest=ndpost,
-    nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
+    ##nkeeptestmean=ndpost,
+    nkeeptreedraws=ndpost,
     printevery=100L,
-    treesaslists=FALSE, keeptrainfits=TRUE,
+    ##treesaslists=FALSE,
+    keeptrainfits=TRUE,
     seed = 99L,    ## only used by mc.recur.bart
     mc.cores = 2L, ## ditto
     nice=19L       ## ditto
     )
 {
+    x.train <- bartModelMatrix(x.train)
+    x.test <- bartModelMatrix(x.test)
+
+    if(length(rho)==0) rho <- ncol(x.train)
+
     if(length(y.train)==0) {
         if(length(binaryOffset)==0) {
             lambda <- sum(delta)/sum(apply(times, 1, max))
@@ -59,49 +69,63 @@ recur.bart <- function(
         K     <- length(times)
     }
 
-    post <- pbart(x.train=x.train, y.train=y.train, x.test=x.test,
+    if(type=='pbart') call <- pbart
+    else if(type=='lbart') {
+        binaryOffset <- 0
+        call <- lbart
+    }
+
+    post <- call(x.train=x.train, y.train=y.train, x.test=x.test,
+                 sparse=sparse, a=a, b=b, augment=augment, rho=rho,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset, ##M=M,
+                  xinfo=xinfo, usequants=usequants,
+                  cont=cont, rm.const=rm.const,
+                  binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip,
                   keepevery=keepevery, nkeeptrain=nkeeptrain,
-                  nkeeptest=nkeeptest, nkeeptestmean=nkeeptestmean,
-                  nkeeptreedraws=nkeeptreedraws, printevery=printevery,
-                  treesaslists=treesaslists)
+                  nkeeptest=nkeeptest, ##nkeeptestmean=nkeeptestmean,
+                  nkeeptreedraws=nkeeptreedraws, printevery=printevery)
 
-    if(attr(post, 'class')!='pbart') return(post)
+    if(type!=attr(post, 'class')) return(post)
 
     post$binaryOffset <- binaryOffset
     post$times <- times
     post$K <- K
     post$tx.train <- x.train
+    post$type <- type
 
-    ## training grid could be incomplete due to death and/or forced zeros
+    if(keeptrainfits) {
+        ## if(type=='pbart') post$haz.train <- pnorm(post$yhat.train)
+        ## else if(type=='lbart') post$haz.train <- plogis(post$yhat.train)
 
-    ## if(length(x.test)==0) {
-    ##     post$cum.train <- pnorm(post$yhat.train)
-    ##     post$haz.train <- post$cum.train
+        post$haz.train <- post$prob.train
+        post$cum.train <- post$haz.train
 
-    ##     H <- nrow(x.train)
+        H <- nrow(x.train)
 
-    ##     for(h in 1:H) {
-    ##         j <- which(x.train[h, 1]==times) ## for grid points only
+        for(h in 1:H) {
+            j <- which(x.train[h, 1]==times) ## for grid points only
 
-    ##         if(j==1) post$haz.train[ , h] <- post$haz.train[ , h]/times[1]
-    ##         else {
-    ##             post$haz.train[ , h] <- post$haz.train[ , h]/(times[j]-times[j-1])
-    ##             post$cum.train[ , h] <- post$cum.train[ , h-1]+post$cum.train[ , h]
-    ##         }
-    ##     }
-    ## }
-    ## else {
+            if(j==1) post$haz.train[ , h] <- post$haz.train[ , h]/times[1]
+            else {
+                post$haz.train[ , h] <- post$haz.train[ , h]/(times[j]-times[j-1])
+                post$cum.train[ , h] <- post$cum.train[ , h-1]+post$cum.train[ , h]
+            }
+        }
+
+        post$haz.train.mean <- apply(post$haz.train, 2, mean)
+        post$cum.train.mean <- apply(post$cum.train, 2, mean)
+    }
 
     if(length(x.test)>0) { ## this should always be the case
         post$tx.test <- x.test
 
-        post$haz.test <- pnorm(post$yhat.test)
+        ## if(type=='pbart') post$haz.test <- pnorm(post$yhat.test)
+        ## else if(type=='lbart') post$haz.test <- plogis(post$yhat.test)
 
         if(!x.test.nogrid) {
+            post$haz.test <- post$prob.test
             post$cum.test <- post$haz.test
 
             H <- nrow(x.test)
@@ -115,6 +139,9 @@ recur.bart <- function(
                     post$cum.test[ , h] <- post$cum.test[ , h-1]+post$cum.test[ , h]
                 }
             }
+
+            post$haz.test.mean <- apply(post$haz.test, 2, mean)
+            post$cum.test.mean <- apply(post$cum.test, 2, mean)
         }
 
         ## H <- nrow(x.test)
