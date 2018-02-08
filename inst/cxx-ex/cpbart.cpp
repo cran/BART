@@ -278,7 +278,7 @@ void cpbart(
 
    for(size_t i=0;i<(nd+burn);i++) {
       if(i%printevery==0) printf("done %zu (out of %lu)\n",i,nd+burn);
-      if(i==floor(burn/2)&&dart) bm.startdart();
+      if(i==(burn/2)&&dart) bm.startdart();
       //draw bart
       bm.draw(1., gen);
       //bm.draw(rootM, gen);

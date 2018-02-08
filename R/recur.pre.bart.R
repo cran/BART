@@ -24,16 +24,16 @@ recur.pre.bart <- function(
                            delta,
                            ## matrix of indicators: 0=no event, 1=event
 
+                           x.train=NULL,
+                           ## matrix of covariate regressors
+                           ## can be NULL, i.e. KM analog
+
                            tstop=NULL,
                            ## for non-instantaneous events, this the
                            ## matrix of event stop times, i.e., between
                            ## times[i, j] and tstop[i, j] subject i is
                            ## not in the risk set for a recurrent event
                            ## N.B. NOT for counting process notation
-
-                           x.train=NULL,
-                           ## matrix of covariate regressors
-                           ## can be NULL, i.e. KM analog
 
                            last.value=TRUE
                            ) {
@@ -51,7 +51,7 @@ recur.pre.bart <- function(
 
     J <- ncol(times)
 
-    times <- cbind(times, apply(times, 1, max))
+    times <- cbind(times, apply(times, 1, max, na.rm=TRUE))
 
     dimnames(times)[[2]][J+1] <- 'stop'
 
@@ -66,15 +66,18 @@ recur.pre.bart <- function(
 
     k <- 1
     id <- 0
-    for(i in 1:N) for(j in 1:K) if(events[j] <= times[i, J+1]) {
-                                    y.train[k] <- 0
-                                    id[k] <- i
+    for(i in 1:N)
+        for(j in 1:K)
+            if(events[j] <= times[i, J+1]) {
+                y.train[k] <- 0
+                id[k] <- i
 
-                                    for(h in 1:J) if(y.train[k]==0 & events[j]==times[i, h] & delta[i, h]==1)
-                                                      y.train[k] <- 1
+                for(h in 1:J) if(!is.na(times[i, h]) && !is.na(delta[i, h]) &&
+                                 y.train[k]==0 && events[j]==times[i, h] && delta[i, h]==1)
+                                  y.train[k] <- 1
 
-                                    k <- k+1
-                                }
+                k <- k+1
+            }
 
     m <- length(y.train)
 
@@ -110,7 +113,8 @@ recur.pre.bart <- function(
         for(j in 1:K) if(events[j] <= times[i, J+1]) {
                           X.train[k, 1:3] <- c(events[j], events[j]-t.0, n.t)
 
-                          for(h in 1:J) if(events[j]==times[i, h] & delta[i, h]==1) {
+                          for(h in 1:J) if(!is.na(times[i, h]) && !is.na(delta[i, h]) &&
+                                           events[j]==times[i, h] && delta[i, h]==1) {
                                             n.t <- n.t+1
                                             t.0 <- events[j]
                                         }
@@ -132,7 +136,8 @@ recur.pre.bart <- function(
             X.test[k, 1:3] <- c(events[j], events[j]-t.0, n.t)
 
             for(h in 1:J) {
-                if(events[j]==times[i, h] & delta[i, h]==1) {
+                if(!is.na(times[i, h]) && !is.na(delta[i, h]) &&
+                   events[j]==times[i, h] && delta[i, h]==1) {
                     n.t <- n.t+1
                     t.0 <- events[j]
                 }

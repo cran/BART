@@ -6,7 +6,7 @@ Recurrent event data contained in \eqn{(t_1,\delta_1, ..., t_k,\delta_k, x)} mus
 suitable for the BART model; see \code{recur.bart} for more details.
 }
 \usage{
-recur.pre.bart( times, delta, tstop=NULL, x.train=NULL, last.value=TRUE )
+recur.pre.bart( times, delta, x.train=NULL, tstop=NULL, last.value=TRUE )
 }
 \arguments{
    \item{times}{
@@ -17,16 +17,16 @@ recur.pre.bart( times, delta, tstop=NULL, x.train=NULL, last.value=TRUE )
      Matrix of event indicators: 1 is an event while 0 is censored.\cr
    }
 
-   \item{tstop}{ For non-instantaneous events, this the matrix of event
-     stop times, i.e., between \code{times[i, j]} and \code{tstop[i, j]}
-     subject \code{i} is not in the risk set for a recurrent event.
-     N.B. This is NOT for counting process notation. \cr }
-   
    \item{x.train}{
    Explanatory variables for training (in sample) data.\cr
    If provided, must be a matrix
    with (as usual) rows corresponding to observations and columns to variables.\cr
    }
+
+   \item{tstop}{ For non-instantaneous events, this the matrix of event
+     stop times, i.e., between \code{times[i, j]} and \code{tstop[i, j]}
+     subject \code{i} is not in the risk set for a recurrent event.
+     N.B. This is NOT for counting process notation. \cr }
 
    \item{last.value}{If \code{last.value=TRUE}, then the sojourn time,
      \code{v}, and the number of previous events, \code{N}, are carried

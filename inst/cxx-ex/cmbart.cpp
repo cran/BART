@@ -276,7 +276,7 @@ void cmbart(
 
       if(i%printevery==0) printf("done %zu (out of %zu)\n",i,nd+burn);
       for(size_t c=0;c<C;c++) {
-	if(i==floor(burn/2)&&dart) bm[c].startdart();
+	if(i==(burn/2)&&dart) bm[c].startdart();
          for(size_t j=0;j<n;j++) {
             yf[j]=zpm[c*n+j]*bm[c].f(j);
             double tempC=0.0;

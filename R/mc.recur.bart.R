@@ -49,10 +49,11 @@ mc.recur.bart <- function(
     parallel::mc.reset.stream()
 
     x.train <- bartModelMatrix(x.train)
-    x.test <- bartModelMatrix(x.test)
+    ##x.test <- bartModelMatrix(x.test)
 
     if(length(y.train)==0) {
-        recur <- recur.pre.bart(times, delta, x.train, x.test)
+        recur <- recur.pre.bart(times, delta, x.train)
+        ##recur <- recur.pre.bart(times, delta, x.train, x.test)
 
         y.train <- recur$y.train
         x.train <- recur$tx.train

@@ -53,7 +53,8 @@ recur.bart <- function(
             binaryOffset <- qnorm(1-exp(-lambda))
         }
 
-        recur <- recur.pre.bart(times, delta, x.train, x.test)
+        recur <- recur.pre.bart(times, delta, x.train)
+        ##recur <- recur.pre.bart(times, delta, x.train, x.test)
 
         y.train <- recur$y.train
         x.train <- recur$tx.train
