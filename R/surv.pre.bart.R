@@ -27,16 +27,19 @@
 surv.pre.bart <- function(
                       times,
                       ## vector of survival times
-                      
+
                       delta,
                       ## vector of event indicators: 1 event, 0 censoring
-    
+
                       x.train=NULL,
                       ## matrix of covariate regressors
                       ## can be NULL, i.e. KM analog
-                      
-                      x.test=NULL
+
+                      x.test=NULL,
                       ## matrix of covariate regressors at tx.test settings
+
+                      K=NULL
+                      ## if specified, then use K quantiles for time grid
                       ) {
     ## currently does not handle time dependent Xs
     ## can be extended later
@@ -52,15 +55,29 @@ surv.pre.bart <- function(
     if(length(x.train)>0 && N!=nrow(x.train))
         stop('The length of times and the number of rows in x.train, if any, must be identical')
 
-    events <- unique(sort(times))
-    ## time grid of events including censoring times
+    if(length(K)>0) {
+        events <- unique(quantile(times, probs=(1:K)/K))
+        attr(events, 'names') <- NULL
+
+        for(i in 1:N) {
+            k <- min(which(times[i]<=events))
+            times[i] <- events[k]
+        }
+    }
+    else {
+        events <- unique(sort(times))
+        ## time grid of events including censoring times
+    }
 
     K <- length(events)
 
+    if(events[1]<=0)
+        stop('Time points exist less than or equal to time zero.')
+
     y.train <- integer(N) ## y.train is at least N long
-            
+
     k <- 1
-        
+
     for(i in 1:N) for(j in 1:K) if(events[j] <= times[i]) {
         y.train[k] <- delta[i]*(times[i] == events[j])
 
@@ -72,22 +89,22 @@ surv.pre.bart <- function(
     if(length(x.train)==0) {
         p <- 0
         n <- 1
-        
+
         X.train <- matrix(nrow=m, ncol=1, dimnames=list(NULL, 't'))
     } else {
         p <- ncol(x.train)
-        
+
         if(length(x.test)>0) n <- nrow(x.test)
-        
+
         X.train <- matrix(nrow=m, ncol=p+1)
 
         if(length(dimnames(x.train)[[2]])>0)
             dimnames(X.train)[[2]] <- c('t', dimnames(x.train)[[2]])
         else dimnames(X.train)[[2]] <- c('t', paste0('x', 1:p))
     }
-    
+
     k <- 1
-    
+
     for(i in 1:N) for(j in 1:K) if(events[j] <= times[i]) {
         if(p==0) X.train[k, ] <- c(events[j])
         else X.train[k, ] <- c(events[j], x.train[i, ])
@@ -104,7 +121,7 @@ surv.pre.bart <- function(
         }
     }
     else X.test <- matrix(nrow=0, ncol=0)*0
-    
+
     return(list(y.train=y.train, tx.train=X.train, tx.test=X.test, times=events, K=K,
                 binaryOffset=binaryOffset))
 }

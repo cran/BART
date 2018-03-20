@@ -18,7 +18,8 @@
 
 wbart=function(
 x.train, y.train, x.test=matrix(0.0,0,0),
-sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+sparse=FALSE, theta=0, omega=1,
+a=0.5, b=1, augment=FALSE, rho=NULL,
 xinfo=matrix(0.0,0,0), usequants=FALSE,
 cont=FALSE, rm.const=TRUE,
 sigest=NA, sigdf=3, sigquant=.90,
@@ -46,9 +47,13 @@ if(!transposed) {
     if(length(x.test)>0)
             x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
     rm.const <- temp$rm.const
+    grp <- temp$grp
     rm(temp)
 }
-else rm.const <- NULL
+else {
+    rm.const <- NULL
+    grp <- NULL
+}
 
 if(n!=ncol(x.train))
     stop('The length of y.train and the number of rows in x.train must be identical')
@@ -57,6 +62,7 @@ p = nrow(x.train)
 np = ncol(x.test)
 if(length(rho)==0) rho=p
 if(length(rm.const)==0) rm.const <- 1:p
+if(length(grp)==0) grp <- 1:p
 
 ##if(p>1 & length(numcut)==1) numcut=rep(numcut, p)
 
@@ -124,6 +130,9 @@ res = .Call("cwbart",
             sigest,
             w,
             sparse,
+            theta,
+            omega,
+            grp,
             a,
             b,
             rho,

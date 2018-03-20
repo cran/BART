@@ -7,7 +7,7 @@ suitable for the BART competing risks model; see \code{crisk.bart} for more deta
 }
 \usage{
 crisk.pre.bart( times, delta, x.train=NULL, x.test=NULL,
-                x.train2=x.train, x.test2=x.test )
+                x.train2=x.train, x.test2=x.test, K=NULL )
 }
 \arguments{
    \item{times}{
@@ -38,6 +38,11 @@ crisk.pre.bart( times, delta, x.train=NULL, x.test=NULL,
    \item{x.test2}{
    Explanatory variables for test (out of sample) data of cause 2.\cr
    If provided, must be a matrix and have the same structure as x.train.\cr
+ }
+ 
+   \item{K}{
+     If provided, then coarsen \code{times} per the quantiles
+     \eqn{1/K, 2/K, ..., K/K}.
    }
 }
 
@@ -83,8 +88,8 @@ delta[delta==2] <- 1
 delta[delta>1] <- 2
 table(delta, transplant$event)
 
-table(1+(transplant$futime\%/\%30))
-times <- ((transplant$futime+1)\%/\%7)
+table(1+floor(transplant$futime/30.5)) ## months
+times <- 1+floor(transplant$futime/30.5)
 
 typeO <- 1*(transplant$abo=='O')
 typeA <- 1*(transplant$abo=='A')

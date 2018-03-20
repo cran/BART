@@ -139,37 +139,39 @@ void bart::draw(double sigma, rn& gen)
 //--------------------------------------------------
 void bart::draw_s(rn& gen)
 {
-  // Draw sparsity parameter alpha as described in Linero, 2016
-  // spars / (spars + rho ) ~ Be(a,b)
-  // Set (a,b) to (.5,1) for sparsity
-  // Set (a,b) to (1,1) for non-sparsity
+  // Draw sparsity parameter theta (Linero calls it alpha); see Linero, 2018
+  // theta / (theta + rho ) ~ Beta(a,b)
+  // Set (a=0.5, b=1) for sparsity
+  // Set (a=1, b=1) for non-sparsity
   // rho = p usually, but making rho < p increases sparsity
-  double spars,beta;
-  gen.set_beta(a, b);
-  beta=gen.beta();
-  spars=(beta*rho/(1-beta))/(double)p;
+  if(!const_theta){
+  double sumlogpv=0.,mx,sm,log_sum_exp;
+  std::vector<double> lambda_g (1000,0.);  
+  std::vector<double> theta_g (1000,0.);
+  std::vector<double> lwt_g (1000,0.);
+    for(size_t j=0;j<p;j++) sumlogpv+=log(pv[j]);
+    for(size_t k=0;k<1000;k++){
+      lambda_g[k]=(double)(k+1)/1001.;
+      theta_g[k]=(lambda_g[k]*rho)/(1.-lambda_g[k]);
+      lwt_g[k]=lgamma(theta_g[k])-lgamma(theta_g[k]/(double)p)*(double)p
+	       +(theta_g[k]/(double)p)*sumlogpv
+	       +(a-1)*log(lambda_g[k])+(b-1)*log(1-lambda_g[k]);
+      if(k==0) mx=lwt_g[0];
+      else if(lwt_g[k]>mx) mx=lwt_g[k];
+    }
+    //for(size_t k=0;k<1000;k++) if(lwt_g[k]>mx) mx=lwt_g[k];
+    sm=0.;
+    for(size_t k=0;k<1000;k++) sm+=exp(lwt_g[k]-mx);
+    log_sum_exp=mx+log(sm);
+    for(size_t k=0;k<1000;k++) lwt_g[k]=exp(lwt_g[k]-log_sum_exp);
+    gen.set_wts(lwt_g);
+    theta=theta_g[gen.discrete()];
+   } 
   // Now draw s, the vector of splitting probabilities
   std::vector<double> _alpha(p);
-  for(size_t j=0;j<p;j++) _alpha[j]=spars+nv[j];
+  for(size_t j=0;j<p;j++) _alpha[j]=theta/(double)p+nv[j];
   gen.set_alpha(_alpha);
   pv=gen.dirichlet();
-/*
-  double x1,x2,beta,gsum;
-  gen.set_shape(a);
-  x1=gen.gamma();
-  gen.set_shape(b);
-  x2=gen.gamma();
-  beta=x1/(x1+x2);
-  spars=beta*rho/(1-beta);
-  // Now draw s, the vector of splitting probabilities
-  gsum=0;
-  for(size_t j=0;j<p;j++){
-    gen.set_shape(spars/(double)p+nv[j]);
-    pv[j]=gen.gamma();
-    gsum+=pv[j];
-  }
-  for(size_t j=0;j<p;j++) pv[j]=pv[j]/gsum;
-*/
 }
 //--------------------------------------------------
 //public functions

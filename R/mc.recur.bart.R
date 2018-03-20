@@ -60,7 +60,9 @@ mc.recur.bart <- function(
         x.test  <- recur$tx.test
 
         if(length(binaryOffset)==0) {
-            lambda <- sum(delta)/sum(times[ , ncol(times)])
+            lambda <- sum(delta, na.rm=TRUE)/
+                sum(apply(times, 1, max, na.rm=TRUE))
+            ##lambda <- sum(delta)/sum(times[ , ncol(times)])
             binaryOffset <- qnorm(1-exp(-lambda))
         }
     }

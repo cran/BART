@@ -1,0 +1,305 @@
+\documentclass[nojss]{jss}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Continuous outcomes with BART: Part 2}
+%\usepackage{thumbpdf,lmodern}
+\usepackage{verbatim}
+\usepackage{statex2}
+\usepackage[authoryear,round]{natbib}
+\usepackage{rotating}
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+%% - \author{} with primary affiliation
+%% - \Plainauthor{} without affiliations
+%% - Separate authors by \And or \AND (in \author) or by comma (in \Plainauthor).
+%% - \AND starts a new line, \And does not.
+%\author{Achim Zeileis\\Universit\"at Innsbruck
+%   \And Second Author\\Plus Affiliation}
+%\Plainauthor{Achim Zeileis, Second Author}
+\author{Robert McCulloch\\Arizona State University
+\And Rodney Sparapani\\Medical College of Wisconsin}
+\Plainauthor{Robert McCulloch, Rodney Sparapani}
+
+%% - \title{} in title case
+%% - \Plaintitle{} without LaTeX markup (if any)
+%% - \Shorttitle{} with LaTeX markup (if any), used as running title
+%\title{A Short Demo Article: Regression Models for Count Data in \proglang{R}}
+%\Plaintitle{A Short Demo Article: Regression Models for Count Data in R}
+%\Shorttitle{A Short Demo Article in \proglang{R}}
+
+\title{Continuous outcomes with BART: Part 2}
+\Plaintitle{Continuous outcomes with BART: Part 2}
+\Shorttitle{Continuous outcomes with BART: Part 2}
+
+%% - \Abstract{} almost as usual
+\Abstract{
+  This short article illustrates examples of analyzing
+  continuous outcomes with the {\bf BART} \proglang{R} package.
+}
+
+%% - \Keywords{} with LaTeX markup, at least one required
+%% - \Plainkeywords{} without LaTeX markup (if necessary)
+%% - Should be comma-separated and in sentence case.
+\Keywords{Bayesian Additive Regression Trees} 
+\Plainkeywords{Bayesian Additive Regression Trees}
+
+%% - \Address{} of at least one author
+%% - May contain multiple affiliations for each author
+%%   (in extra lines, separated by \emph{and}\\).
+%% - May contain multiple authors for the same affiliation
+%%   (in the same first line, separated by comma).
+
+\Address{
+  Rodney Sparapani {rsparapa@mcw.edu}\\
+  Division of Biostatistics, Institute for Health and Equity\\
+  Medical College of Wisconsin, Milwaukee campus
+%  8701 Watertown Plank Road\\
+%  Milwaukee, WI\ \ 53226, USA\\
+%  E-mail: {rsparapa@mcw.edu}
+}
+
+\begin{document}
+
+<<setup, echo=FALSE>>=
+knitr::opts_chunk$set(echo = TRUE)
+@ 
+
+<<colfun,echo=FALSE>>=
+library(knitr)
+#Color Format
+colFmt = function(x,color){
+##   outputFormat = opts_knit$get("rmarkdown.pandoc.to")
+     paste("\\textcolor{",color,"}{",x,"}",sep="")
+}
+@
+
+\maketitle 
+
+\section{BART}
+
+In this section, we demonstrate the analysis of continuous outcomes
+with BART via the {\bf BART} \proglang{R} package.  
+For continuous outcomes, 
+Bayesian Additive Regression Trees (BART) \citep{ChipGeor10}
+fit the basic model:
+
+$$
+y_i = f(x_i) + \epsilon_i, \;\; \epsilon_i \sim N(0, w_i^2 \sigma^2)
+$$
+
+We use Markov Chain Monte Carlo (MCMC) to get draws from the posterior
+distribution of the parameter $(f,\sigma)$.  In this section, we
+describe the functionality of \code{BART::wbart} which is the basic
+function in the {\bf BART} \proglang{R} package.  But first, we
+delve into the details of the BART prior itself.
+
+\subsection{Boston Housing Data} 
+
+Let's examine the classic example of the Boston housing data.
+We'll predict the median house value, \code{y=mdev}, from  
+\code{x1 = rm} (number of rooms) and \code{x2=lsat} (lower status).
+<<s1-1, include=TRUE, echo=TRUE,cache=TRUE>>=
+library(MASS)
+x = Boston[,c(6,13)] #rm=number of rooms and lstat= percent lower status
+y = Boston$medv # median value
+head(cbind(x,y))
+@
+
+\subsection{A Quick Look at the Data}
+
+<<pl-dat, include=TRUE, echo=TRUE,out.width='80%',fig.align='center', dependson="s1-1">>=
+par(mfrow=c(2,2))
+par(mai=c(.8,.8,.2,.2))
+plot(x[,1],y,xlab="x1=rm",ylab="y=mdev",cex.axis=1.3,cex.lab=1.2)
+plot(x[,2],y,xlab="x2=lstat",ylab="y=mdev",cex.axis=1.3,cex.lab=1.2)
+plot(x[,1],x[,2],xlab="x1=rm",ylab="x2=lstat",cex.axis=1.3,cex.lab=1.2)
+@
+
+\subsection{Run wbart}
+
+<<s1-2, include=TRUE, echo=TRUE,cache=TRUE,dependson="s1-1",message=FALSE>>=
+library(BART) #BART package
+set.seed(99) #MCMC, so set the seed
+nd=200 # number of kept draws
+burn=50 # number of burn in draws
+bf = wbart(x,y,nskip=burn,ndpost=nd)
+@ 
+
+\subsection{Results returned with a list}
+ 
+We returned the results of running \code{wbart} in the object
+\code{bf} of type \code{wbart} which is essentially a list.
+
+<<example, include=TRUE, echo=TRUE,dependson="s1-2",collapse=TRUE>>=
+names(bf)
+length(bf$sigma)
+length(bf$yhat.train.mean)
+dim(bf$yhat.train)
+@
+
+\Sexpr{colFmt("Remember","red")}, the training data has $n=$
+\Sexpr{length(y)} observations, we had \code{burn=}\Sexpr{burn} 
+burnin discarded draws and \code{nd=}\Sexpr{nd} draws kept.
+
+Let's look at a couple of the key list components.
+\code{\$sigma}: burnin + kept (\Sexpr{burn+nd}) draws of $\sigma$.\\
+\code{yhat.train.mean}: $j^{th}$ value is posterior mean of 
+$f(x_j)$, \ $f$ evaluated at the $j^{th}$ training observation.
+\code{yhat.train}: $i,j$ value  is the $i^{th}$ kept MCMC draw of $f(x_j)$.
+
+\subsection{Assess Convegence} 
+%{ with $\sigma$ Draws}
+
+As with any high-dimensional MCMC, assessing convergence may be tricky.  
+The simplest thing to look at are the draws of $\sigma$.  
+The parameter $\sigma$ is the only identified parameter in the model 
+and it also gives us a sense of the size of the errors.
+
+<<plotsigma, include=TRUE, echo=TRUE,dependson="s1-2", out.width='50%',fig.align='center'>>=
+plot(bf$sigma)
+abline(v=burn,lwd=2,col="red")
+@
+
+Look's like it burned in very quickly.  
+Just one initial draw looking a bit bigger than the rest.
+Apparently, subsequent variation is legitimate posterior variation.  
+In a more difficult problem you may see the $\sigma$ draws initially 
+declining as the MCMC searches for a good fit.
+
+\subsection{Look at in-sample Fit and Compare to a Linear Fit}
+
+Let's look at the in-sample BART fit (\code{yhat.train.mean})  
+and compare it to \code{y=medv} fits from a multiple linear regression.  
+
+<<comparison, include=TRUE, echo=TRUE,dependson="s1-2", out.width='50%',fig.align='center'>>=
+lmf = lm(y~.,data.frame(x,y))
+fitmat = cbind(y,bf$yhat.train.mean,lmf$fitted.values)
+colnames(fitmat)=c("y","BART","Linear")
+cor(fitmat)
+pairs(fitmat)
+@
+
+The BART fit is noticeably different from the linear fit.
+
+\subsection{A Quick Look at the Uncertainty}
+
+We order the observations by the fitted house value 
+(\code{yhat.train.mean})
+and then use boxplots to display the draws of $f(x)$ in each column of
+\code{yhat.train}.
+<<boxplots, include=TRUE, echo=TRUE,out.width='70%',fig.align='center',dependson="s1-2">>=
+ii = order(bf$yhat.train.mean) #order observations by predicted value
+boxplot(bf$yhat.train[,ii]) #boxplots of f(x) draws
+@
+
+Substantial predictive uncertainty, but you can still be fairly certain that
+some houses should cost more than other.
+
+\subsection{Using predict.wbart}
+
+We can get out of sample predictions in two ways. 
+First, we can can just ask for them when we call \code{wbart} by supplying 
+a matrix or data frame of test $x$ values. 
+Second, we can call a \code{predict} method.
+
+%\subsection{Train and Test Data Sets}
+
+Let's split our data into train and test subsets.  
+
+<<ttsplit, include=TRUE, echo=TRUE,cache=TRUE,dependson="s1-1">>=
+n=length(y) #total sample size
+set.seed(14)  # Dave Keon, greatest Leaf of all time!
+ii = sample(1:n,floor(.75*n)) # indices for train data, 75% of data
+xtrain=x[ii,]; ytrain=y[ii] # training data
+xtest=x[-ii,]; ytest=y[-ii] # test data
+cat("train sample size is ",length(ytrain)," and test sample size is ",length(ytest),"\n")
+@
+
+And now we can run \code{wbart} using the training data to 
+learn and predict at \code{xtest}.
+First, we'll just pass \code{xtest} to the \code{wbart} call.
+
+<<pred1,include=FALSE, echo=TRUE,cache=TRUE,message=FALSE,dependson="ttsplit">>=
+set.seed(99)
+bfp1 = wbart(xtrain,ytrain,xtest) #predict.wbart wants a matrix
+@
+
+<<output1, include=TRUE, echo=TRUE,dependson="pred1",collapse=TRUE>>=
+dim(bfp1$yhat.test)
+length(bfp1$yhat.test.mean)
+@
+
+Now, \code{yhat.test}: the $i,j$ value is the $i^{th}$ kept MCMC draw of 
+$f(x_j)$ where $x_j$ is the $j^{th}$ row of \code{xtest}.\\
+\code{yhat.test.mean}: the $j^{th}$ value is the posterior mean of 
+$f(x_j)$, i.e., $f$ evaluated at the $j^{th}$ row of \code{xtest}.
+
+Alternatively, we could run \code{wbart} saving all the MCMC results
+and then call \code{predict.wbart}.
+<<pred2,include=TRUE, echo=TRUE,cache=TRUE,message=FALSE,dependson="ttsplit">>=
+set.seed(99)
+bfp2 = wbart(xtrain,ytrain)
+yhat = predict(bfp2,as.matrix(xtest)) #predict wants a matrix
+@
+
+So \code{yhat} and \code{bfp1$yhat.test} are the same.
+<<output2, include=TRUE, echo=TRUE,dependson="pred2",collapse=TRUE>>=
+dim(yhat)
+summary(as.double(yhat-bfp1$yhat.test))
+@
+
+\subsection{Thinning}
+
+In our simple example of the Boston housing data set \code{wbart} 
+runs pretty fast.
+But with more data and longer runs you may want to speed things up
+by saving less and then using \code{predict}.
+Let's just keep a thinned subset of 200 tree ensembles.
+
+<<bfthin,include=TRUE, echo=TRUE,cache=TRUE,message=FALSE,dependson="ttsplit">>=
+set.seed(4) #Bobby Orr's jersey number is the seed
+bfthin = wbart(xtrain,ytrain,nskip=1000,ndpost=10000,
+                     nkeeptrain=0,nkeeptest=0,nkeeptestmean=0,nkeeptreedraws=200)
+yhatthin = predict(bfthin,as.matrix(xtest)) #predict wants a matrix
+@
+
+<<output3, include=TRUE, echo=TRUE,collapse=TRUE>>=
+dim(bfthin$yhat.train)
+dim(yhatthin)
+@
+
+Now, there are no kept draws of $f(x)$ for training $x$, 
+and we have 200 tree ensembles
+to use with \code{predict.wbart}.  
+
+The thinning arguments.
+\begin{itemize}
+\item \code{nkeeptrain} : number of $f(x)$ draws to save for training $x$.
+\item \code{nkeeptest} : number of $f(x)$ draws to save for test $x$.
+\item \code{nkeeptestmeam} : number of draws to use in computing 
+\code{yhat.test.mean}.
+\item \code{nkeeptreedraws} : number of tree ensembles to keep.
+\end{itemize}
+
+The default values are to keep all the draws (e.g.,
+                                              \code{nkeeptrain=ndpost}).
+
+Of course, if you keep 100 out of 100,000, you keep every 1,000th draw.  
+
+Now, let's have a look at the predictions.
+
+<<output4, include=TRUE, echo=TRUE,out.width='60%',fig.align='center',dependson="ttsplit">>=
+fmat=cbind(ytest,bfp1$yhat.test.mean,apply(yhatthin,2,mean))
+colnames(fmat) = c("y","BARTpred","BARTpredThin")
+pairs(fmat)
+@
+
+\Sexpr{colFmt("Recall","red")}, the predictions labeled "BARTpred"
+are from a BART run with 
+\code{seed=99} and all default values.  
+The predictions labeled "BARTpredThin" are from 200 kept trees out of a long run with 1,000 burnins discarded and 10,000 draws kept with \code{seed=4}.  
+\Sexpr{colFmt("It is interesting how similar they are !!!!","red")}
+
+\bibliography{references}
+
+\end{document}

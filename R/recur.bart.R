@@ -49,7 +49,8 @@ recur.bart <- function(
 
     if(length(y.train)==0) {
         if(length(binaryOffset)==0) {
-            lambda <- sum(delta)/sum(apply(times, 1, max))
+            lambda <- sum(delta, na.rm=TRUE)/
+                sum(apply(times, 1, max, na.rm=TRUE))
             binaryOffset <- qnorm(1-exp(-lambda))
         }
 

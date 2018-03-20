@@ -431,6 +431,72 @@ x_{Q} \\
 In the above display, $m=1, \., M$ are the
 MCMC samples which are the rows of the output matrix.
 
+\subsection{Binary Trees}
+
+BART relies on an ensemble of $H$ binary trees.  We exploit the tree
+metaphor to its fullest.  Each of these trees grows from the ground up
+starting out as a root node.  The root node is generally a branch
+decision rule, but it doesn't have to be; occasionally there is only a
+root terminal node and its corresponding leaf output value.  If the
+root is a branch decision rule, then it spawns a left and a right node
+which each can be either a branch decision rule or a terminal leaf
+value and so on.  
+In tree, ${T}$, there are $C$ nodes which are made of $B$
+branches and $L$ leaves: $C=B+L$.  There is an algebraic relationship
+between the number of branches and leaves which we express as $C= 2L-1$.
+
+The ensemble of trees is encoded in an ASCII string
+which is returned in the \code{treedraws\$trees} list item.  This
+string can be easily exported and imported by \proglang{R} with the
+following:\\
+\code{write(post\$treedraws\$trees, 'trees.txt')\\
+  tc <- textConnection(post\$treedraws\$tree)\\
+  trees <- read.table(file=tc, fill=TRUE, row.names=NULL, header=FALSE,\\
+  col.names=c('node', 'var', 'cut', 'leaf'))\\
+  close(tc)}\\
+
+The string is encoded via the following binary tree notation.  The
+first line is an exception which has the number of MCMC samples, $M$,
+in the field \code{node}; the number of trees, $H$, in the field
+\code{var}; and the number of variables, $P$, in the field \code{cut}.
+For the rest of the file, the field \code{node} is used for the number
+of nodes in the tree when all other fields are \code{NA}; or for a
+specific node when the other fields are present.  The nodes are
+numbered in relation to the tier level, \code{t=floor(log2(node))}, as
+follows.
+\begin{table}[!h]
+\begin{tabular}{r|ccccccc}
+Tier & \\
+$t$ & \multicolumn{3}{c}{$2^t+0$} & $\dots$ &
+\multicolumn{3}{c}{$2^t+2^t-1$} \\ \hline
+$\vdots$ & \\
+2 & 4 &   & 5 &   & 6 &   & 7 \\
+1 &   & 2 &   &   &   & 3 &   \\
+0 &   &   &   & 1 &   &   &   \\
+\end{tabular}
+\end{table}
+
+The \code{var} field is the variable in the branch decision rule which
+is encoded $0, \dots, P-1$ as a \proglang{C/C++} array index (rather
+than an R index).  Similarly, the \code{cut} field is the cutpoint of
+the variable in the branch decision rule which is encoded
+$0, \dots, c_j-1$ for variable $j$; note that the cutpoints are
+returned in the \code{treedraws\$cutpoints} list item.  The terminal
+leaf output value is contained in the field \code{leaf}.  It is not
+immediately obvious which nodes are branches vs.\ leaves since it
+appears that the \code{leaf} field is given for both branches and
+leaves.  Leaves are always associated with \code{var=0} and
+\code{cut=0}; however, note that this is also a valid branch 
+variable/cutpoint since these are \proglang{C/C++} indices.
+% The key insight is that the 
+% first $B$ rows of each node are branches and the rest are leaves.
+The key to discriminating between branches and leaves is the algebraic
+relationship between a branch, $v$, at tier $t$ leading to its left,
+$l$, and right, $r$, nodes at tier $t+1$.  If $v=2^t+k$, then
+$l=2^{t+1}+2k$ and $r=2^{t+1}+2k+1$, i.e., for each node, besides root,
+you can determine from which branch it arose and those nodes that are
+not a branch (since they have no leaves) are necessarily leaves.
+  
 \subsection{Creating a BART executable}
 
 Occasionally, you may need to create a BART executable that you can
@@ -464,7 +530,7 @@ readily adaptable to UNIX and Windows as well.
 
 \bibliography{references}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.48]{figures/parallel.pdf}
 \end{center}
@@ -477,7 +543,7 @@ readily adaptable to UNIX and Windows as well.
   is the gain in efficiency. \label{MCMC} }
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.42]{figures/amdahl.pdf}
 \end{center}

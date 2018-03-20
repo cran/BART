@@ -19,9 +19,9 @@ delta <- lung$status-1 ##lung$status: 1=censored, 2=dead
 ## this study reports time in days rather than weeks or months
 ## coarsening from days to weeks or months will reduce the computational burden
 ##times <- ceiling(times/30)
-times <- ceiling(times/7)  ## weeks
+##times <- ceiling(times/7)  ## weeks
 
-table(times)
+##table(times)
 table(delta)
 
 ## matrix of observed covariates
@@ -45,10 +45,10 @@ table(x.train[ , 3])
 ## in the interest of time, consider speeding it up by parallel processing
 ## run "mc.cores" number of shorter MCMC chains in parallel processes
 post <- mc.surv.bart(x.train=x.train, times=times, delta=delta,
-                     type='lbart', mc.cores=8, seed=99)
+                     K=50, type='lbart', mc.cores=8, seed=99)
 
 pre <- surv.pre.bart(times=times, delta=delta, x.train=x.train,
-                     x.test=x.train)
+                     x.test=x.train, K=50)
 
 K <- pre$K
 M <- nrow(post$yhat.train)
@@ -77,7 +77,7 @@ females <- males+K
 par(mfrow=c(2, 1))
 
 plot(c(0, pre$times), c(1, pd.mu[males]), type='s', col='blue',
-     ylim=0:1, ylab='S(t, x)', xlab='t (weeks)',
+     ylim=0:1, ylab='S(t, x)', xlab='t (days)', ##xlab='t (weeks)',
      main=paste('Advanced Lung Cancer ex. (BART::lung)',
                 "Friedman's partial dependence function",
                 'Top: Logistic BART, Bottom: Probit BART',

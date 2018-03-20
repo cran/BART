@@ -21,7 +21,8 @@ small amount to the overall fit.
 \usage{
 pbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE,
    k=2.0, power=2.0, base=.95,
@@ -61,6 +62,8 @@ pbart(
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,

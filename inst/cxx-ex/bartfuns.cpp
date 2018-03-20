@@ -181,7 +181,7 @@ void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree
       //draw v,  the variable
       std::vector<size_t> goodvars; //variables nx can split on
       int L,U; //for cutpoint draw
-      // Degenerate Trees Strategy (Assumption 2.1)
+      // Degenerate Trees Strategy (Assumption 2.2)
       if(!aug){
       getgoodvars(nx,xi,goodvars);
 	gen.set_wts(pv);
@@ -195,10 +195,9 @@ void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree
 	  c = L + floor(gen.uniform()*(U-L+1)); // draw cutpoint usual way
 	}
       }
-      // Data Augmentation Strategy (Assumption 2.2)
-      // Draw G ~ Geom(P(picking a good var))
-      // For a simulated G = g, draw g bad vars 
-      // and use those as split counts 
+      // Modified Data Augmentation Strategy (Mod. Assumption 2.1)
+      // Set c_j = s_j*E[G] = s_j/P{picking a good var}
+      // where  G ~ Geom( P{picking a good var} )
       else{
 	std::vector<size_t> allvars; //all variables
 	std::vector<size_t> badvars; //variables nx can NOT split on
@@ -209,10 +208,10 @@ void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree
 	size_t nbadvars=0; //number of bad vars
 	double smpgoodvars=0.; //P(picking a good var)
 	double smpbadvars=0.; //P(picking a bad var)
-	size_t nbaddraws=0; //number of draws at a particular node
+//	size_t nbaddraws=0; //number of draws at a particular node
 	//this loop fills out badvars, pgoodvars, pbadvars, 
 	//there may be a better way to do this...
-	for(size_t j=0;j!=pv.size();j++){
+	for(size_t j=0;j<pv.size();j++){
 	  allvars.push_back(j);
 	  if(goodvars[j-nbadvars]!=j) {
 	    badvars.push_back(j);
@@ -229,12 +228,17 @@ void bprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree
 	gen.set_wts(pgoodvars);
 	v = goodvars[gen.discrete()];
 	if(nbadvars!=0){ // if we have bad vars then we need to augment, otherwise we skip
-	  gen.set_p(smpgoodvars); // set parameter for G
-	  nbaddraws=gen.geometric(); // draw G = g ~ Geom
-	  gen.set_wts(pbadvars); // draw g bad variables and add them to variable counts
+	  //gen.set_p(smpgoodvars); // set parameter for G
+	  //nbaddraws=gen.geometric(); // draw G = g ~ Geom
+	  // for each bad variable, set its c_j equal to its expected count
+	  /*
+	    gen.set_wts(pbadvars); 
 	  for(size_t k=0;k!=nbaddraws;k++) {
 	    nv[badvars[gen.discrete()]]++;
 	    }
+	  */
+	  for(size_t j=0;j<nbadvars;j++)
+	    nv[badvars[j]]=nv[badvars[j]]+(1/smpgoodvars)*(pv[badvars[j]]/smpbadvars); 	  
 	}
 /*
       size_t vi = floor(gen.uniform()*goodvars.size()); //index of chosen split variable

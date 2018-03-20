@@ -122,14 +122,16 @@ computation.
 %BART in survival analysis. 
 The complete details of our approach can be found in
 \citet{SparLoga16} and a brief introduction follows.  We take an
-approach that is akin to discrete-time survival analysis
-\citep{Fahr98}.  Following the capabilities of BART, we do not
-stipulate linearity nor proportional hazards.  We use the same
-notation developed above for the Cox proportional hazards model above.
+approach that is tantamount to discrete-time survival analysis
+\citep{Thom77,ArjaHaar87,FahrTutz94,Fahr98}.  Following the
+capabilities of BART, we do not stipulate linearity nor proportional
+hazards.  We use the same notation developed for the Cox proportional
+hazards model above.
 
 Now, consider event indicators $y_{ij}$ for each subject $i$ at each
-distinct time $t_{(j)}$ up to and including the subject's observation
-time $t_i=t_{(n_i)}$ with $n_i=\#\{j:t_{(j)}\leq t_i\}$ or
+distinct time $t_{(j)}$ up to and including the subject's last
+observation time $t_i=t_{(n_i)}$ with
+%$n_i=\#\{j:t_{(j)}\leq t_i\}$ or
 $n_i=\arg \max_j\wrap{t_{(j)}\leq t_i}$.  This means $y_{ij}=0$ if
 $j<n_i$ and $y_{in_i}=\delta_i$. Denote the probability of an event at
 time $t_{(j)}$, conditional on no previous event, by $p_{ij}$.  Now, our
@@ -163,12 +165,12 @@ where $\Phi$ is the standard Normal cumulative distribution function.
 % definition of $p_{ij}$'s as conditional probabilities, and not a consequence of
 % an assumption of independence.
 
-If the event indicators, $y_{ij}$, are known, then you can specify
-them with the \code{y.train} argument (and, consequently, $\mu_0=0$,
-which is the default that you can over-ride with the
-\code{binaryOffset} argument).  However, in most cases, these
+If the event indicators, $y_{ij}$, have already been computed, then
+you can specify them with the \code{y.train} argument; this results in
+the default $\mu_0=0$ (which you can over-ride with the
+\code{binaryOffset} argument).  However, it is likely that the
 indicators would need to be constructed, so for convenience, you can
-specify $(s_i, \delta_i)$, with the arguments \code{times} and
+specify $(s_i, \delta_i)$ by the arguments \code{times} and
 \code{delta} respectively.  In this case, the default value of $\mu_0$
 assumes that the times follow the Exponential distribution and the
 covariates are not involved, i.e.,
@@ -177,17 +179,18 @@ $\mu_0=\Phi^{-1}\wrap{1-\exp\wrap[()]{\frac{\sum_i \delta_i}{\sum_i
 (which you can over-ride with the \code{binaryOffset} argument).  For
 BART with continuous outcomes, typically the outcome is centered and
 $\mu_0$ is taken to be $\b{y}$.  While centering can be helpful for
-small samples with \citet{AlbeChib93}, it is unnecessary for
-moderate to large samples because of the flexibility of $f$ (for
+small samples with \citet{AlbeChib93}, it is unnecessary for moderate
+to large samples because of the flexibility of $f$ (for
 \citet{HolmHeld06} with Logistic latents which have heavier tails,
-centering is unnecessary even for small samples so $\mu_0$ is
-fixed at zero if \code{type='lbart'}).
+centering is unnecessary even for small samples so $\mu_0$ is fixed at
+zero for \code{type='lbart'}).
 
 So just like in the Cox model case, we have to construct quantities of
 interest with BART for survival analysis.  In discrete-time survival
-analysis, the probability of an event in an interval essentially replaces
-the instantaneous hazard in continuous-time survival analysis: 
-$p(t,\bm{x})=\Phi(\mu_0+f(t,\bm{x}))$.  And, the survival function
+analysis, the probability of an event in an interval is the foundation
+which essentially replaces
+the instantaneous hazard from continuous-time survival analysis: 
+$p(t,\bm{x})=\Phi(\mu_0+f(t,\bm{x}))$.  Now, the survival function
 is constructed as follows: 
 $ S(t_{(j)}|\bm{x})=Pr(T>t_{(j)}|\bm{x})=\prod_{l=1}^j (1-p(t_{(l)},\bm{x}))$.
 
@@ -267,10 +270,16 @@ returned and the argument \code{keepevery} is used for thinning, i.e.,
 return \code{M} observations where \code{keepevery} are culled in
 between each returned value.  For BART with time-to-event outcomes,
 the default is \code{keepevery=10} (rather than \code{keepevery=1} for
-other outcomes) since the grid of time points inflates the size of
-data sets and has a tendency towards higher auto-correlation,
-therefore, making thinning more necessary.  To avoid unnecessarily
-massive data sets, coarsen the time axis appropriately.
+other outcomes) since the grid of time points creates data set
+observations of order $N \times K$ which have a tendency towards higher
+auto-correlation, therefore, making thinning more necessary.  To avoid
+unnecessarily enlarged data sets, it is often prudent to coarsen the
+time axis appropriately, i.e., re-scale from days to weeks or months.
+You can coarsen automatically by supplying the optional \code{K}
+argument to coarsen the times to a grid of time quantiles: \code{1/K},
+\code{2/K}, ..., \code{K/K} (not to be confused with the \code{k}
+argument which is a prior parameter for the distribution of the leaf
+terminal values).
 
 Here is a schematic of the input and output for the \code{surv.bart}
 function for serial computation and \code{mc.surv.bart} for parallel
@@ -318,33 +327,33 @@ Here is a schematic of the input and output for the \code{predict.survbart} func
 \end{array}} \\
 \end{align*}
 
-As previously noted,
-BART does not directly provide a summary of the effect of a single
-covariate, or a subset of covariates, on the outcome.  For survival
-analysis, we use Friedman's partial dependence function \citep{Frie01}
-with BART to summarize the marginal effect due to a subset of the
-covariates, $(t, \bm{x}_S)$, by aggregating over the complement of covariates,
-$\bm{x}_C$, i.e., $\bm{x} =\wrap{\bm{x}_S,\bm{x}_C}$.  The marginal
-dependence function is defined by fixing $(t, \bm{x}_S)$ while aggregating
-over the observed settings of the complement covariates in the cohort:
+As previously noted, BART does not directly provide a summary of the
+effect of a single covariate, or a subset of covariates, on the
+outcome.  For survival analysis, we use Friedman's partial dependence
+function \citep{Frie01} with BART to summarize the marginal effect due
+to a subset of the covariates, $(t, \bm{x}_S)$, by aggregating over
+the complement of covariates, $\bm{x}_C$, i.e.,
+$\bm{x} =\wrap{\bm{x}_S,\bm{x}_C}$.  This marginal dependence function
+is defined by fixing $(t, \bm{x}_S)$ while aggregating over the
+observed settings of the complement covariates in the cohort:
 $f(t, \bm{x}_S)={N^{-1}}\sum_{i=1}^N f(t, \bm{x}_S,\bm{x}_{iC})$.  For
-survival analysis, the $f$ function is not directly of interest; rather,
-the survival function is more interpretable:
-$S(t, \bm{x}_S) = {N^{-1}} \sum_{i=1}^N S(t, \bm{x}_S,\bm{x}_{iC})$. 
-Other marginal functions can be obtained in a
-similar fashion.  Estimates can be derived via functions of
-the posterior samples such as means, quantiles, e.g.,\\
+survival analysis, the $f$ function is often not directly of interest;
+rather, the survival function is more readily interpretable:
+$S(t, \bm{x}_S) = {N^{-1}} \sum_{i=1}^N S(t, \bm{x}_S,\bm{x}_{iC})$.
+Other marginal functions can be obtained in a similar fashion.
+Estimates can be derived via functions of
+the posterior samples such as means, quantiles, e.g.,
 $\hat{S}(t, \bm{x}_S) = {M^{-1}} {N^{-1}} \sum_{m=1}^M \sum_{i=1}^N
-S_m(t, \bm{x}_S,\bm{x}_{iC})$ where $m$ indexes posterior samples. 
-Friedman's partial dependence
-function is a concept that is very flexible.  So flexible that we are
-unable to provide abstract functional support in the {\bf BART}
-package; rather, we provide examples of the many practical uses in the
-\code{demo} directory.
+S_m(t, \bm{x}_S,\bm{x}_{iC})$
+where $m$ indexes posterior samples.  Friedman's partial dependence
+function is a concept which is very flexible.  So flexible that as of
+yet, we are unable to provide abstract functional support in the {\bf
+  BART} package; rather, we provide examples of the many practical
+uses in the \code{demo} directory.
 
 Here we present an example that is available in the {\bf BART} package.\\
 \code{system.file('demo/lung.surv.bart.R', package='BART')}.  The
-North Central Cancer Treatment Group surveyed 228 advanced lung cancer
+North Central Cancer\\ Treatment Group surveyed 228 advanced lung cancer
 patients \citep{LoprLaur94}.  This data can be found in the
 \code{lung} data set.  The study focused on prognostic variables.
 Patient responses were paired with a few clinical variables.  We control
@@ -354,24 +363,59 @@ Friedman's partial dependence function; see Figure~\ref{lung}.  We
 also analyze this data set with Logistic
 latents and the results are quite similar (not shown):
 \code{system.file('demo/lung.surv.lbart.R', package='BART')}.
-\begin{figure}
-\begin{center}
-\includegraphics[scale=0.45]{figures/lung.pdf}
-\caption{Advanced lung cancer example: Friedman's partial dependence
-  function with 95\% credible intervals: males (blue) vs.\ females
-  (red). \label{lung}}
-\end{center}
-\end{figure}
 Furthermore, we perform convergence diagnostics on the chain:\\
 \code{system.file('demo/geweke.lung.surv.bart.R', package='BART')}.
 \begin{comment}
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/geweke-lung-surv-bart.pdf}
 \caption{Convergence diagnostics of the advanced lung cancer example.}
 \end{center}
 \end{figure}
 \end{comment}
+
+\subsection{Survival analysis and the concordance probability}
+
+The concordance probability \citep{GoneHell05} is a measure of the
+discriminatory ability of survival analysis analogous to the
+area under the receiver operating characteristic curve for binary
+outcomes.  A simple analytic example with the Exponential
+distribution is as follows.
+\begin{align*}
+t_i & ~ \Exp{\lambda_i} \where i \in \{1, 2\} \\
+\P{t_1<t_2} & = \int_0^{\infty} \int_0^{t_2} \lambda_2 \e{-\lambda_2 t_2} 
+              \lambda_1 \e{-\lambda_1 t_1} \d{t_1}  \d{t_2} 
+              = \frac{\lambda_1}{\lambda_1+\lambda_2} \\
+1-\P{t_1>t_2} & = 1- \frac{\lambda_2}{\lambda_1+\lambda_2}
+  = \frac{\lambda_1}{\lambda_1+\lambda_2}\\
+\end{align*}
+Notice that the concordance is symmetric with respect to $t_1$ and $t_2$.
+
+We can make a similar calculation based on our BART survival analysis model.
+First, we calculate $ \P{s_1 < s_2} $.
+\begin{align*}
+\P{s_1 < s_2}  = &\P{s_1=t_{(1)}, s_2>t_{(1)}}+\\
+&\P{s_1=t_{(2)}, s_2>t_{(2)}|s_1>t_{(1)}, s_2>t_{(1)}}\P{s_1>t_{(1)}, s_2>t_{(1)}}+\.\\
+= & \sum_{j=1}^K \P{s_1=t_{(j)}, s_2>t_{(j)}|s_1>t_{(j-1)}, s_2>t_{(j-1)}}
+    \P{s_1>t_{(j-1)}, s_2>t_{(j-1)}} \\
+= & \sum_{j=1}^K p_{1j} q_{2j} S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+\end{align*}
+Now, we calculate the mirror image relationship.
+\begin{align*}
+1- \P{s_1 > s_2} = &  1-\sum_{j=1}^K q_{1j} p_{2j} S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+ = &1-\sum_{j=1}^K (1-p_{1j}) (1-q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+ = & 1-\sum_{j=1}^K (1-p_{1j}-q_{2j}+p_{1j}q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+= & 1-\sum_{j=1}^K p_{1j}q_{2j}  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)})
+-\sum_{j=1}^K (q_{1j}-q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+\end{align*}
+However, note that these probabilities are not symmetric.  Therefore,
+we enforce symmetry as follows.
+\begin{align*}
+  \kappa_{s_1, s_2} = & 0.5 \wrap[()]{\P{s_1 < s_2}+1- \P{s_1 > s_2}} 
+   =  0.5\wrap{1  -\sum_{j=1}^K (q_{1j}-q_{2j}) S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)})}  \\
+\end{align*}
+See the concordance probability example at 
+\code{system.file('demo/concord.surv.bart.R', package='BART')}.
 
 \subsection{Competing risks with BART}
 
@@ -384,7 +428,7 @@ serial computation and\\ \code{mc.crisk.bart} for parallel computation.
 Typically, competing risks \citep{FineGray99,KalbPren02} deal with events
 which are mutually exclusive, say, death from cardiovascular disease
 vs.\ death from other causes, i.e., a patient experiencing one of the
-events is prevented from experiencing another.  % Our application is
+events is incapable of experiencing another.  % Our application is
 % slightly different in that we have two events, death and hospital
 % admission, which are not mutually exclusive.  Suffering death prevents a patient from experiencing a
 % future hospital admission, but the converse is not true, i.e., a
@@ -398,21 +442,21 @@ events is prevented from experiencing another.  % Our application is
 % semi-competing events)
 %  Nevertheless, competing risks offers us an
 % approach to handle dependent censoring.
-We adopt the subdistribution concept of competing risks from
-\citet{FineGray99}.  Let's suppose we have two kinds of events: kind 1
-events, death from cause 1 which is the cause of interest, and kind 2
-events, death from cause 2 which is any other cause.  The distribution
-function of an event time is
+We adopt the subdistribution concept of \citet{FineGray99} for
+competing risks.  Let's suppose we have two kinds of events: events of
+kind 1, death from cause 1 which is the cause of interest, and events
+of kind 2, death from cause 2 which is any other cause.  The
+distribution function of an event time is
 $F(t, \bm{x})=G_1(t, \bm{x})+G_2(t, \bm{x})$ where
 $G_1(t, \bm{x})=p F_1(t, \bm{x})$ and
 $G_2(t, \bm{x})=(1-p) F_2(t, \bm{x})$.  $F_1$ and $F_2$ are
-distribution functions which integrate to one and $G_1$ and $G_2$ are
-subdistribution functions which do
-not.  % integrate to $p$ and $1-p$ respectively
+distribution functions, i.e., $F_h(\infty, \bm{x})=1$.  While $G_1$
+and $G_2$ are subdistribution functions, i.e.,
+$G_h(\infty, \bm{x})<1$.  % integrate to $p$ and $1-p$ respectively
 \citet{FineGray99} model the subdistribution functions rather than the
-distribution functions; and we will do the same.  But, here we part
-ways with \citet{FineGray99} since they assume linear proportionality
-and the Exponential distribution while we impose neither precarious
+distribution functions; and we do the same.  But, here we part ways
+with \citet{FineGray99} since they assume linear proportionality and
+the Exponential distribution while we impose neither precarious
 restrictive assumption.
 
 To accomodate competing risks, we adapt our notation slightly:
@@ -427,8 +471,8 @@ $0=t_{(0)}< t_{(1)}<\cdots < t_{(J)} < \infty$.  % To accomodate
 % $j=1, \dots, n_i=\arg \max_j \wrap{ t_{(j)}\le s_i } $ indexes time
 % points on the grid; and $k=1, \dots, N_i=N_i(s_i)$ indexes hospital
 % admissions.  Now, an analysis of recurrent events proceeds as follows.
-We model the probability of a kind 1 event,
-$p_1(t_{(j)}, \bm{x}_i)$, and kind 2 events conditioned on subject $i$ being alive at time
+We model the probability for an event of kind 1,
+$p_1(t_{(j)}, \bm{x}_i)$, and an event of kind 2 conditioned on subject $i$ being alive at time
 $t_{(j)}$, $p_2(t_{(j)}, \bm{x}_i)$.  % So, we can estimate the
 % survival function and the cumulative incidence functions as follows.
 % \begin{align*}
@@ -492,7 +536,7 @@ with BART for the transplant event of type O patients which are in
 general agreement; see Figure~\ref{liver-transplant}.
 
 \begin{comment}
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/liver-AJ.pdf}
 \end{center}
@@ -501,38 +545,26 @@ Aalen-Johansen estimator available in {\bf survival} R package.}
 \end{figure}
 \end{comment}
 
-\begin{figure}
-\begin{center}
-\includegraphics[scale=0.45]{figures/liver-BART.pdf}
-\end{center}
-\caption{Liver transplant competing risks for type O patients
-  estimated by BART and Aalen-Johansen. \label{liver-transplant}}
-\end{figure}
-
 \subsection{Recurrent events with BART}%\label{recur}
 
-The {\bf BART}
-package supports recurrent events with \code{recur.bart} for serial
-computation and \code{mc.recur.bart} for parallel computation.
-Due to the capabilities of BART, we have great flexibility in modeling
-the dependence of recurrent events on covariates.  
-Consider data in the form:
-$\delta_i, s_i, \bm{t}_{i}, \bm{u}_{i}, \bm{x}_i(t)$ where
-$i=1, \dots, n$ indexes subjects; 
-$s_i$ is the end of the observation period (death, $\delta_i=1$, 
-or censoring, $\delta_i=0$);
+The {\bf BART} package supports recurrent events with
+\code{recur.bart} for serial computation and \code{mc.recur.bart} for
+parallel computation.  BART provides much desired flexibility in
+modeling the dependence of recurrent events on covariates.  Consider
+data in the form: $\delta_i, s_i, \bm{t}_{i}, \bm{u}_{i}, \bm{x}_i(t)$
+where $i=1, \dots, n$ indexes subjects; $s_i$ is the end of the
+observation period (death, $\delta_i=1$, or censoring, $\delta_i=0$);
 $N_i$ is the number of events during the observation period;
-$\bm{t}_{i}=\wrap{t_{i1}, \dots, t_{iN_i }}$ and $t_{ik}$ is the
-event start time of the $k$th event (let $t_{i0}=0$);
-$\bm{u}_{i}=\wrap{u_{i1}, \dots, u_{iN_i}}$ and $u_{ik}$ is the
-event end time of the $k$th event (let $u_{i0}=0$);
- and $\bm{x}_i(t)$ is a vector of time-dependent covariates.  
-Both start and end times of events are necessary to define risk set
-eligibility for non-absorbing events like readmissions since patients
-currently hospitalized cannot be readmitted.
-For instantaneous events (or roughly instantaneous events such as
-emergency department visits with time measured in days), the end times
-are ignored.
+$\bm{t}_{i}=\wrap{t_{i1}, \dots, t_{iN_i }}$ and $t_{ik}$ is the event
+start time of the $k$th event (let $t_{i0}=0$);
+$\bm{u}_{i}=\wrap{u_{i1}, \dots, u_{iN_i}}$ and $u_{ik}$ is the event
+end time of the $k$th event (let $u_{i0}=0$); and $\bm{x}_i(t)$ is a
+vector of time-dependent covariates.  Both start and end times of
+events are necessary to define risk set eligibility for events of
+stochastic duration like readmissions since patients currently
+hospitalized cannot be readmitted.  For instantaneous events (or
+roughly instantaneous events such as emergency department visits with
+time measured in days), the end times can be simply ignored.
 
 We denote the $J$ collectively distinct event start and end times for
 all subjects by $0<t_{(1)}< \dots< t_{(J)}<\infty$ thus taking
@@ -553,9 +585,9 @@ $\tilde{\bm{x}}_i(t_{(j)})=\wrap[()]{ N_i(t_{(j-1)}), v_i(t_{(j)}),
   \bm{x}_i(t_{(j)})}$.
 Let $N_i(t-) \equiv \lim\limits_{s\uparrow t} N_i(s)$ be the counting
 process of events for subject $i$ just prior to time $t$ and we also
-define $N_i=N_i(s_i)$.  Let $v_i(t)=t-u_{N_i(t-)}$ is the sojourn time
+note that $N_i=N_i(s_i)$.  Let $v_i(t)=t-u_{N_i(t-)}$ be the sojourn time
 for subject $i$, i.e., time since last event, if any.  Notice that we
-can replace $N_i(t_{(j)}-)$ with $N_i(t_{(j-1)})$ since, by design,
+can replace $N_i(t_{(j)}-)$ with $N_i(t_{(j-1)})$ since, by construction,
 the state of information available at time $t_{(j)}-$ is the same as
 that available at $t_{(j-1)}$.
 %For simplicity of presentation, we let
@@ -571,8 +603,8 @@ define the cumulative intensity process as:
  = \sum_{j'=1}^j \Pr{N_i(t_{(j')})-N_i(t_{(j'-1)})=1\left|\right. t_{(j')}, \tilde{\bm{x}}_i(t_{(j')})} 
   =\sum_{j'=1}^j p_{ij'} 
 \end{align}
-where, for the moment, we leave these $p_{ij}$ unspecified; we will
-provide a definition later \eqref{recur}.
+where these $p_{ij}$ are currently unspecified and we 
+provide their definition later \eqref{recur}.
 Note: the terms ``intensity'' and ``hazard'' are generally interchangeable.
 % (some use the terms ``intensity'' and ``hazard'' interchangeably, but
 % we prefer ``intensity'' for recurrent events to avoid confusion with
@@ -583,28 +615,30 @@ Note: the terms ``intensity'' and ``hazard'' are generally interchangeable.
 % \widehat{\Lambda}(t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})) =\sum_{i=1}^j \hat{p}_{ij} 
 % \end{align*}
 
-With absorbing events, you need not worry about the conditional
-independence of future events (there aren't any); but, with recurrent
-events, we need to address it.  Conditional independence can be had by
-conditioning on the entire event history, $N_i(s) \where 0\le s < t$,
-which would be the most general model.  However, conditioning on the
-entire event history is often problematic as it is here.
-%Conditioning on $N_i(t-)$ creates a very general model.
-We condition on both $N_i(t-)$ and the most recent sojourn time, $v_i(t)$, 
-which gives us a reasonable expectation of conditional independence. %; we call this a semi-Markov model.
+With absorbing events such as mortality there is no concern about the
+conditional independence of future events because there will never be
+any.  Conversely, with recurrent events, there is a valid concern.  Of
+course, conditional independence can be satisfied by conditioning on
+the entire event history, denoted by $N_i(s) \where 0\le s < t$.
+However, conditioning on the entire event history is impractical.
+Rather, we condition on both $N_i(t-)$ and $v_i(t)$ to satisfy any
+concern of conditional independence.
 
 We now write the model for $y_{ij}$ as a nonparametric probit
 regression of $y_{ij}$ on
-$\wrap[()]{t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})}$ akin to parametric
-models of discrete-time intensity \citep{Fahr98}. %{Thom77,ArjaHaar87,FahrTutz94}.
-Specifically, with temporal data converted from
+$\wrap[()]{t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})}$ tantamount to
+parametric models of discrete-time intensity
+\citep{Thom77,ArjaHaar87,FahrTutz94,Fahr98}.  Specifically, with
+temporal data converted from
 $\delta_i, s_i, \bm{t}_{i}, \bm{u}_{i}, \bm{x}_i(t)$ to a sequence of
 longitudinal binary events as follows:
-$y_{ij}\ =\ \max_k \I{t_{ik}=t_{(j)}}$. %,\ j=1, \dots, n_i 
-But, what is the range of $j$ in the equation above?  As we shall see,
-there is a caveat in translating this into the likelihood
-which we address by a vignette. 
+$y_{ij}\ =\ \max_k \I{t_{ik}=t_{(j)}}$. %,\ j=1, \dots, n_i
+% But, what is the range of $j$ in the equation above?  As we shall see,
+% there is a caveat in translating this into the likelihood
+% which we address by a vignette. 
 %(the likelihood is presented below in equation~\eqref{L}).  
+However, note that the definition of $j$ is currently unspecified.
+To understand the impetus of the range of $j$, let's look at an example.
 
 Suppose that we have two subjects with the following values:
 \begin{align*}
@@ -615,10 +649,10 @@ N_2=1, s_2=12, {t}_{21}=4, {u}_{21}=7 &
 \end{align*}
 which creates the grid of times $(3, 4, 7, 8, 9, 12)$.  For subject 1
 (2), notice that $y_{12}=y_{13}=0$ ($y_{23}=0$) as it should be since
-no event occurred at times 4 or 7 (7).  However, no events occurred
-because their first event had not ended yet, i.e., these time points
-do not contribute to the likelihood since these subjects are not
-chronologically at risk for an event.  The {\bf BART} package provides the
+no event occurred at times 4 or 7 (7).  However, there were no events 
+since their first event had not ended yet, i.e., these subjects are not
+chronologically at risk for an event and, therefore, no corresponding random 
+behavior contributed to the likelihood.  The {\bf BART} package provides the
 \code{recur.pre.bart} function which you can use to construct these
 data sets.  Here is a short demonstration of its capabilities adapted
 from \code{demo/data.recur.pre.bart.R} (re-formatted for display purposes).
@@ -629,38 +663,37 @@ from \code{demo/data.recur.pre.bart.R} (re-formatted for display purposes).
 > tstop <- matrix(c(7, 8, 0, 7,  0,  0), nrow=2, ncol=3, byrow=TRUE)
 > delta <- matrix(c(1, 1, 0, 1,  0,  0), nrow=2, ncol=3, byrow=TRUE)
 > recur.pre.bart(times=times, delta=delta, tstop=tstop)
-$y.train                $tx.train     $tx.test   
-[1] 1 1 0 0 1 0 0 0           t v N         t v N
-$times                  [1,]  3 3 0   [1,]  3 3 0
-[1]  3  4  7  8  9 12   [2,]  8 5 1   [2,]  4 1 1
-$K                      [3,]  9 1 2   [3,]  7 4 1
-[1] 6                   [4,]  3 3 0   [4,]  8 5 1
-                        [5,]  4 4 0   [5,]  9 1 2
-                        [6,]  8 4 1   [6,] 12 4 2
-                        [7,]  9 5 1   [7,]  3 3 0
-                        [8,] 12 8 1   [8,]  4 4 0
+$K   $times   $y.train  $tx.train     $tx.test   
+[1]  [1]      [1]             t v N         t v N
+ 6    3        1        [1,]  3 3 0   [1,]  3 3 0
+      4        1        [2,]  8 5 1   [2,]  4 1 1
+      7        0        [3,]  9 1 2   [3,]  7 4 1
+      8        0        [4,]  3 3 0   [4,]  8 5 1
+      9        1        [5,]  4 4 0   [5,]  9 1 2
+     12        0        [6,]  8 4 1   [6,] 12 4 2
+               0        [7,]  9 5 1   [7,]  3 3 0
+               0        [8,] 12 8 1   [8,]  4 4 0
                                       [9,]  7 3 1
                                      [10,]  8 4 1
                                      [11,]  9 5 1
                                      [12,] 12 8 1
 \end{verbatim}
-Notice that \code{\$tx.test} is not limited to the same time points as 
-\code{\$tx.train}, i.e., we often want/need to estimate $f$ at counter-factual
-values not observed in the data so each subject contributes an equal number
-of evaluations for estimation purposes.
+Notice that \code{\$tx.test} is not limited to the same time points as
+\code{\$tx.train}, i.e., we often want/need to estimate $f$
+at counter-factual values not observed in the data so each subject
+contributes an equal number of evaluations for estimation purposes.
  
-Therefore, the only $y_{ij}$ that contribute to the likelihood are 
-those corresponding to $j \in R_i(t_{(j)})$ where the risk set for 
-subject $i$ at time
-$t_{(j)}$ either contains $j$ or is empty.  We define the risk set as 
-$R_i(t_{(j)}) = \wrap[\{\}]{j : ( j \in \{1, \dots, n_i\} ) \cap
-  \wrap[()]{\cap_{k=1}^{N_i} \{t_{(j)} \not\in (t_{ik}, u_{ik}) \} } }$
-% Furthermore, for simplicity, we define the risk
-% set by its complement 
-% $R_i^C = \{j : t_{ik} < t_{(j)} < u_{ik},\ k=1, \dots, N_i \}$
-and we denote the binary outcomes for subject $i$ by the
-longitudinally ordered vector
-$\bm{y}_i=\wrap{y_{ij}} \where j \in R_i(t_{(j)})$\ .
+It is now clear that the $y_{ij}$
+which contribute to the likelihood are those that correspond to $j
+\in R_i(t_{(j)})$ which is the risk set for subject
+$i$ at time $t_{(j)}$ that either contains $j$
+or is empty.  We formally define the risk set as $R_i(t_{(j)})
+= \wrap[\{\}]{j : ( j \in \{1, \dots, n_i\} ) \cap
+  \wrap[()]{\cap_{k=1}^{N_i} \{t_{(j)} \not\in (t_{ik}, u_{ik}) \} }
+}$.
+% and we denote the binary outcomes for subject $i$ by the
+% longitudinally ordered vector
+% $\bm{y}_i=\wrap{y_{ij}} \where j \in R_i(t_{(j)})$.
 
 Putting it all together, we arrive at the following recurrent events
 discrete-time model.
@@ -680,11 +713,8 @@ z_{ij}|y_{ij},f & ~ \begin{cases}
 \N{ \mu_{ij}}{1}\I{0, \infty} & \If y_{ij}=1 \\
 \end{cases}  \\
 \end{align*}
-Consequently, we have the following likelihood
-where $\bm{y}$ (the entire collection of
-$\bm{y}_{i}$'s) is given $\bm{p}$ (the entire collection of
-$p_{ij}$'s): $ \wrap{\bm{y}|\bm{p}}\ = \prod_{i=1}^n\prod_{j \in R_i} p_{ij}^{y_{ij}} 
-(1-p_{ij})^{1-y_{ij}}$.
+% Consequently, we have the following Bernoulli likelihood
+% $\prod_{i=1}^n\prod_{j \in R_i} p_{ij}^{y_{ij}} (1-p_{ij})^{1-y_{ij}}$.
 For binary data, $\mu_0=\Phi^{-1}({p_0})$ can be used for centering
 the latents around the probability of an event $p_0$.
 %where $\Phi^{-1}(.) $ is the inverse standard Normal
@@ -695,7 +725,7 @@ events follow the Exponential distribution and the covariates,
 $\tilde{\bm{x}}$, have no impact, i.e.,
 $\mu_0=\Phi^{-1}\!\wrap[()]{1-\exp\wrap[()]{\frac{\sum_i N_i}{\sum_i s_{i}}}}$.
 
-With the data prepared as described in the above vignette, the BART
+With the data prepared as described in the above example, the BART
 model for binary data treats the probability of an event within an
 interval as a nonparametric function of time, $t$, and 
 covariates, $\tilde{\bm{x}}(t)$. Conditioned on the data, BART
@@ -704,16 +734,17 @@ from the posterior distribution of $f$. For any $t$ and $\tilde{\bm{x}}(t)$,
 we obtain the posterior distribution of
 $p(t, \tilde{\bm{x}}(t))  =\Phi(\mu_0+f(t, \tilde{\bm{x}}(t)))$.
 
-For the purposes of recurrent events survival analysis, we are typically 
-interested in 
-estimating the cumulative intensity function as presented in formula \eqref{cum-int}.
-With these estimates, one can accomplish inference from the posterior via
-means, quantiles or other functions of 
-$ p(t, \tilde{\bm{x}}_i(t))$ or $\Lambda(t,\tilde{\bm{x}}(t))$ as needed
-such as the relative intensity, i.e., 
+For the purposes of recurrent events survival analysis, we are
+typically interested in estimating the cumulative intensity function
+as presented in formula \eqref{cum-int}.  With these estimates, one
+can accomplish inference from the posterior via means, quantiles or
+other functions of $ p(t, \tilde{\bm{x}}_i(t))$ or
+$\Lambda(t,\tilde{\bm{x}}(t))$ as needed such as the relative
+intensity, i.e.,
 $RI(t,\tilde{\bm{x}}_n(t),\tilde{\bm{x}}_d(t))=\frac{p(t,\tilde{\bm{x}}_n(t))}{p(t,\tilde{\bm{x}}_d(t))}$\label{risk}
-where $\tilde{\bm{x}}_n(t) $ and $\tilde{\bm{x}}_d(t) $ are two settings
-we wish to compare like two treatments. %treatment~1 vs.\ treatment~2.
+where $\tilde{\bm{x}}_n(t) $ and $\tilde{\bm{x}}_d(t) $ are two
+settings we wish to compare like two
+treatments. %treatment~1 vs.\ treatment~2.
 % Also, the cumulative intensity could be calculated for arbitrary intervals
 % on the grid, i.e., $\int_{t_{(a)}}^{ t_{(b)}} \mathrm{d} \Lambda(t, \tilde{\bm{x}}_i(t)) = \sum_{j=a}^b p_{ij}$.
 
@@ -728,7 +759,7 @@ tumors were removed at each visit.  For each patient, their recurrence
 time, if any, was measured from the beginning of treatment.  There
 were 118 patients enrolled but only 116 were followed beyond time zero
 and contribute information.  This data set is loaded by
-\code{data(bladder)} and the loaded data frame of interest is
+\code{data(bladder)} and the data frame of interest is
 \code{bladder1}.  This data set is analyzed by
 \code{system.file('demo/bladder.recur.bart.R', package='BART')}.  In
 Figure~\ref{RI-Th-Pl}, notice that the relative intensity calculated
@@ -742,7 +773,26 @@ are wide throughout; see Figure~\ref{RI-Th-B6}.  And, finally, vitamin
 B6 is no better than placebo, and possibly worse, but the 95\%
 credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
 
-\begin{figure}
+\bibliography{references}
+
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[scale=0.45]{figures/lung.pdf}
+\caption{Advanced lung cancer example: Friedman's partial dependence
+  function with 95\% credible intervals: males (blue) vs.\ females
+  (red). \label{lung}}
+\end{center}
+\end{figure}
+
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[scale=0.45]{figures/liver-BART.pdf}
+\end{center}
+\caption{Liver transplant competing risks for type O patients
+  estimated by BART and Aalen-Johansen. \label{liver-transplant}}
+\end{figure}
+
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/RI-Th-Pl.pdf}
 \end{center}
@@ -750,7 +800,7 @@ credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
   dependence function: Thiotepa vs.\ Placebo.  \label{RI-Th-Pl}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/RI-Th-B6.pdf}
 \end{center}
@@ -758,7 +808,7 @@ credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
   dependence function: Thiotepa vs.\ Vitamin B6.  \label{RI-Th-B6}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/RI-B6-Pl.pdf}
 \end{center}
@@ -766,8 +816,6 @@ credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
   dependence function: Vitamin B6 vs.\ Placebo.  \label{RI-B6-Pl}}
 \end{figure}
 
-
-\bibliography{references}
 
 \end{document}
 
@@ -817,7 +865,7 @@ identified {peripheral vascular disease (PVD)}, {insulin treatment},
 and the number of previous admissions, $N_i(t-)$, as risk agonists.
 
 
-\begin{table}
+\begin{table}[t!]
 \begin{center}
 \caption{Diabetes and recurrent hospital admissions.}
 \begin{tabular}{lrcrc}\hline
@@ -852,7 +900,7 @@ Insurance and Age          &488&                       &525\\
 \end{center}
 \end{table}
 
-\begin{table}
+\begin{table}[t!]
 \begin{center}
 \caption{Diabetes and recurrent hospital admissions.}
 \begin{tabular}{lrcrccc}\hline
@@ -878,7 +926,7 @@ Insurance and Age          &488&                       &525\\
 \end{center}
 \end{table}
 
-\begin{table}
+\begin{table}[t!]
 \caption{Hospital admission risk profiles.}
 \begin{center}
 \begin{tabular}{l|cc|cccccc} \hline
@@ -901,14 +949,14 @@ Low     & 0 & 0  & 0 & 0 & 0 & 0 & 0 & 0  \\
 % \end{tabular}
 % \end{center}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/count-pred-I-color.pdf}
 \end{center}
 \caption{Risk profiles: Cumulative Intensity via Friedman's partial dependence function.}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/count-pred-RI-color.pdf}
 \end{center}
@@ -916,7 +964,7 @@ Low     & 0 & 0  & 0 & 0 & 0 & 0 & 0 & 0  \\
   via Friedman's partial dependence function.}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.45]{figures/count-pred-PI-color.pdf}
 \end{center}

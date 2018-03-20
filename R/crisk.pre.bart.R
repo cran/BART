@@ -27,24 +27,27 @@
 crisk.pre.bart <- function(
                       times,
                       ## vector of survival times
-                      
+
                       delta,
                       ## vector of event indicators
                       ## 0=censoring, 1=cause 1, 2=cause 2
-    
+
                       x.train=NULL,
                       ## matrix of covariate regressors for cause 1
                       ## can be NULL, i.e. KM analog
-                      
+
                       x.test=NULL,
                       ## matrix of covariate regressors for cause 1
 
                       x.train2=x.train,
                       ## matrix of covariate regressors for cause 2
                       ## can be NULL, i.e. KM analog
-                                          
-                      x.test2=x.test
+
+                      x.test2=x.test,
                       ## matrix of covariate regressors for cause 2
+
+                      K=NULL
+                      ## if specified, then use K quantiles for time grid
                       ) {
     ## currently does not handle time dependent Xs
     ## can be extended later
@@ -53,9 +56,9 @@ crisk.pre.bart <- function(
     check <- unique(sort(delta))
 
     C <- length(check)
-    
+
     ## with gap times, there is no censoring per se, only 1s and 2s
-    if(!(C %in% 2:3) || (C==3 && !all(check==0:2)) || (C==2 && !all(check==1:2))) 
+    if(!(C %in% 2:3) || (C==3 && !all(check==0:2)) || (C==2 && !all(check==1:2)))
         stop('delta must be coded as: 0(censored), 1(cause 1) or 2(cause 2)')
 
     if(length(x.train)>0 && length(x.train2)>0 && nrow(x.train)!=nrow(x.train2))
@@ -63,12 +66,14 @@ crisk.pre.bart <- function(
 
     if(length(x.test)>0 && length(x.test2)>0 && nrow(x.test)!=nrow(x.test2))
         stop('number of rows in x.test and x.test2 must be equal')
-        
-    pre <- surv.pre.bart(times=times, 1*(delta==1), x.train=x.train, x.test=x.test)
-                   
+
+    pre <- surv.pre.bart(times=times, 1*(delta==1), K=K,
+                         x.train=x.train, x.test=x.test)
+
     pre$cond <- which(pre$y.train==0)
-    
-    pre2 <- surv.pre.bart(times=times, 1*(delta==2), x.train=x.train2, x.test=x.test2)
+
+    pre2 <- surv.pre.bart(times=times, 1*(delta==2), K=K,
+                         x.train=x.train2, x.test=x.test2)
 
     pre$tx.train2 <- pre2$tx.train
     pre$tx.test2 <- pre2$tx.test

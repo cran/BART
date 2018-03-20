@@ -18,12 +18,15 @@
 
 bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
                          rm.const=FALSE, cont=FALSE, xinfo=NULL) {
+    
     X.class = class(X)
 
     if(X.class=='factor') {
         X.class='data.frame'
         X=data.frame(X=X)
     }
+
+    grp=NULL
 
     if(X.class=='data.frame') {
         p=dim(X)[2]
@@ -33,17 +36,21 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
                 Xtemp = class.ind(X[[i]])
                 colnames(Xtemp) = paste(xnm[i],1:ncol(Xtemp),sep='')
                 X[[i]]=Xtemp
+                grp=c(grp, rep(i, ncol(Xtemp)))
             } else {
                 X[[i]]=cbind(X[[i]])
                 colnames(X[[i]])=xnm[i]
+                grp=c(grp, i)
             }
         }
         Xtemp=cbind(X[[1]])
         if(p>1) for(i in 2:p) Xtemp=cbind(Xtemp, X[[i]])
         X=Xtemp
     }
-    else if(X.class=='numeric' | X.class=='integer')
+    else if(X.class=='numeric' | X.class=='integer') {
         X=cbind(as.numeric(X))
+        grp=1
+    }
     else if(X.class=='NULL') return(X)
     else if(X.class!='matrix')
         stop('Expecting either a factor, a vector, a matrix or a data.frame')
@@ -117,5 +124,6 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
     ##dimnames(xinfo)[[1]] <- dimnames(X)[[2]]
 
     if(numcut==0) return(X)
-    else return(list(X=X, numcut=as.integer(nc), rm.const=rm.vars, xinfo=xinfo))
+    else return(list(X=X, numcut=as.integer(nc), rm.const=rm.vars,
+                     xinfo=xinfo, grp=grp))
 }

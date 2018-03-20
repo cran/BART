@@ -81,10 +81,11 @@ To extend BART to binary outcomes, we employ the technique of
 \cite{AlbeChib93} to create what we call probit BART.  Probit BART is
 provided by the {\bf BART} package as the \code{pbart} function.  In
 this case, the outcome, \code{y.train}, is provided as an integer with
-values 0 or 1.  Given these $y_i$, we introduce the auxiliary Normal
-latents, $z_i$, as the outcome for a continuous BART with unit
-variance where $i$ indexes subject and $\Phi$ is the standard Normal
-cumulative distribution function.
+values 0 or 1.  Given $y_i$, we introduce the truncated Normal
+latents, $z_i$; these auxiliary latents are efficiently sampled
+\citep{Robe95} and recast as the outcome for a continuous BART
+with unit variance where $i$ indexes subject and $\Phi$ is the
+standard Normal cumulative distribution function.
 \begin{align*}
 y_{i}|p_{i} & \ind \B{p_{i}} \\
 p_{i}|f & =  \Phi({\mu}_0+f(\bm{x}_i)) \where f \prior \mathrm{BART} \\
@@ -214,7 +215,7 @@ package; rather, we provide examples of the many practical uses in the
 
 Note that the distribution of the latent $z_i$ is not identifiable
 from the data so it is essentially a parametric assumption.  This
-assumption can be relaxed by assuming the latents come from the
+assumption can be relaxed by assuming the latents follow the
 Logistic distribution which has heavier tails and, therefore, is a
 better choice if the $p_i$ can be very close to zero or one.  For
 Logistic latents, we employ the technique of \cite{HolmHeld06} to
@@ -222,20 +223,20 @@ create what we call logistic BART.  However, it is important to
 recognize that logistic BART is more computationally intensive 
 than probit BART.
   
-The outcome, \code{y.train}, is provided as an integer with values 0 or 1.
-Logistic BART is provided by the \code{lbart} function.  Unlike probit
-BART where we sample Normal latents, $z_i$, with a fixed variance
-$\sd^2=1$; with Logisitic BART, we sample Normal latents, $z_i$, with
-a random variance $\sd_i^2$.  If
-${\sd^2_i} = 4\psi_i^2 \where \psi_i ~ \mbox{Kolmogorov-Smirnov}$,
-then the $z_i$ follow the Logistic distribution.  Sampling $\psi_i$
-from the Kolmogorov-Smirnov distribution is described by
-\cite{Devr86}.  So, the conditionally Normal latents, $z_i|\sd_i^2$,
-are the outcomes for a continuous BART with a known heteroskedastic
-variance, $\sd_i^2$.  Since Logistic latents are more flexible, there
-is no centering parameter, i.e., $\mu_0=0$.  Therefore, the
-probabilities are $p_i=F(f(\bm{x}_i))$ where $F$ is the standard
-Logistic distribution function.
+The outcome, \code{y.train}, is provided as an integer with values 0
+or 1.  Logistic BART is provided by the \code{lbart} function.  Unlike
+probit BART where the auxiliary latents, $z_i$, have a fixed variance
+$\sd^2=1$; with Logisitic BART, we sample truncated Normal latents,
+$z_i$, with a random variance $\sd_i^2$ \citep{Robe95}.  If
+${\sd^2_i} = 4\psi_i^2 \where \psi_i$ is sampled from the
+Kolmogorov-Smirnov distribution, then $z_i$ follow the Logistic
+distribution.  Sampling from the Kolmogorov-Smirnov
+distribution is described by \cite{Devr86}.  So, the conditionally
+Normal latents, $z_i|\sd_i^2$, are the outcomes for a continuous BART
+with a known heteroskedastic variance, $\sd_i^2$.  Since Logistic
+latents are more flexible, there is no centering parameter, i.e.,
+$\mu_0=0$.  Therefore, the probabilities are $p_i=F(f(\bm{x}_i))$
+where $F$ is the standard Logistic distribution function.
 
 The input and output for \code{lbart} is essentially identical
 to \code{pbart}.  Also, the \code{predict} function for 
@@ -383,15 +384,15 @@ specifying \code{sparse=TRUE} (the default is \code{sparse=FALSE}).
 Let's represent the variable selection probabilities by
 $s_j \where j=1, \., P$.  Now, replace the uniform variable selection
 prior in BART with a Dirichlet prior.  Also, place a Beta prior on the
-$\alpha$ parameter.
+$\theta$ parameter.
 \begin{align*}
-\wrap{s_1, \., s_P} & \prior \Dir{\alpha/P, \., \alpha/P} \\
-\frac{\alpha}{\alpha+\rho} & \prior \Beta{a}{b} \\
+\wrap{s_1, \., s_P} & \prior \Dir{\theta/P, \., \theta/P} \\
+\frac{\theta}{\theta+\rho} & \prior \Beta{a}{b} \\
 \end{align*}
 Typical settings are $b=1$ and $\rho=P$ (the defaults) which you can
 over-ride with the \code{b} and \code{rho} arguments respectively.
 The value $a=0.5$ (the default) is a sparse setting whereas an
-alternative setting $a=1$ is not sparse; you can specify this
+alternative setting $a=1$ is not sparse or dense; you can specify this
 parameter with argument \code{a}.  Linero discusses two assumptions:
 Assumption 2.1 and Assumption 2.2 (see \citet{Line16} for more
 details).  Basically, Assumption 2.2 (2.1) is more (less) friendly to
@@ -410,6 +411,21 @@ notice that there are 34 false positives.  For $N=1000$, all five active
 covariates are identified, but notice that there are 18 false positives.
 For $N=10000$, all five active covariates are identified and notice
 that there are only two false positives.
+
+We are often interested in the inter-relationship between covariates
+within our model.  We can assess these relationships by inspecting
+the binary trees.  For example, we can ascertain how often $x_1$ is
+chosen as a branch decision rule leading to a branch decision rule
+with $x_2$ further up the tree or vice versa.  In this case, we call
+$x_1$ and $x_2$ a concordant pair and we denote by
+$x_1 \leftrightarrow x_2$ which is a symmetric relationship, i.e.,
+$x_1 \leftrightarrow x_2$ implies $x_2 \leftrightarrow x_1$.  If $B_h$
+is the number of branches in tree ${T}_h$, then the concordant
+pair probability is:
+$\kappa_{ij} = \P{x_i \leftrightarrow x_j \in {T}_h|B_h>1}$
+for $i=1, \dots, P-1$ and $j=i+1, \dots, P$.  See an example of 
+calculating these probabilities in \code{system.file('demo/trees.pbart.R',
+package='BART')}.
 
 \subsection{Motivating example: chronic pain and obesity}
 
@@ -443,7 +459,7 @@ pain and BMI for both genders where females have a parallel higher
 probability than males.  For frail and underweight, the probability is
 high and drops as BMI increases until about 35 kg/m$^2$ and afterwards
 increases until about 65 kg/m$^2$ and then is flat.  Based on sampling
-weights (not shown), the results are basically the same.  In
+weights, the results are basically the same (not shown).  In
 Figure~\ref{neck}, the unweighted relationship between chronic neck
 pain, BMI and gender are displayed: males (females) are represented by
 blue (red) lines.  As you can see, there appears to be no relationship
@@ -452,7 +468,9 @@ genders where females have a nearly parallel higher probability than
 males.  Based on sampling weights (not shown), the results are
 basically the same.
 
-\begin{figure}
+\bibliography{references}
+
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/geweke-pbart2-100.pdf}
 \end{center}
@@ -474,7 +492,7 @@ we conclude that the chains have converged.
 \label{geweke-pbart2-100}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/geweke-pbart2-1000.pdf}
 \end{center}
@@ -499,7 +517,7 @@ that more thinning be employed via the
 \label{geweke-pbart2-1000}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/geweke-pbart2-10000.pdf}
 \end{center}
@@ -523,7 +541,7 @@ that more thinning be employed via the
 \label{geweke-pbart2-10000}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/sparse-pbart.pdf}
 \end{center}
@@ -541,7 +559,7 @@ that more thinning be employed via the
   there are only two false positives.  \label{varsel}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/clbp.pdf}
 \end{center}
@@ -558,7 +576,7 @@ weights (not shown), the results are basically the same
 \label{clbp}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t!]
 \begin{center}
 \includegraphics[scale=0.425]{figures/neck.pdf}
 \end{center}
@@ -572,8 +590,6 @@ males.  Based on sampling weights (not shown), the results are
 basically the same.
 \label{neck}}
 \end{figure}
-
-\bibliography{references}
 
 \end{document}
 

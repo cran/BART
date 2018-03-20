@@ -44,7 +44,7 @@ response case, \eqn{f} is the sum of many tree models.  }
 
 crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
            x.train2=x.train, y.train2=NULL,
-           times=NULL, delta=NULL,
+           times=NULL, delta=NULL, K=NULL,
            x.test=matrix(0.0,0,0), x.test2=x.test, cond=NULL,
            sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
            xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
@@ -67,7 +67,7 @@ crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
 
 mc.crisk.bart(x.train=matrix(0, 0L, 0L), y.train=NULL,
               x.train2=x.train, y.train2=NULL,
-              times=NULL, delta=NULL,
+              times=NULL, delta=NULL, K=NULL,
               x.test=matrix(0.0,0,0), x.test2=x.test, cond=NULL,
               sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
               xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
@@ -129,6 +129,11 @@ that the definition of \code{x.train} is dependent on whether
      must be provided.
    }
 
+   \item{K}{
+     If provided, then coarsen \code{times} per the quantiles
+     \eqn{1/K, 2/K, ..., K/K}.
+   }
+   
    \item{x.test}{
    Explanatory variables for test (out of sample) data of cause 1.\cr
    Must be a matrix and have the same structure as x.train.\cr

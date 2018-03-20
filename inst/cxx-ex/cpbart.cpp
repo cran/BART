@@ -49,6 +49,9 @@ RcppExport SEXP cpbart(
    SEXP _itau,
 //   SEXP _iM, // number of shards for Modified LISA MCMC
    SEXP _idart,
+   SEXP _itheta,
+   SEXP _iomega,
+   SEXP _igrp,
    SEXP _ia,
    SEXP _ib,
    SEXP _irho,
@@ -94,6 +97,10 @@ RcppExport SEXP cpbart(
    bool aug;
    if(Rcpp::as<int>(_iaug)==1) aug=true;
    else aug=false;
+   double theta = Rcpp::as<double>(_itheta);
+   double omega = Rcpp::as<double>(_iomega);
+   Rcpp::IntegerVector _grp(_igrp);
+   int *grp = &_grp[0];
    size_t nkeeptrain = Rcpp::as<int>(_inkeeptrain);
    size_t nkeeptest = Rcpp::as<int>(_inkeeptest);
 //   size_t nkeeptestme = Rcpp::as<int>(_inkeeptestme);
@@ -151,6 +158,9 @@ void cpbart(
    double binaryOffset,
    double tau,
    bool dart,
+   double theta,
+   double omega,
+   int *grp,
    double a,
    double b,
    double rho,
@@ -227,10 +237,11 @@ void cpbart(
    printf("*****Number of Trees: %zu\n",m);
    printf("*****Number of Cut Points: %d ... %d\n", numcut[0], numcut[p-1]);
    printf("*****burn and ndpost: %zu, %zu\n",burn,nd);
-   printf("*****Prior:beta,alpha,tau: %lf,%lf,%lf\n",
+   printf("*****Prior:mybeta,alpha,tau: %lf,%lf,%lf\n",
                    mybeta,alpha,tau);
    printf("*****binaryOffset: %lf\n",binaryOffset);
-   cout << "*****Dirichlet:sparse,a,b,rho,augment: " << dart << ',' << a << ',' 
+   cout << "*****Dirichlet:sparse,theta,omega,a,b,rho,augment: " 
+	<< dart << ',' << theta << ',' << omega << ',' << a << ',' 
 	<< b << ',' << rho << ',' << aug << endl;
    printf("*****nkeeptrain,nkeeptest,nkeeptreedraws: %zu,%zu,%zu\n",
                nkeeptrain,nkeeptest,nkeeptreedraws);
@@ -246,7 +257,7 @@ void cpbart(
    //bart bm(m);
    bm.setprior(alpha,mybeta,tau);
    bm.setdata(p,n,ix,iz,numcut);
-   bm.setdart(a,b,rho,aug,dart);
+   bm.setdart(a,b,rho,aug,dart,theta,omega);
    //--------------------------------------------------
 //init
   for(size_t k=0; k<n; k++) {

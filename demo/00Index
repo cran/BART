@@ -3,6 +3,7 @@ aids.itr.lbart	   AIDS example for individualized treatment rules with logit BAR
 bladder.recur.bart	   Bladder cancer example for recurrent events with BART
 c.surv.bart	   BART and the concordance probability
 cal.recur.bart	   Interval coverage calibration for recurrent events with BART
+concord.surv.bart  Concordance probability for survival analysis with BART
 cube.pbart	   x-cubed example for binary outcomes with BART
 data.recur.pre.bart	   Data construction for recurrent events with BART
 ex.mbart	   Example for multinomial BART
@@ -17,6 +18,7 @@ geweke.surv.bart   Geweke diagnostics for survival analysis with BART
 geweke.lung.surv.bart   Geweke diagnostics for advanced lung cancer survival analysis with BART
 dm.recur.bart	   Diabetes and hospital admission example for recurrent events with BART
 liver.crisk.bart   Liver transplant example for competing risks with BART
+liver50.crisk.bart   Liver transplant example setting K=50 for competing risks with BART
 lung.surv.bart	   Lung cancer example for survival analysis with probit BART
 lung.surv.lbart	   Lung cancer example for survival analysis with logit BART
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
@@ -25,3 +27,4 @@ np.recur.bart	   Nonproportional intensity for recurrent events with BART
 sparse.lbart	   Dirichlet sparsity prior with logistic BART
 sparse.pbart	   Dirichlet sparsity prior with probit BART
 sparse.wbart	   Dirichlet sparsity prior with continuous BART
+trees.pbart	   Concordant variable pairs probability with probit BART

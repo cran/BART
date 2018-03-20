@@ -20,7 +20,7 @@
 crisk.bart <- function(
     x.train=matrix(0.0, 0L, 0L), y.train=NULL,
     x.train2=x.train, y.train2=NULL,
-    times=NULL, delta=NULL,
+    times=NULL, delta=NULL, K=NULL,
     x.test=matrix(0.0, 0L, 0L), x.test2=x.test, cond=NULL,
     sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
     xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
@@ -54,7 +54,8 @@ crisk.bart <- function(
     if(length(rho2)==0) rho2=ncol(x.train2)
 
     if(length(y.train)==0) {
-        pre <- crisk.pre.bart(times, delta, x.train, x.test, x.train2, x.test2)
+        pre <- crisk.pre.bart(times, delta, x.train, x.test,
+                              x.train2, x.test2, K=K)
 
         y.train <- pre$y.train
         x.train <- pre$tx.train
@@ -158,8 +159,15 @@ crisk.bart <- function(
     post$id <- id
     post$times <- times
     post$K <- K
-    post$tx.train <- x.train
-    post$tx.train2 <- x.train2
+
+    if(!transposed) {
+        post$tx.train <- x.train
+        post$tx.train2 <- x.train2
+    } else {
+        post$tx.train <- t(x.train)
+        post$tx.train2 <- t(x.train2)
+    }
+
     post$type <- type
     post$cond <- cond
     post$treedraws2 <- post2$treedraws
@@ -173,13 +181,19 @@ crisk.bart <- function(
     post$yhat.train.mean <- NULL
 
     if(length(x.test)>0) {
-        post$tx.test <- x.test
-        post$tx.test2 <- x.test2
-        H <- nrow(x.test)/K ## the number of different settings
+        if(!transposed) {
+            post$tx.test <- x.test
+            post$tx.test2 <- x.test2
+        } else {
+            post$tx.test <- t(x.test)
+            post$tx.test2 <- t(x.test2)
+        }
+
+        H <- nrow(post$tx.test)/K ## the number of different settings
 
         post$yhat.test2 <- post2$yhat.test
-
         post$prob.test2 <- post2$prob.test
+
         ## if(type=='pbart') {
         ##     post$prob.test <- pnorm(post$yhat.test)
         ##     post$prob.test2 <- pnorm(post$yhat.test2)
@@ -194,13 +208,14 @@ crisk.bart <- function(
         post$cif.test <- post$prob.test
         post$cif.test2 <- post$prob.test2
 
-        for(h in 1:H) for(j in 2:K) {
+        for(h in 1:H)
+            for(j in 2:K) {
                 l <- K*(h-1)+j
 
                 post$cif.test[ , l] <- post$cif.test[ , l-1]+post$surv.test[ , l-1]*post$cif.test[ , l]
                 post$cif.test2[ , l] <- post$cif.test2[ , l-1]+post$surv.test[ , l-1]*post$cif.test2[ , l]
                 post$surv.test[ , l] <- post$surv.test[ , l-1]*post$surv.test[ , l]
-                      }
+            }
 
         post$cif.test.mean <- apply(post$cif.test, 2, mean)
         post$cif.test2.mean <- apply(post$cif.test2, 2, mean)

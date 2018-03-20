@@ -1,14 +1,31 @@
-Changes and New Features in 1.5 (2018-02-02):
+Changes and New Features in 1.6 (2018-03-19):
+
+	* for binary outcomes, new default for ntree=50
+	  (change inadvertently omitted from v1.4 below)
+
+        * enhancement: recur.pre.bart, recur.bart and mc.recur.bart
+	  can now handle NA entries in the times and delta matrices
+
+	* enhancement: for time-to-event outcomes, new optional 
+	  K parameter which coarsens time per the quantiles
+          1/K, 2/K, ..., K/K.
+
+	* fix bug: x.test/x.test2 now properly transposed if needed
+	  for post-processing
+
+	* fix bug: sparse Dirichlet prior now corrected for 
+	  random theta update.  Thanks to Antonio Linero for
+	  the detailed bug report.
+
+Changes and New Features in 1.5 (2018-02-08):
 
         * fix bug: ambiguous call of floor surrounding integer division
 
 	* fix bug: x.test is not an argument of recur.pre.bart
 
-        * enhancement: recur.pre.bart can now handle NA entries in
-	  the times and delta matrices as long as they are not the
-	  first entry of the row
-
 Changes and New Features in 1.4 (2018-02-02):
+
+	* for binary outcomes, new default for ntree=50
 
         * fixed library bloat on Linux with strip
 

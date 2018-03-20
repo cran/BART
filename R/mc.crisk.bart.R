@@ -20,7 +20,7 @@
 mc.crisk.bart <- function(
     x.train = matrix(0.0, 0L, 0L), y.train=NULL,
     x.train2 = x.train, y.train2=NULL,
-    times=NULL, delta=NULL,
+    times=NULL, delta=NULL, K=NULL,
     x.test = matrix(0.0, 0L, 0L), x.test2 = x.test, cond=NULL,
     sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
     xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
@@ -55,7 +55,8 @@ mc.crisk.bart <- function(
     x.test <- bartModelMatrix(x.test)
 
     if(length(y.train)==0) {
-        pre <- crisk.pre.bart(times, delta, x.train, x.test, x.train2, x.test2)
+        pre <- crisk.pre.bart(times, delta, x.train, x.test,
+                              x.train2, x.test2, K=K)
 
         y.train <- pre$y.train
         x.train <- pre$tx.train
@@ -214,7 +215,7 @@ mc.crisk.bart <- function(
             post$cif.test2.mean <- apply(post$cif.test2, 2, mean)
             post$surv.test.mean <- apply(post$surv.test, 2, mean)
         }
-        
+
         post$varcount.mean <- apply(post$varcount, 2, mean)
         post$varcount2.mean <- apply(post$varcount2, 2, mean)
         post$varprob.mean <- apply(post$varprob, 2, mean)

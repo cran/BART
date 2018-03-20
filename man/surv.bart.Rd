@@ -43,7 +43,7 @@ response case, \eqn{f} is the sum of many tree models.  }
 \usage{
 
 surv.bart( x.train=matrix(0.0,0,0),
-           y.train=NULL, times=NULL, delta=NULL,
+           y.train=NULL, times=NULL, delta=NULL, K=NULL,
            x.test=matrix(0.0,0,0),
            sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
            xinfo=matrix(0.0,0,0), usequants=FALSE,
@@ -64,8 +64,8 @@ surv.bart( x.train=matrix(0.0,0,0),
          )
 
 mc.surv.bart( x.train=matrix(0.0,0,0),
-              y.train=NULL, times=NULL, delta=NULL,
-              x.test=matrix(0.0,0,0),
+              y.train=NULL, times=NULL, delta=NULL, K=NULL,
+              x.test=matrix(0.0,0,0), 
               sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
               xinfo=matrix(0.0,0,0), usequants=FALSE,
               cont=FALSE, rm.const=TRUE, type='pbart',
@@ -116,6 +116,11 @@ that the definition of \code{x.train} is dependent on whether
      must be provided.
    }
 
+   \item{K}{
+     If provided, then coarsen \code{times} per the quantiles
+     \eqn{1/K, 2/K, ..., K/K}.
+   }
+   
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
    Must be a matrix and have the same structure as x.train.\cr

@@ -19,7 +19,7 @@
 
 surv.bart <- function(
     x.train = matrix(0.0, 0L, 0L),
-    y.train=NULL, times=NULL, delta=NULL,
+    y.train=NULL, times=NULL, delta=NULL, K=NULL,
     x.test = matrix(0.0, 0L, 0L),
     sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
     xinfo=matrix(0.0,0,0), usequants=FALSE,
@@ -47,7 +47,7 @@ surv.bart <- function(
     if(length(rho)==0) rho=ncol(x.train)
 
     if(length(y.train)==0) {
-        pre <- surv.pre.bart(times, delta, x.train, x.test)
+        pre <- surv.pre.bart(times, delta, x.train, x.test, K=K)
 
         y.train <- pre$y.train
         x.train <- pre$tx.train

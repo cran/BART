@@ -49,6 +49,9 @@ RcppExport SEXP cwbart(
    SEXP _isigest,
    SEXP _iw,
    SEXP _idart,
+   SEXP _itheta,
+   SEXP _iomega,
+   SEXP _igrp,
    SEXP _ia,
    SEXP _ib,
    SEXP _irho,
@@ -97,6 +100,10 @@ RcppExport SEXP cwbart(
    bool aug;
    if(Rcpp::as<int>(_iaug)==1) aug=true;
    else aug=false;
+   double theta = Rcpp::as<double>(_itheta);
+   double omega = Rcpp::as<double>(_iomega);
+   Rcpp::IntegerVector _grp(_igrp);
+   int *grp = &_grp[0];
    size_t nkeeptrain = Rcpp::as<int>(_inkeeptrain);
    size_t nkeeptest = Rcpp::as<int>(_inkeeptest);
    size_t nkeeptestme = Rcpp::as<int>(_inkeeptestme);
@@ -155,6 +162,9 @@ void cwbart(
    double sigma,
    double* iw,
    bool dart,
+   double theta,
+   double omega,
+   int *grp,
    double a,
    double b,
    double rho,
@@ -221,7 +231,8 @@ void cwbart(
                    mybeta,alpha,tau,nu,lambda);
    printf("*****sigma: %lf\n",sigma);
    printf("*****w (weights): %lf ... %lf\n",iw[0],iw[n-1]);
-   cout << "*****Dirichlet:sparse,a,b,rho,augment: " << dart << ',' << a << ',' 
+   cout << "*****Dirichlet:sparse,theta,omega,a,b,rho,augment: " 
+	<< dart << ',' << theta << ',' << omega << ',' << a << ',' 
 	<< b << ',' << rho << ',' << aug << endl;
    printf("*****nkeeptrain,nkeeptest,nkeeptestme,nkeeptreedraws: %zu,%zu,%zu,%zu\n",
                nkeeptrain,nkeeptest,nkeeptestme,nkeeptreedraws);
@@ -232,7 +243,7 @@ void cwbart(
    //heterbart bm(m);
    bm.setprior(alpha,mybeta,tau);
    bm.setdata(p,n,ix,iy,numcut);
-   bm.setdart(a,b,rho,aug,dart);
+   bm.setdart(a,b,rho,aug,dart,theta,omega);
 
    //--------------------------------------------------
    //sigma

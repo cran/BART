@@ -19,7 +19,8 @@ small amount to the overall fit.
 \usage{
 wbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE,
    sigest=NA, sigdf=3, sigquant=.90,
@@ -47,10 +48,10 @@ wbart(
    }
 
    \item{y.train}{
-   Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (normal errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a probit link is fit.
+   Continuous dependent variable for training (in sample) data.\cr
+   %% If y is numeric a continous response model is fit (normal errors).\cr
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a probit link is fit.
    }
 
    \item{x.test}{
@@ -61,6 +62,8 @@ wbart(
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,

@@ -52,8 +52,19 @@ public:
    void setpi(pinfo& pi) {this->pi = pi;}
    void setprior(double alpha, double beta, double tau)
       {pi.alpha=alpha; pi.mybeta = beta; pi.tau=tau;}
-   void setdart(double _a, double _b, double _rho, bool _aug, bool _dart)
-      {this->a=_a; this->b=_b; this->rho=_rho; this->aug=_aug; this->dart=_dart;}
+   void setdart(double _a, double _b, double _rho, bool _aug, bool _dart, 
+		double _theta=0., double _omega=1.) {
+     this->a=_a; this->b=_b; this->rho=_rho; this->aug=_aug; 
+     this->dart=_dart; this->omega=_omega; 
+     if(_theta==0.){
+       this->const_theta=false;
+       this->theta=(double)p;
+     }
+     else{
+       this->const_theta=true;
+       this->theta=_theta;
+     }
+}
    void startdart() {this->dartOn=!(this->dartOn);}
    void settau(double tau) {pi.tau=tau;}
    tree& gettree(size_t i ) { return t[i];}
@@ -86,8 +97,8 @@ protected:
    double *r;
    double *ftemp;
    dinfo di;
-   bool dart,dartOn,aug;
-   double a,b,rho,const_alpha;
+   bool dart,dartOn,aug,const_theta;
+   double a,b,rho,theta,omega;
    std::vector<size_t> nv;
    std::vector<double> pv;
 };
