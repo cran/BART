@@ -1,13 +1,13 @@
 \name{mbart}
-\title{BART for multinomial outcomes with Logistic latents}
+\title{BART for multinomial outcomes with Normal latents}
 \alias{mbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For numeric response \eqn{y}, we have
 \eqn{y = f(x) + \epsilon}{y = f(x) + e},
-where \eqn{\epsilon \sim Log(0, 1)}{e ~ Log(0, 1)}.\cr
+where \eqn{\epsilon \sim N(0, 1)}{e ~ N(0, 1)}.\cr
 For a multinomial response \eqn{y}, \eqn{P(Y=y | x) = F(f(x))}, where \eqn{F}
-denotes the standard Logistic CDF (logit link).
+denotes the standard Normal CDF (probit link).
 
 In both cases, \eqn{f} is the sum of many tree models.
 The goal is to have very flexible inference for the uknown
@@ -21,11 +21,12 @@ small amount to the overall fit.
 \usage{
 mbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
-   cont=FALSE, rm.const=TRUE, tau.interval=0.95,
+   cont=FALSE, rm.const=TRUE, %%tau.interval=0.95,
    k=2.0, power=2.0, base=.95, 
-   binaryOffset=0,
+   binaryOffset=NULL,
    ntree=50L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L,
@@ -43,25 +44,28 @@ mbart(
    If a variable is a factor in a data frame, it is replaced with dummies.
    Note that q dummies are created if q>2 and
    one dummy is created if q=2, where q is the number of levels of the factor.
-   \code{lbart} will generate draws of \eqn{f(x)} for each \eqn{x}
-   which is a row of x.train.
+   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x}
+   which is a row of \code{x.train}.
    }
 
    \item{y.train}{
-   Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (Logistic errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a logit link is fit.
+   Categorical dependent variable for training (in sample) data.\cr
+   %% If y is numeric a continous response model is fit (Logistic errors).\cr
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a logit link is fit.
    }
 
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
-   Should have same structure as x.train.\cr
-   \code{lbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
+   Should have same structure as \code{x.train}.\cr
+   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of \code{x.test}.
    }
 
    \item{sparse}{Whether to perform variable selection based on a
-     sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+     sparse Dirichlet prior rather than simply uniform; see Linero
+     2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
@@ -85,17 +89,17 @@ mbart(
 
    \item{rm.const}{ Whether or not to remove constant variables.}
 
-   \item{tau.interval}{
-     The width of the interval to scale the variance for the terminal
-     leaf values.}
+   %% \item{tau.interval}{
+   %%   The width of the interval to scale the variance for the terminal
+   %%   leaf values.}
    
    \item{k}{
-   For numeric y,
-   k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
-   The response (y.train) is internally scaled to range from -.5 to .5.
-   For binary y,
+   %% For numeric y,
+   %% k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
+   %% The response (y.train) is internally scaled to range from -.5 to .5.
+   For categorical \code{y.train},
    k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
-   In both cases, the bigger k is, the more conservative the fitting will be.
+   %%In both cases, the bigger k is, the more conservative the fitting will be.
    }
 
    \item{power}{
@@ -107,7 +111,9 @@ mbart(
    }
 
    \item{binaryOffset}{
-   Currently fixed at zero, but might be relaxed RSN.}
+   Used for categorical \eqn{y}.\cr
+   The model is \eqn{P(Y=j | x) = F(f(x) + binaryOffset[j])}.\cr
+   }
    
    %% \item{binaryOffset}{
    %% Used for binary \eqn{y}.\cr
@@ -173,9 +179,9 @@ mbart(
    %% }
 
    \item{transposed}{
-   When running \code{lbart} in parallel, it is more memory-efficient
+   When running \code{mbart} in parallel, it is more memory-efficient
    to transpose \code{x.train} and \code{x.test}, if any, prior to
-   calling \code{mc.lbart}.
+   calling \code{mc.mbart}.
    }
 
    %% \item{treesaslists}{
@@ -187,9 +193,10 @@ mbart(
 }
 \details{
    BART is an Bayesian MCMC method.
-   At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{f | (x,y)}{f \| (x,y)} in the numeric \eqn{y} case
-   and just \eqn{f} in the binary \eqn{y} case.
+   At each MCMC interation, we produce a draw from %% the joint posterior
+   %% \eqn{f | (x,y)}{f \| (x,y)} in the numeric \eqn{y} case
+   %% and just
+   \eqn{f} in the categorical \eqn{y} case.
 
    Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
    from which fits and summaries may be extracted.  The output consists of values
@@ -217,24 +224,24 @@ mbart(
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
 
-   %% In addition the list
-   %% has a binaryOffset component giving the value used.
+   In addition, the list
+   has a binaryOffset vector giving the value used.
 
-   Note that in the multinomial \eqn{y} case yhat.train is 
-   \eqn{f(x)}. %% + binaryOffset
-   If you want draws of the probability
-   \eqn{P(Y=y | x)} you need to apply the Logistic CDF (\code{plogis})
-   to these values.
+   Note that in the multinomial \eqn{y} case \code{yhat.train} is 
+   \eqn{f(x) + binaryOffset[j]}.
+   %% If you want draws of the probability
+   %% \eqn{P(Y=y | x)} you need to apply the Normal CDF (\code{plogis})
+   %% to these values.
 }
 \references{
 Chipman, H., George, E., and McCulloch R. (2010)
    Bayesian Additive Regression Trees.
    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi: 10.1214/09-AOAS285>.
 
-Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning.
-   Advances in Neural Information Processing Systems 19,
-   Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+%% Chipman, H., George, E., and McCulloch R. (2006)
+%%    Bayesian Ensemble Learning.
+%%    Advances in Neural Information Processing Systems 19,
+%%    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
@@ -242,11 +249,11 @@ Friedman, J.H. (1991)
 }
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Robert Gramacy: \email{rbg@vt.edu},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
+Rodney Sparapani: \email{rsparapa@mcw.edu},\cr
+Robert Gramacy: \email{rbg@vt.edu}.
 }
 \seealso{
-\code{\link{lbart}}
+\code{\link{pbart}}
 }
 \examples{
 
@@ -258,7 +265,7 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 f = function(x) #only the first 5 matter
     sin(pi*x[ , 1]*x[ , 2]) + 2*(x[ , 3]-.5)^2+x[ , 4]+0.5*x[ , 5]-1.5
 
-sigma = 1.0  # y~Logistic(f(x), sigma)
+sigma = 1.0  # y~N(f(x), sigma)
 P = 5        # number of covariates
 N = 2500
 C = 3        # number of categories
@@ -282,7 +289,7 @@ set.seed(12)
 x.train=matrix(runif(N*P), N, P)
 dimnames(x.train)[[2]] <- paste0('x', 1:5)
 Ey.train = f(x.train)
-y.train=rlogis(N, Ey.train, sigma)
+y.train=rnorm(N, Ey.train, sigma)
 
 i <- y.train > -1
 j <- y.train > 1
@@ -305,37 +312,37 @@ post = mc.mbart(x.train, y.train, x.test, mc.cores=8, seed=99)
 
 h <- seq(1, C*N, by=C)
 
-print(cor(post$prob.train.mean[h], plogis(-1, Ey.train, sigma))^2)
-print(cor(post$prob.train.mean[h+1], plogis(1, Ey.train, sigma)-plogis(-1, Ey.train, sigma))^2)
-print(cor(post$prob.train.mean[h+2], plogis(1, Ey.train, sigma, 0))^2)
+print(cor(post$prob.train.mean[h], pnorm(-1, Ey.train, sigma))^2)
+print(cor(post$prob.train.mean[h+1], pnorm(1, Ey.train, sigma)-pnorm(-1, Ey.train, sigma))^2)
+print(cor(post$prob.train.mean[h+2], pnorm(1, Ey.train, sigma, 0))^2)
 
-plot(plogis(-1, Ey.train, sigma), post$prob.train.mean[h], pch='.',
+plot(pnorm(-1, Ey.train, sigma), post$prob.train.mean[h], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=1)', ylab='Est. P(y=1)')
 abline(0, 1)
 
-plot(plogis(1, Ey.train, sigma)-plogis(-1, Ey.train, sigma), post$prob.train.mean[h+1], pch='.',
+plot(pnorm(1, Ey.train, sigma)-pnorm(-1, Ey.train, sigma), post$prob.train.mean[h+1], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=2)', ylab='Est. P(y=2)')
 abline(0, 1)
 
-plot(plogis(1, Ey.train, sigma, 0), post$prob.train.mean[h+2], pch='.',
+plot(pnorm(1, Ey.train, sigma, 0), post$prob.train.mean[h+2], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=3)', ylab='Est. P(y=3)')
 abline(0, 1)
 
 h <- seq(1, C*M, by=C)
 
-print(cor(post$prob.test.mean[h], plogis(-1, Ey.test, sigma))^2)
-print(cor(post$prob.test.mean[h+1], plogis(1, Ey.test, sigma)-plogis(-1, Ey.test, sigma))^2)
-print(cor(post$prob.test.mean[h+2], plogis(1, Ey.test, sigma, 0))^2)
+print(cor(post$prob.test.mean[h], pnorm(-1, Ey.test, sigma))^2)
+print(cor(post$prob.test.mean[h+1], pnorm(1, Ey.test, sigma)-pnorm(-1, Ey.test, sigma))^2)
+print(cor(post$prob.test.mean[h+2], pnorm(1, Ey.test, sigma, 0))^2)
 
-plot(plogis(-1, Ey.test, sigma), post$prob.test.mean[h], pch='.',
+plot(pnorm(-1, Ey.test, sigma), post$prob.test.mean[h], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=1)', ylab='Est. P(y=1)')
 abline(0, 1)
 
-plot(plogis(1, Ey.test, sigma)-plogis(-1, Ey.test, sigma), post$prob.test.mean[h+1], pch='.',
+plot(pnorm(1, Ey.test, sigma)-pnorm(-1, Ey.test, sigma), post$prob.test.mean[h+1], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=2)', ylab='Est. P(y=2)')
 abline(0, 1)
 
-plot(plogis(1, Ey.test, sigma, 0), post$prob.test.mean[h+2], pch='.',
+plot(pnorm(1, Ey.test, sigma, 0), post$prob.test.mean[h+2], pch='.',
      xlim=0:1, ylim=0:1, xlab='Known P(y=3)', ylab='Est. P(y=3)')
 abline(0, 1)
 

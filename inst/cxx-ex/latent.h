@@ -35,6 +35,14 @@ using R::pnorm;
 extern int NS;
 extern rk_state** states;
 
+#ifndef NoRcpp
+
+RcppExport SEXP cdraw_lambda(SEXP lambda, SEXP mean, SEXP kmax, SEXP thin);
+
+RcppExport SEXP cdraw_z(SEXP mean, SEXP tau, SEXP lambda);
+
+#endif
+
 void draw_z(int n, double *xbeta, double *lambda, double *z_out);
 void draw_lambda(int n, double *xbeta_in, int kmax, int thin, double *lambda_inout);
 double draw_lambda_i(double lambda_old, double xbeta, int kmax, int thin, rk_state *state);

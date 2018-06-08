@@ -351,3 +351,58 @@ double drawnodemu(size_t n, double sy, double tau, double sigma, rn& gen)
    return (sy/s2)/(a+b) + gen.normal()/sqrt(a+b);
 }
 
+double log_sum_exp(std::vector<double>& v){
+    double mx=v[0],sm=0.;
+    for(size_t i=0;i<v.size();i++) if(v[i]>mx) mx=v[i];
+    for(size_t i=0;i<v.size();i++){
+      sm += exp(v[i]-mx);
+    }
+    return mx+log(sm);
+}
+
+//--------------------------------------------------
+//draw variable splitting probabilities from Dirichlet (Linero, 2018)
+void draw_s(std::vector<size_t>& nv, std::vector<double>& lpv, double& theta, rn& gen){
+  size_t p=nv.size();
+// Now draw s, the vector of splitting probabilities
+  std::vector<double> _theta(p);
+  for(size_t j=0;j<p;j++) _theta[j]=theta/(double)p+(double)nv[j];
+  //gen.set_alpha(_theta);
+  lpv=gen.log_dirichlet(_theta);
+}
+
+//--------------------------------------------------
+//draw Dirichlet sparsity parameter from posterior using grid
+void draw_theta0(bool const_theta, double& theta, std::vector<double>& lpv,
+		 double a, double b, double rho, rn& gen){
+  // Draw sparsity parameter theta_0 (Linero calls it alpha); see Linero, 2018
+  // theta / (theta + rho ) ~ Beta(a,b)
+  // Set (a=0.5, b=1) for sparsity
+  // Set (a=1, b=1) for non-sparsity
+  // rho = p usually, but making rho < p increases sparsity
+  if(!const_theta){
+    size_t p=lpv.size();
+    double sumlpv=0.,lse;
+    
+    std::vector<double> lambda_g (1000,0.);
+    std::vector<double> theta_g (1000,0.);
+    std::vector<double> lwt_g (1000,0.);
+    for(size_t j=0;j<p;j++) sumlpv+=lpv[j];
+    for(size_t k=0;k<1000;k++){
+      lambda_g[k]=(double)(k+1)/10001.;
+      theta_g[k]=(lambda_g[k]*rho)/(1.-lambda_g[k]);
+      double theta_log_lik=lgamma(theta_g[k])-(double)p*lgamma(theta_g[k]/(double)p)+(theta_g[k]/(double)p)*sumlpv;
+      double beta_log_prior=(a-1.)*log(lambda_g[k])+(b-1.)*log(1.-lambda_g[k]);
+//      cout << "SLP: " << sumlogpv << "\nTLL: " << theta_log_lik << "\nBLP: " << beta_log_prior << '\n';
+      lwt_g[k]=theta_log_lik+beta_log_prior;      
+    }
+    lse=log_sum_exp(lwt_g);
+    for(size_t k=0;k<1000;k++) {
+      lwt_g[k]=exp(lwt_g[k]-lse);
+//      cout << "LWT: " << lwt_g[k] << '\n';
+    }
+    gen.set_wts(lwt_g);    
+    theta=theta_g[gen.discrete()];
+  } 
+}
+

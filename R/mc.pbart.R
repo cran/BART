@@ -19,12 +19,13 @@
 
 mc.pbart <- function(
     x.train, y.train, x.test = matrix(0.0, 0L, 0L),
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL,
     xinfo=matrix(0.0,0,0), usequants=FALSE,
     cont=FALSE, rm.const=TRUE,
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = 0,
+    binaryOffset = NULL,
     ntree=50L, numcut=100L,
     ndpost=1000L, nskip=100L,
     keepevery=1L, printevery=100L,
@@ -70,7 +71,8 @@ mc.pbart <- function(
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
                   pbart(x.train=x.train, y.train=y.train, x.test=x.test,
-                        sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                        sparse=sparse, theta=theta, omega=omega,
+                        a=a, b=b, augment=augment, rho=rho,
                         xinfo=xinfo,
                         k=k, power=power, base=base,
                         binaryOffset=binaryOffset,
@@ -91,18 +93,23 @@ mc.pbart <- function(
 
     if(mc.cores==1 | attr(post, 'class')!='pbart') return(post)
     else {
-        p <- nrow(x.train[ , post$rm.const])
+        if(class(rm.const)!='logical') post$rm.const <- rm.const
+
+        post$ndpost <- mc.cores*mc.ndpost
+        
+        p <- nrow(x.train[post$rm.const, ])
+        ##p <- nrow(x.train[ , post$rm.const])
 
         ## if(length(rm.const)==0) rm.const <- 1:p
         ## post$rm.const <- rm.const
 
-        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
-        ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree),
+                           ' ', as.character(p))
         old.stop <- nchar(old.text)
 
         post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
-                                    ##paste0(as.character(mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
+                                    paste0(as.character(post$ndpost), ' ',
+                                           as.character(ntree), ' ',
                                            as.character(p)),
                                     post$treedraws$trees)
 
@@ -110,13 +117,17 @@ mc.pbart <- function(
 
         for(i in 2:mc.cores) {
             if(keeptrainfits) {
-                post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
-                post$prob.train <- rbind(post$prob.train, post.list[[i]]$prob.train)
+                post$yhat.train <- rbind(post$yhat.train,
+                                         post.list[[i]]$yhat.train)
+                post$prob.train <- rbind(post$prob.train,
+                                         post.list[[i]]$prob.train)
             }
 
             if(keeptestfits) {
-                post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
-                post$prob.test <- rbind(post$prob.test, post.list[[i]]$prob.test)
+                post$yhat.test <- rbind(post$yhat.test,
+                                        post.list[[i]]$yhat.test)
+                post$prob.test <- rbind(post$prob.test,
+                                        post.list[[i]]$prob.test)
             }
 
             post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)

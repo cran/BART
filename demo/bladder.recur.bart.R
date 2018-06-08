@@ -138,7 +138,7 @@ plot(post$times, RI.Th.Pl.mu, col='blue',
 lines(post$times, RI.Th.Pl.025, col='red')
 lines(post$times, RI.Th.Pl.975, col='red')
 abline(h=1)
-##dev.copy2pdf(file='../vignettes/figures/RI-Th-Pl.pdf')
+dev.copy2pdf(file='../vignettes/figures/RI-Th-Pl.pdf')
 
 plot(post$times, RI.B6.Pl.mu, col='blue',
      log='y', main='Bladder cancer ex: Vitamin B6 vs. Placebo',
@@ -146,7 +146,7 @@ plot(post$times, RI.B6.Pl.mu, col='blue',
 lines(post$times, RI.B6.Pl.025, col='red')
 lines(post$times, RI.B6.Pl.975, col='red')
 abline(h=1)
-##dev.copy2pdf(file='../vignettes/figures/RI-B6-Pl.pdf')
+dev.copy2pdf(file='../vignettes/figures/RI-B6-Pl.pdf')
 
 plot(post$times, RI.Th.B6.mu, col='blue',
      log='y', main='Bladder cancer ex: Thiotepa vs. Vitamin B6',
@@ -154,4 +154,4 @@ plot(post$times, RI.Th.B6.mu, col='blue',
 lines(post$times, RI.Th.B6.025, col='red')
 lines(post$times, RI.Th.B6.975, col='red')
 abline(h=1)
-##dev.copy2pdf(file='../vignettes/figures/RI-Th-B6.pdf')
+dev.copy2pdf(file='../vignettes/figures/RI-Th-B6.pdf')

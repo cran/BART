@@ -18,7 +18,8 @@
 
 mc.wbart <- function(
     x.train, y.train, x.test=matrix(0.0,0,0),
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL,
     xinfo=matrix(0.0,0,0), usequants=FALSE,
     cont=FALSE, rm.const=TRUE,
     sigest=NA, sigdf=3, sigquant=0.90,
@@ -66,7 +67,8 @@ mc.wbart <- function(
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
                    wbart(x.train=x.train, y.train=y.train, x.test=x.test,
-                         sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                         sparse=sparse, theta=theta, omega=omega,
+                         a=a, b=b, augment=augment, rho=rho,
                          xinfo=xinfo,
                          sigest=sigest, sigdf=sigdf, sigquant=sigquant,
                          k=k, power=power, base=base,
@@ -85,7 +87,6 @@ mc.wbart <- function(
     post <- post.list[[1]]
 
     ## sigma.len <- length(post$sigma)
-
     ## if(sigma.len>mc.ndpost) {
     ##     sigma.beg <- 1+sigma.len-mc.ndpost
     ##     post$sigma <- post$sigma[sigma.beg:sigma.len]
@@ -93,24 +94,31 @@ mc.wbart <- function(
 
     if(mc.cores==1 | attr(post, 'class')!='wbart') return(post)
     else {
-        p <- nrow(x.train[ , post$rm.const])
+        if(class(rm.const)!='logical') post$rm.const <- rm.const
+        post$ndpost <- mc.cores*mc.ndpost
+        p <- nrow(x.train[post$rm.const, ])
+        ##p <- nrow(x.train[ , post$rm.const])
 
         ## if(length(rm.const)==0) rm.const <- 1:p
         ## post$rm.const <- rm.const
 
-        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
+        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree),
+                           ' ', as.character(p))
         old.stop <- nchar(old.text)
 
         post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
+                                    paste0(as.character(post$ndpost), ' ',
+                                           as.character(ntree), ' ',
                                            as.character(p)),
                                     post$treedraws$trees)
 
         for(i in 2:mc.cores) {
-            post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
+            post$yhat.train <- rbind(post$yhat.train,
+                                     post.list[[i]]$yhat.train)
 
             if(length(post$yhat.test)>0)
-                post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
+                post$yhat.test <- rbind(post$yhat.test,
+                                        post.list[[i]]$yhat.test)
 
             ## if(sigma.len>0)
             ##     post$sigma <- c(post$sigma, post.list[[i]]$sigma[sigma.beg:sigma.len])
@@ -128,6 +136,12 @@ mc.wbart <- function(
                 post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
                 post$varprob <- rbind(post$varprob, post.list[[i]]$varprob)
             }
+
+            post$proc.time['elapsed'] <- max(post$proc.time['elapsed'],
+                                                 post.list[[i]]$proc.time['elapsed'])
+            for(j in 1:5)
+                if(j!=3)
+                    post$proc.time[j] <- post$proc.time[j]+post.list[[i]]$proc.time[j]
         }
 
         if(length(post$yhat.train.mean)>0)

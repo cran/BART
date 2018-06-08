@@ -96,16 +96,23 @@ z_{i}|y_{i},f & ~ \N{{\mu}_0+ f(\bm{x}_i)}{1} \begin{cases}
 \end{align*}
 The $z_i$ are centered around a known constant, $\mu_0$, which is
 tantamount to centering the probabilities, $p_i$, around
-$p_0=\Phi(\mu_0)$.  If $\mu_0=0$, which is the default, then the $p_i$
-are centered around 0.5; to specify a different value, say -1, pass
-the argument \code{binaryOffset=-1} in the \code{pbart} call.  The key
+$p_0=\Phi(\mu_0)$.  The default value of $\mu_0$ is
+$\Phi^{-1}(\bar{y})$ (which you can over-ride with the
+\code{binaryOffset} argument).
+% If $\mu_0=0$, which is the default, then the $p_i$
+% %are centered around 0.5; to specify a different value, say -1, pass
+% %the argument \code{binaryOffset=-1} in the \code{pbart} call.  The key
+% are centered around 0.5; to center at a different value, say 0.05, pass
+% the argument \code{binaryOffset=-1.645} in the \code{pbart} call.  
+The key
 insight into the probit BART technique is that the Gibbs conditional
 $ {f|z_i,y_i} {\;\stackrel{d}{=} f|z_i} $, i.e., given $z_i$, $y_i$ is
 unnecessary.  This setup leads to the following Bernoulli likelihood:
 $\wrap{\bm{y}|f} = \prod_{i=1}^N p_{i}^{y_i}(1-p_{i})^{1-y_i}$. 
 
-In the following, we assume that \code{binaryOffset=0} for convenience
-(which is the default).  The \code{pbart} (\code{mc.pbart}) function
+In the following, we assume that \code{binaryOffset=0} for convenience.
+%(which is the default).  
+The \code{pbart} (\code{mc.pbart}) function
 is for serial (parallel) computation.  The outcome \code{y.train} is a
 vector containing zeros and ones.  The covariates for training
 (validation, if any) are \code{x.train} (\code{x.test}) which can be
@@ -230,13 +237,20 @@ $\sd^2=1$; with Logisitic BART, we sample truncated Normal latents,
 $z_i$, with a random variance $\sd_i^2$ \citep{Robe95}.  If
 ${\sd^2_i} = 4\psi_i^2 \where \psi_i$ is sampled from the
 Kolmogorov-Smirnov distribution, then $z_i$ follow the Logistic
-distribution.  Sampling from the Kolmogorov-Smirnov
-distribution is described by \cite{Devr86}.  So, the conditionally
-Normal latents, $z_i|\sd_i^2$, are the outcomes for a continuous BART
-with a known heteroskedastic variance, $\sd_i^2$.  Since Logistic
-latents are more flexible, there is no centering parameter, i.e.,
-$\mu_0=0$.  Therefore, the probabilities are $p_i=F(f(\bm{x}_i))$
-where $F$ is the standard Logistic distribution function.
+distribution.  Sampling from the Kolmogorov-Smirnov distribution is
+described by \cite{Devr86}.  So, the conditionally Normal latents,
+$z_i|\sd_i^2$, are the outcomes for a continuous BART with a known
+heteroskedastic variance, $\sd_i^2$.  The $z_i$ are centered around a
+known constant, $\mu_0$, which is tantamount to centering the
+probabilities, $p_i$, around $p_0=F(\mu_0)$ where $F$ is the standard
+Logistic distribution function.  The default value of $\mu_0$ is
+$F^{-1}(\bar{y})$ (which you can over-ride with the
+\code{binaryOffset} argument).
+Therefore, the probabilities are $p_i=F(\mu_0+f(\bm{x}_i))$.
+% Since Logistic
+% latents are more flexible, there is no centering parameter, i.e.,
+% $\mu_0=0$.  
+%where $F$ is the standard Logistic distribution function.
 
 The input and output for \code{lbart} is essentially identical
 to \code{pbart}.  Also, the \code{predict} function for 

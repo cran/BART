@@ -94,12 +94,12 @@ wbart(
    corresponding standard deviation and a quantile to put this rough estimate at.
    If sigest=NA then the rough estimate will be the usual least squares estimator.
    Otherwise the supplied value will be used.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{sigdf}{
    Degrees of freedom for error variance prior.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{sigquant}{
@@ -107,16 +107,17 @@ wbart(
    The closer the quantile is to 1,
    the more aggresive the fit will be as you are putting more prior weight
    on error standard deviations (\eqn{\sigma}{sigma}) less than the rough estimate.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{k}{
    For numeric y,
    k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
    The response (y.train) is internally scaled to range from -.5 to .5.
-   For binary y,
+   %% For binary y,
    k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
-   In both cases, the bigger k is, the more conservative the fitting will be.
+   %In both cases,
+   The bigger k is, the more conservative the fitting will be.
    }
 
    \item{power}{
@@ -210,8 +211,8 @@ wbart(
 \details{
    BART is an Bayesian MCMC method.
    At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
-   and just \eqn{f} in the binary \eqn{y} case.
+   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case.
+   %and just \eqn{f} in the binary \eqn{y} case.
 
    Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
    from which fits and summaries may be extracted.  The output consists of values

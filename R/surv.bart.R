@@ -1,6 +1,6 @@
 
 ## BART: Bayesian Additive Regression Trees
-## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+## Copyright (C) 2017-2018 Robert McCulloch and Rodney Sparapani
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -18,29 +18,35 @@
 
 
 surv.bart <- function(
-    x.train = matrix(0.0, 0L, 0L),
+    x.train = matrix(0,0,0),
     y.train=NULL, times=NULL, delta=NULL, K=NULL,
-    x.test = matrix(0.0, 0L, 0L),
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
-    xinfo=matrix(0.0,0,0), usequants=FALSE,
-    cont=FALSE, rm.const=TRUE, type='pbart',
-    k = 2.0, ## BEWARE: do NOT use k for other purposes below
-    power = 2.0, base = 0.95,
-    binaryOffset = NULL,
+    x.test = matrix(0,0,0),
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0,0,0), usequants=FALSE,
+    ## cont=FALSE,
+    rm.const=TRUE, type='pbart',
+    ntype=as.integer(
+        factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+    k = 2, ## BEWARE: do NOT use k for other purposes below
+    power = 2, base = 0.95,
+    offset = NULL, tau.num=c(NA, 3, 6)[ntype],
+    ##binaryOffset = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L, keepevery = 10L,
-    nkeeptrain=ndpost, nkeeptest=ndpost,
-    ##nkeeptestmean=ndpost,
-    nkeeptreedraws=ndpost,
+    ##nkeeptrain=ndpost, nkeeptest=ndpost,
+    ##nkeeptreedraws=ndpost,
     printevery=100L,
-    ##treesaslists=FALSE,
-    keeptrainfits=TRUE,
+    ##keeptrainfits=TRUE,
     id = NULL,     ## only used by surv.bart
     seed = 99L,    ## only used by mc.surv.bart
     mc.cores = 2L, ## ditto
     nice=19L       ## ditto
 )
 {
+    if(is.na(ntype) || ntype==1)
+        stop("type argument must be set to either 'pbart' or 'lbart'")
+
     x.train <- bartModelMatrix(x.train)
     x.test <- bartModelMatrix(x.test)
 
@@ -56,40 +62,46 @@ surv.bart <- function(
         times   <- pre$times
         K       <- pre$K
 
-        if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
+        ##if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
     }
     else {
         if(length(unique(sort(y.train)))>2)
             stop('y.train has >2 values; make sure you specify times=times & delta=delta')
 
-        if(length(binaryOffset)==0) binaryOffset <- 0
+        ##if(length(binaryOffset)==0) binaryOffset <- 0
 
         times <- unique(sort(x.train[ , 1]))
         K     <- length(times)
     }
 
-    if(type=='pbart') call <- pbart
-    else if(type=='lbart') {
-        binaryOffset <- 0
-        call <- lbart
-    }
+    ##if(length(binaryOffset)==0) binaryOffset <- qnorm(mean(y.train))
 
-    post <- call(x.train=x.train, y.train=y.train, x.test=x.test,
-                 sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+    ## if(type=='pbart') call <- pbart
+    ## else if(type=='lbart') {
+    ##     ##binaryOffset <- 0
+    ##     call <- lbart
+    ## }
+
+    post <- gbart(x.train=x.train, y.train=y.train,
+                  x.test=x.test, type=type,
+                  sparse=sparse, theta=theta, omega=omega,
+                  a=a, b=b, augment=augment, rho=rho,
                   xinfo=xinfo, usequants=usequants,
-                  cont=cont, rm.const=rm.const,
+                  ##cont=cont,
+                  rm.const=rm.const,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset,
+                  offset=offset, tau.num=tau.num,
+                  ##binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip, keepevery=keepevery,
-                  nkeeptrain=nkeeptrain, nkeeptest=nkeeptest,
+                  ##nkeeptrain=nkeeptrain, nkeeptest=nkeeptest,
                   ##nkeeptestmean=nkeeptestmean,
-                  nkeeptreedraws=nkeeptreedraws,
+                  ##nkeeptreedraws=nkeeptreedraws,
                   printevery=printevery)
 
     if(type!=attr(post, 'class')) return(post)
 
-    post$binaryOffset <- binaryOffset
+    ##post$binaryOffset <- binaryOffset
     post$id <- id
     post$times <- times
     post$K <- K
@@ -105,7 +117,8 @@ surv.bart <- function(
     ##          for(j in 2:K) {
     ##              l <- K*(h-1)+j
 
-    ##              post$surv.train[ , l] <- post$surv.train[ , l-1]*post$surv.train[ , l]
+    ##              post$surv.train[ , l] <-
+    ## post$surv.train[ , l-1]*post$surv.train[ , l]
     ##          }
 
     ##      post$surv.train.mean <- apply(post$surv.train, 2, mean)
@@ -123,7 +136,8 @@ surv.bart <- function(
             for(j in 2:K) {
                 l <- K*(h-1)+j
 
-                post$surv.test[ , l] <- post$surv.test[ , l-1]*post$surv.test[ , l]
+                post$surv.test[ , l] <-
+                    post$surv.test[ , l-1]*post$surv.test[ , l]
             }
 
         post$surv.test.mean <- apply(post$surv.test, 2, mean)

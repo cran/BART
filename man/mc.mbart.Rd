@@ -1,13 +1,13 @@
 \name{mc.mbart}
-\title{BART for categorical outcomes with Logistic latents and parallel computation}
+\title{BART for categorical outcomes with Normal latents and parallel computation}
 \alias{mc.mbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For numeric response \eqn{y}, we have
 \eqn{y = f(x) + \epsilon}{y = f(x) + e},
-where \eqn{\epsilon \sim Log(0, 1)}{e ~ Log(0, 1)}.\cr
-For a binary response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
-denotes the standard Logistic CDF (logit link).
+where \eqn{\epsilon \sim N(0, 1)}{e ~ N(0, 1)}.\cr
+For a categorical response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
+denotes the standard Normal CDF (probit link).
 
 In both cases, \eqn{f} is the sum of many tree models.
 The goal is to have very flexible inference for the uknown
@@ -21,11 +21,12 @@ small amount to the overall fit.
 \usage{
 mc.mbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
-   cont=FALSE, rm.const=TRUE, tau.interval=0.95,
+   cont=FALSE, rm.const=TRUE, %%tau.interval=0.95,
    k=2.0, power=2.0, base=.95,
-   binaryOffset=0,
+   binaryOffset=NULL,
    ntree=50L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L, printevery=100,
@@ -44,24 +45,26 @@ mc.mbart(
    Note that q dummies are created if q>2 and
    one dummy is created if q=2, where q is the number of levels of the factor.
    \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x}
-   which is a row of x.train.
+   which is a row of \code{x.train}.
    }
 
    \item{y.train}{
-   Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (normal errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a logit link is fit.
+   Categorical dependent variable for training (in sample) data.\cr
+   %% If y is numeric a continous response model is fit (normal errors).\cr
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a logit link is fit.
    }
 
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
-   Should have same structure as x.train.\cr
-   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of x.test.
+   Should have same structure as \code{x.train}.\cr
+   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of \code{x.test}.
    }
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
@@ -85,17 +88,17 @@ mc.mbart(
 
    \item{rm.const}{ Whether or not to remove constant variables.}  
 
-   \item{tau.interval}{
-     The width of the interval to scale the variance for the terminal
-     leaf values.}
+   %% \item{tau.interval}{
+   %%   The width of the interval to scale the variance for the terminal
+   %%   leaf values.}
    
    \item{k}{
-   For numeric y,
-   k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
-   The response (y.train) is internally scaled to range from -.5 to .5.
-   For binary y,
+   %% For numeric y,
+   %% k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
+   %% The response, \code{y.train}, is internally scaled to range from -.5 to .5.
+   For categorical \code{y.train},
    k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
-   In both cases, the bigger k is, the more conservative the fitting will be.
+   %%In both cases, the bigger k is, the more conservative the fitting will be.
    }
 
    \item{power}{
@@ -107,10 +110,10 @@ mc.mbart(
    }
 
    \item{binaryOffset}{
-   Used for binary \eqn{y}.\cr
-   The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
-   The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
-   a probability other than .5.
+   %%Used for binary \eqn{y}.\cr
+   The model is \eqn{P(Y=j | x) = F(f(x) + binaryOffset[j])}.\cr
+   %% The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
+   %% a probability other than .5.
    }
 
    \item{ntree}{
@@ -176,61 +179,63 @@ mc.mbart(
 }
 \details{
    BART is an Bayesian MCMC method.
-   At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
-   and just \eqn{f} in the binary \eqn{y} case.
+   At each MCMC interation, we produce a draw from %% the joint posterior
+   %% \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
+   %% and just
+   \eqn{f} in the categorical \eqn{y} case.
 
-   Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
-   from which fits and summaries may be extracted.  The output consists of values
-   \eqn{f^*(x)}{f*(x)} (and \eqn{\sigma^*}{sigma*} in the numeric case) where * denotes a particular draw.
-   The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
-}
-\value{
-   \code{mc.mbart} returns an object of type \code{mbart} which is
-   essentially a list. % assigned class \sQuote{bart}.
+   Thus, unlike a lot of other modelling methods in R, we do not produce
+   a single model object from which fits and summaries may be extracted.
+   The output consists of values \eqn{f^*(x)}{f*(x)}
+   %%(and \eqn{\sigma^*}{sigma*} in the numeric case) where * denotes a
+   particular draw.  The \eqn{x} is either a row from the training data,
+   \code{x.train}, or the test data, \code{x.test}.  }
 
-   \item{yhat.train}{
-   A matrix with ndpost rows and nrow(x.train) columns.
-   Each row corresponds to a draw \eqn{f^*}{f*} from the posterior of \eqn{f}
-   and each column corresponds to a row of x.train.
-   The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the \eqn{i^{th}}{i\^th} kept draw of \eqn{f}
-   and the \eqn{j^{th}}{j\^th} row of x.train.\cr
-   Burn-in is dropped.
-   }
+ \value{ \code{mc.mbart}
+   returns an object of type \code{mbart} which is essentially a list. %
+   assigned class \sQuote{bart}.
 
-   \item{yhat.test}{Same as yhat.train but now the x's are the rows of the test data.}
-   \item{yhat.train.mean}{train data fits = mean of yhat.train columns.}
-   \item{yhat.test.mean}{test data fits = mean of yhat.test columns.}
-   \item{varcount}{a matrix with ndpost rows and nrow(x.train) columns.
+   \item{yhat.train}{ A matrix with ndpost rows and \code{nrow(x.train)}
+   columns.  Each row corresponds to a draw \eqn{f^*}{f*} from the
+   posterior of \eqn{f} and each column corresponds to a row of
+   \code{x.train}.  The \eqn{(i,j)} value is \eqn{f^*(x)}{f*(x)} for the
+   \eqn{i^{th}}{i\^th} kept draw of \eqn{f} and the \eqn{j^{th}}{j\^th}
+   row of \code{x.train}.\cr Burn-in is dropped.  }
+
+   \item{yhat.test}{Same as \code{yhat.train} but now the x's are the rows of the test data.}
+   \item{yhat.train.mean}{train data fits = mean of \code{yhat.train} columns.}
+   \item{yhat.test.mean}{test data fits = mean of \code{yhat.test} columns.}
+   \item{varcount}{a matrix with ndpost rows and \code{nrow(x.train)} columns.
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
 
-   In addition the list
-   has a binaryOffset component giving the value used.
+   In addition, the list
+   has a \code{binaryOffset} vector giving the value used.
 
-   Note that in the binary \eqn{y}, case yhat.train and yhat.test are
-   \eqn{f(x)} + binaryOffset.  If you want draws of the probability
-   \eqn{P(Y=1 | x)} you need to apply the Logistic cdf (\code{plogis})
-   to these values.
+   Note that in the categorical \eqn{y}, case \code{yhat.train} and
+   \code{yhat.test} are \eqn{f(x) + binaryOffset[j]}.
+   %% If you want draws of the probability
+   %% \eqn{P(Y=1 | x)} you need to apply the Normal cdf (\code{p})
+   %% to these values.
 }
 \references{
 Chipman, H., George, E., and McCulloch R. (2010)
    Bayesian Additive Regression Trees.
    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
 
-Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning.
-   Advances in Neural Information Processing Systems 19,
-   Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+%% Chipman, H., George, E., and McCulloch R. (2006)
+%%    Bayesian Ensemble Learning.
+%%    Advances in Neural Information Processing Systems 19,
+%%    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
    \emph{The Annals of Statistics}, \bold{19}, 1--67.
 
-Holmes, C and Held, L (2006)
-	Bayesian auxiliary variable models for binary and multinomial regression.
-	\emph{Bayesian Analysis}, \bold{1}, 145--68.
+%% Holmes, C and Held, L (2006)
+%% 	Bayesian auxiliary variable models for binary and multinomial regression.
+%% 	\emph{Bayesian Analysis}, \bold{1}, 145--68.
 	
 Linero, A.R. (2016)
   Bayesian regression trees for high dimensional prediction and variable
@@ -239,7 +244,8 @@ Linero, A.R. (2016)
 }
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
+Rodney Sparapani: \email{rsparapa@mcw.edu},\cr
+Robert Gramacy: \email{rbg@vt.edu}.
 }
 \seealso{
 \code{\link{mbart}}

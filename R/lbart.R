@@ -22,7 +22,7 @@ sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
 xinfo=matrix(0.0,0,0), usequants=FALSE,
 cont=FALSE, rm.const=TRUE, tau.interval=0.95,
 k=2.0, power=2.0, base=.95,
-binaryOffset=0,
+binaryOffset=NULL,
 ntree=200L, numcut=100L,
 ndpost=1000L, nskip=100L,
 keepevery=1L,
@@ -37,8 +37,9 @@ printevery=100, transposed=FALSE
 #data
 n = length(y.train)
 
-if(binaryOffset!=0)
-    stop('binaryOffset not supported by lbart')
+## if(binaryOffset!=0)
+##     stop('binaryOffset not supported by lbart')
+if(length(binaryOffset)==0) binaryOffset=qlogis(mean(y.train))
 
 if(!transposed) {
     temp = bartModelMatrix(x.train, numcut, usequants=usequants,
@@ -161,8 +162,8 @@ if(np>0) {
 if(nkeeptreedraws>0)
     names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
 
-dimnames(res$varcount)[[2]] = dimnames(x.train)[[1]]
-dimnames(res$varprob)[[2]] = dimnames(x.train)[[1]]
+dimnames(res$varcount)[[2]] = as.list(dimnames(x.train)[[1]])
+dimnames(res$varprob)[[2]] = as.list(dimnames(x.train)[[1]])
 res$varcount.mean <- apply(res$varcount, 2, mean)
 res$varprob.mean <- apply(res$varprob, 2, mean)
 res$binaryOffset=binaryOffset

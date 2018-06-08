@@ -25,7 +25,7 @@ lbart(
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE, tau.interval=0.95,
    k=2.0, power=2.0, base=.95, 
-   binaryOffset=0,
+   binaryOffset=NULL,
    ntree=200L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L,
@@ -48,10 +48,10 @@ lbart(
    }
 
    \item{y.train}{
-   Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (Logistic errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a logit link is fit.
+   Binary dependent variable for training (in sample) data.\cr
+   %% If y is numeric a continous response model is fit (Logistic errors).\cr
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a logit link is fit.
    }
 
    \item{x.test}{
@@ -107,8 +107,12 @@ lbart(
    }
 
    \item{binaryOffset}{
-   Currently fixed at zero, but might be relaxed RSN.}
-   
+   Used for binary \eqn{y}.\cr
+   The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
+   %% The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
+   %% a probability other than .5.
+ }
+ 
    %% \item{binaryOffset}{
    %% Used for binary \eqn{y}.\cr
    %% The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
@@ -217,12 +221,11 @@ lbart(
    Each row is for a draw. For each variable (corresponding to the columns),
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
-
-   %% In addition the list
-   %% has a binaryOffset component giving the value used.
+   In addition, the list
+   has a \code{binaryOffset} giving the value used.
 
    Note that in the binary \eqn{y}, case yhat.train and yhat.test are
-   \eqn{f(x)}. %% + binaryOffset
+   \eqn{f(x) + binaryOffset}.
    If you want draws of the probability
    \eqn{P(Y=1 | x)} you need to apply the Logistic CDF (\code{plogis})
    to these values.

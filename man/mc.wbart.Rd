@@ -6,8 +6,8 @@ BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For numeric response \eqn{y}, we have
 \eqn{y = f(x) + \epsilon}{y = f(x) + e},
 where \eqn{\epsilon \sim N(0,\sigma^2)}{e ~ N(0,sigma^2)}.\cr
-For a binary response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
-denotes the standard normal cdf (probit link).
+%% For a binary response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
+%% denotes the standard normal cdf (probit link).
 
 In both cases, \eqn{f} is the sum of many tree models.
 The goal is to have very flexible inference for the uknown
@@ -21,7 +21,8 @@ small amount to the overall fit.
 \usage{
 mc.wbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE,
    sigest=NA, sigdf=3, sigquant=0.90,
@@ -52,8 +53,8 @@ mc.wbart(
    \item{y.train}{
    Dependent variable for training (in sample) data.\cr
    If y is numeric a continous response model is fit (normal errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a probit link is fit.
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a probit link is fit.
    }
 
    \item{x.test}{
@@ -64,6 +65,8 @@ mc.wbart(
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
@@ -94,12 +97,12 @@ mc.wbart(
    corresponding standard deviation and a quantile to put this rough estimate at.
    If sigest=NA then the rough estimate will be the usual least squares estimator.
    Otherwise the supplied value will be used.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{sigdf}{
    Degrees of freedom for error variance prior.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{sigquant}{
@@ -107,16 +110,17 @@ mc.wbart(
    The closer the quantile is to 1,
    the more aggresive the fit will be as you are putting more prior weight
    on error standard deviations (\eqn{\sigma}{sigma}) less than the rough estimate.
-   Not used if y is binary.
+   %Not used if y is binary.
    }
 
    \item{k}{
    For numeric y,
    k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
    The response (y.train) is internally scaled to range from -.5 to .5.
-   For binary y,
-   k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
-   In both cases, the bigger k is, the more conservative the fitting will be.
+   %% For binary y,
+   %% k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
+   %% In both cases,
+   The bigger k is, the more conservative the fitting will be.
    }
 
    \item{power}{
@@ -207,8 +211,8 @@ mc.wbart(
 \details{
    BART is an Bayesian MCMC method.
    At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
-   and just \eqn{f} in the binary \eqn{y} case.
+   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case.
+   %and just \eqn{f} in the binary \eqn{y} case.
 
    Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
    from which fits and summaries may be extracted.  The output consists of values
@@ -236,13 +240,13 @@ mc.wbart(
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
 
-   In addition the list
-   has a binaryOffset component giving the value used.
+   %% In addition the list
+   %% has a binaryOffset component giving the value used.
 
-   Note that in the binary \eqn{y}, case yhat.train and yhat.test are
-   \eqn{f(x)} + binaryOffset.  If you want draws of the probability
-   \eqn{P(Y=1 | x)} you need to apply the normal cdf (\code{pnorm})
-   to these values.
+   %% Note that in the binary \eqn{y}, case yhat.train and yhat.test are
+   %% \eqn{f(x)} + binaryOffset.  If you want draws of the probability
+   %% \eqn{P(Y=1 | x)} you need to apply the normal cdf (\code{pnorm})
+   %% to these values.
 }
 \references{
 Chipman, H., George, E., and McCulloch R. (2010)

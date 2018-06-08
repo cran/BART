@@ -1,19 +1,17 @@
 Package: BART
 Type: Package
 Title: Bayesian Additive Regression Trees
-Version: 1.6
-Date: 2018-03-19
+Version: 1.7
+Date: 2018-06-08
 Authors@R: c(person('Robert', 'McCulloch', role='aut'),
-  person('Rodney', 'Sparapani', role=c('aut', 'cre'), email='rsparapa@mcw.edu'),
+  person('Rodney', 'Sparapani', role=c('aut', 'cre'), 
+  email='rsparapa@mcw.edu'),
   person('Robert', 'Gramacy', role='aut'),
   person('Charles', 'Spanbauer', role='aut'),
   person('Matthew', 'Pratola', role='aut'),
-  person('Jean-Sebastien', 'Roy', role='ctb'),
-  person('Makoto', 'Matsumoto', role='ctb'),
-  person('Takuji', 'Nishimura', role='ctb'),
   person('Bill', 'Venables', role='ctb'),
   person('Brian', 'Ripley', role='ctb'))
-Description: Bayesian Additive Regression Trees (BART) provide flexible nonparametric modeling of covariates for continuous, binary and time-to-event outcomes.  For more information on BART, see Chipman, George and McCulloch (2010) <doi:10.1214/09-AOAS285> and Sparapani, Logan, McCulloch and Laud (2016) <doi:10.1002/sim.6893>. 
+Description: Bayesian Additive Regression Trees (BART) provide flexible nonparametric modeling of covariates for continuous, binary, categorical and time-to-event outcomes.  For more information on BART, see Chipman, George and McCulloch (2010) <doi:10.1214/09-AOAS285> and Sparapani, Logan, McCulloch and Laud (2016) <doi:10.1002/sim.6893>.
 License: GPL (>= 2)
 Depends: R (>= 2.10), survival
 Imports: Rcpp (>= 0.12.3), parallel, tools
@@ -22,17 +20,14 @@ Suggests: knitr, rmarkdown, sbart, MASS
 VignetteBuilder: knitr
 SystemRequirements: C++11
 NeedsCompilation: yes
-Packaged: 2018-03-20 13:58:57 UTC; rsparapa
+Packaged: 2018-06-08 14:24:18 UTC; rsparapa
 Author: Robert McCulloch [aut],
   Rodney Sparapani [aut, cre],
   Robert Gramacy [aut],
   Charles Spanbauer [aut],
   Matthew Pratola [aut],
-  Jean-Sebastien Roy [ctb],
-  Makoto Matsumoto [ctb],
-  Takuji Nishimura [ctb],
   Bill Venables [ctb],
   Brian Ripley [ctb]
 Maintainer: Rodney Sparapani <rsparapa@mcw.edu>
 Repository: CRAN
-Date/Publication: 2018-03-20 22:25:49 UTC
+Date/Publication: 2018-06-08 16:17:58 UTC

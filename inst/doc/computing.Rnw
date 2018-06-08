@@ -468,7 +468,7 @@ follows.
 \begin{tabular}{r|ccccccc}
 Tier & \\
 $t$ & \multicolumn{3}{c}{$2^t+0$} & $\dots$ &
-\multicolumn{3}{c}{$2^t+2^t-1$} \\ \hline
+\multicolumn{3}{c}{$2^t\!+\!2^t\!-\!1$} \\ \hline
 $\vdots$ & \\
 2 & 4 &   & 5 &   & 6 &   & 7 \\
 1 &   & 2 &   &   &   & 3 &   \\
@@ -493,7 +493,8 @@ variable/cutpoint since these are \proglang{C/C++} indices.
 The key to discriminating between branches and leaves is the algebraic
 relationship between a branch, $v$, at tier $t$ leading to its left,
 $l$, and right, $r$, nodes at tier $t+1$.  If $v=2^t+k$, then
-$l=2^{t+1}+2k$ and $r=2^{t+1}+2k+1$, i.e., for each node, besides root,
+$l=2v$ and $r=2v+1$, i.e., for each node, besides root,
+%$l=2^{t+1}+2k$ and $r=2^{t+1}+2k+1$, i.e., for each node, besides root,
 you can determine from which branch it arose and those nodes that are
 not a branch (since they have no leaves) are necessarily leaves.
   

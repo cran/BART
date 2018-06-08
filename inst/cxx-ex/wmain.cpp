@@ -31,7 +31,7 @@ int main(void) {
    for(size_t i=0; i<nkeeptest; ++i) tedraw[i]=&_tedraw[i*np];
 
   cwbart(n, p, np, &xtrain[0], &y[0], &xtest[0], m, &nc[0], nd, burn,
-	 mybeta, alpha, tau, nu, lambda, ysd, w, 0, 0., 0., 0., 0,
+	 mybeta, alpha, tau, nu, lambda, ysd, w, 0, 0., 0., NULL, 0., 0., 0., 0,
 	 nkeeptrain, nkeeptest, nkeeptestmean, nkeeptreedraws, printevery, 
 	 n1, n2, trmean, temean, sdraw, _trdraw, _tedraw);
 

@@ -78,7 +78,7 @@ crisk.pre.bart <- function(
     pre$tx.train2 <- pre2$tx.train
     pre$tx.test2 <- pre2$tx.test
     pre$y.train2 <- pre2$y.train
-    pre$binaryOffset2 <- pre2$binaryOffset
+    ##pre$binaryOffset2 <- pre2$binaryOffset
 
     return(pre)
 }

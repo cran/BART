@@ -85,29 +85,84 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 \code{\link{crisk.bart}}, \code{\link{mc.crisk.bart}}, \code{\link{mc.crisk.pwbart}}, \code{\link{mc.cores.openmp}}
 }
 \examples{
-##simulate data (example from Friedman MARS paper)
-f = function(x){
-10*sin(pi*x[,1]*x[,2]) + 20*(x[,3]-.5)^2+10*x[,4]+5*x[,5]
-}
-sigma = 1.0  #y = f(x) + sigma*z , z~N(0,1)
-n = 100      #number of observations
-set.seed(99)
-x=matrix(runif(n*10),n,10) #10 variables, only first 5 matter
-y=f(x)
 
+data(transplant)
+
+delta <- (as.numeric(transplant$event)-1)
+## recode so that delta=1 is cause of interest; delta=2 otherwise
+delta[delta==1] <- 4
+delta[delta==2] <- 1
+delta[delta>1] <- 2
+table(delta, transplant$event)
+
+times <- pmax(1, ceiling(transplant$futime/7)) ## weeks
+##times <- pmax(1, ceiling(transplant$futime/30.5)) ## months
+table(times)
+
+typeO <- 1*(transplant$abo=='O')
+typeA <- 1*(transplant$abo=='A')
+typeB <- 1*(transplant$abo=='B')
+typeAB <- 1*(transplant$abo=='AB')
+table(typeA, typeO)
+
+x.train <- cbind(typeO, typeA, typeB, typeAB)
+
+x.test <- cbind(1, 0, 0, 0)
+dimnames(x.test)[[2]] <- dimnames(x.train)[[2]]
+
+## parallel::mcparallel/mccollect do not exist on windows
+if(.Platform$OS.type=='unix') {
 ##test BART with token run to ensure installation works
-set.seed(99)
-post = wbart(x,y,nskip=5,ndpost=5)
-x.test = matrix(runif(500*10),500,10)
+        post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta,
+                               seed=99, mc.cores=2, nskip=5, ndpost=5,
+                               keepevery=1)
+
+        pre <- surv.pre.bart(x.train=x.train, x.test=x.test,
+                             times=times, delta=delta)
+
+        K <- post$K
+
+        pred <- mc.crisk.pwbart(pre$tx.test, pre$tx.test,
+                                post$treedraws, post$treedraws2,
+                                post$binaryOffset, post$binaryOffset2)
+}
 
 \dontrun{
-##run BART
-set.seed(99)
-post = wbart(x,y)
-x.test = matrix(runif(500*10),500,10)
-pred = predict(post, x.test, mu=mean(y))
 
-plot(apply(pred, 2, mean), f(x.test))
+## run one long MCMC chain in one process
+## set.seed(99)
+## post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
+
+## in the interest of time, consider speeding it up by parallel processing
+## run "mc.cores" number of shorter MCMC chains in parallel processes
+post <- mc.crisk.bart(x.train=x.train,
+                       times=times, delta=delta,
+                       x.test=x.test, seed=99, mc.cores=8)
+
+## check <- mc.crisk.pwbart(post$tx.test, post$tx.test,
+##                           post$treedraws, post$treedraws2,
+##                           post$binaryOffset,
+##                           post$binaryOffset2, mc.cores=8)
+check <- predict(post, newdata=post$tx.test, newdata2=post$tx.test2,
+                 mc.cores=8)
+
+print(c(post$surv.test.mean[1], check$surv.test.mean[1],
+        post$surv.test.mean[1]-check$surv.test.mean[1]), digits=22)
+
+print(all(round(post$surv.test.mean, digits=9)==
+    round(check$surv.test.mean, digits=9)))
+
+print(c(post$cif.test.mean[1], check$cif.test.mean[1],
+        post$cif.test.mean[1]-check$cif.test.mean[1]), digits=22)
+
+print(all(round(post$cif.test.mean, digits=9)==
+    round(check$cif.test.mean, digits=9)))
+
+print(c(post$cif.test2.mean[1], check$cif.test2.mean[1],
+        post$cif.test2.mean[1]-check$cif.test2.mean[1]), digits=22)
+
+print(all(round(post$cif.test2.mean, digits=9)==
+    round(check$cif.test2.mean, digits=9)))
 
 }
 }

@@ -33,6 +33,8 @@ predict.wbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()
     if(.Platform$OS.type != "unix" || openmp || mc.cores==1) call <- pwbart
     else call <- mc.pwbart
 
+    if(length(object$mu)==0) object$mu=object$offset
+
     return(call(newdata, object$treedraws, mc.cores=mc.cores, mu=object$mu, ...))
 }
 

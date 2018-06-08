@@ -1,10 +1,11 @@
 mbart = function(
 x.train, y.train, x.test=matrix(0.0,0,0),
-sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+sparse=FALSE, theta=0, omega=1,
+a=0.5, b=1, augment=FALSE, rho=NULL,
 xinfo=matrix(0.0,0,0), usequants=FALSE,
-cont=FALSE, rm.const=TRUE, tau.interval=0.95,
+cont=FALSE, rm.const=TRUE, ##tau.interval=0.95,
 k=2.0, power=2.0, base=.95,
-binaryOffset=0,
+binaryOffset=NULL,
 ntree=50L, numcut=100L,
 ndpost=1000L, nskip=100L,
 keepevery=1L,
@@ -18,8 +19,11 @@ printevery=100, transposed=FALSE
 
 n = length(y.train)
 
-if(binaryOffset!=0)
-    stop('binaryOffset not supported by mbart')
+## if(binaryOffset!=0)
+##     stop('binaryOffset not supported by mbart')
+
+if(length(binaryOffset)==0)
+    binaryOffset <- qnorm(as.integer(table(y.train))/n)
 
 if(!transposed) {
     temp = bartModelMatrix(x.train, numcut, usequants=usequants,
@@ -30,7 +34,12 @@ if(!transposed) {
     if(length(x.test)>0)
             x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
     rm.const <- temp$rm.const
+    grp <- temp$grp
     rm(temp)
+}
+else {
+    rm.const <- NULL
+    grp <- NULL
 }
 
 if(n!=ncol(x.train))
@@ -40,10 +49,11 @@ p = nrow(x.train)
 np = ncol(x.test)
 if(length(rho)==0) rho <- p
 if(length(rm.const)==0) rm.const <- 1:p
+if(length(grp)==0) grp <- 1:p
 
-if(tau.interval>0.5) tau.interval=1-tau.interval
+## if(tau.interval>0.5) tau.interval=1-tau.interval
 
-tau=qlogis(1-0.5*tau.interval)/(k*sqrt(ntree))
+## tau=qlogis(1-0.5*tau.interval)/(k*sqrt(ntree))
 
 #--------------------------------------------------
 #set  nkeeps for thinning
@@ -79,8 +89,11 @@ res = .Call("cmbart",
             power,
             base,
             binaryOffset,
-            tau,
+            3/(k*sqrt(ntree)),##tau,
             sparse,
+            theta,
+            omega,
+            grp,
             a,
             b,
             rho,
@@ -95,13 +108,12 @@ res = .Call("cmbart",
 res$C <- C
 
 if(nkeeptrain>0) {
-    res$prob.train <- plogis(res$yhat.train)
+    res$prob.train <- pnorm(res$yhat.train)
     for(i in 1:n) {
         h <- (i-1)*C
         total <- apply(res$prob.train[ , h+1:C], 1, sum)
         for(j in 1:C) {
             res$prob.train[ , h+j] <- res$prob.train[ , h+j]/total
-            ##res$yhat.train[ , h+j] <- qlogis(res$prob.train[ , h+j])
         }
     }
     res$prob.train.mean <- apply(res$prob.train, 2, mean)
@@ -112,13 +124,12 @@ if(nkeeptrain>0) {
 }
 
 if(np>0) {
-    res$prob.test <- plogis(res$yhat.test)
-    for(i in 1:n) {
+    res$prob.test <- pnorm(res$yhat.test)
+    for(i in 1:np) {
         h <- (i-1)*C
         total <- apply(res$prob.test[ , h+1:C], 1, sum)
         for(j in 1:C) {
             res$prob.test[ , h+j] <- res$prob.test[ , h+j]/total
-            ##res$yhat.test[ , h+j] <- qlogis(res$prob.test[ , h+j])
         }
     }
     res$prob.test.mean <- apply(res$prob.test, 2, mean)
@@ -141,8 +152,8 @@ for(i in 1:p)
         names.[h] <- paste0(names.[h], '.', j)
     }
 
-dimnames(res$varcount)[[2]] = names.
-dimnames(res$varprob)[[2]] = names.
+dimnames(res$varcount)[[2]] = as.list(names.)
+dimnames(res$varprob)[[2]] = as.list(names.)
 res$varcount.mean <- apply(res$varcount, 2, mean)
 res$varprob.mean <- apply(res$varprob, 2, mean)
 res$rm.const <- rm.const

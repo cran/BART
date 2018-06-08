@@ -18,26 +18,31 @@
 
 
 mc.crisk.bart <- function(
-    x.train = matrix(0.0, 0L, 0L), y.train=NULL,
+    x.train = matrix(0,0,0), y.train=NULL,
     x.train2 = x.train, y.train2=NULL,
     times=NULL, delta=NULL, K=NULL,
-    x.test = matrix(0.0, 0L, 0L), x.test2 = x.test, cond=NULL,
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
-    xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
-    cont=FALSE, rm.const=TRUE, type='pbart',
-    k = 2.0, ## BEWARE: do NOT use k for other purposes below
-    power = 2.0, base = 0.95,
-    binaryOffset = NULL,
-    binaryOffset2 = NULL,
+    x.test = matrix(0,0,0), x.test2 = x.test, cond=NULL,
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
+    xinfo=matrix(0,0,0), xinfo2=matrix(0,0,0), usequants=FALSE,
+    ##cont=FALSE,
+    rm.const=TRUE, type='pbart',
+    ntype=as.integer(
+        factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+    k = 2, ## BEWARE: do NOT use k for other purposes below
+    power = 2, base = 0.95,
+    offset = NULL, offset2 = NULL,
+    tau.num=c(NA, 3, 6)[ntype], ##tau.num2=c(NA, 3, 6)[ntype],
+    ##binaryOffset = NULL, binaryOffset2 = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L,
     keepevery = 10L,
-    nkeeptrain=ndpost, nkeeptest=ndpost,
+    ##nkeeptrain=ndpost, nkeeptest=ndpost,
     ##nkeeptestmean=ndpost,
-    nkeeptreedraws=ndpost,
+    ##nkeeptreedraws=ndpost,
     printevery=100L,
     ##treesaslists=FALSE,
-    keeptrainfits=TRUE,
+    ##keeptrainfits=TRUE,
     id=NULL,    ## crisk.bart only
     seed = 99L, mc.cores = 2L, nice=19L
 )
@@ -48,6 +53,9 @@ mc.crisk.bart <- function(
     RNGkind("L'Ecuyer-CMRG")
     set.seed(seed)
     parallel::mc.reset.stream()
+
+    if(is.na(ntype) || ntype==1)
+        stop("type argument must be set to either 'pbart' or 'lbart'")
 
     x.train2 <- bartModelMatrix(x.train2)
     x.test2 <- bartModelMatrix(x.test2)
@@ -69,8 +77,8 @@ mc.crisk.bart <- function(
         K       <- pre$K
 
         if(length(cond)==0) cond <- pre$cond
-        if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
-        if(length(binaryOffset2)==0) binaryOffset2 <- pre$binaryOffset2
+        ##if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
+        ##if(length(binaryOffset2)==0) binaryOffset2 <- pre$binaryOffset2
     }
     else {
         if(length(x.train)==0 | length(x.train2)==0)
@@ -79,8 +87,8 @@ mc.crisk.bart <- function(
         if(nrow(x.train)!=nrow(x.train2))
             stop('number of rows in x.train and x.train2 must be equal')
 
-        if(length(binaryOffset)==0) binaryOffset <- 0
-        if(length(binaryOffset2)==0) binaryOffset2 <- 0
+        ##if(length(binaryOffset)==0) binaryOffset <- 0
+        ##if(length(binaryOffset2)==0) binaryOffset2 <- 0
 
         times <- unique(sort(x.train[ , 1]))
         K     <- length(times)
@@ -121,21 +129,25 @@ mc.crisk.bart <- function(
               crisk.bart(x.train=x.train, y.train=y.train,
                          x.train2=x.train2, y.train2=y.train2,
                          x.test=x.test, x.test2=x.test2, cond=cond,
-                         sparse=sparse, a=a, b=b, augment=augment, rho=rho, rho2=rho2,
+                         sparse=sparse, theta=theta, omega=omega,
+                         a=a, b=b, augment=augment, rho=rho, rho2=rho2,
                          xinfo=xinfo, xinfo2=xinfo2, usequants=usequants,
-                         cont=cont, rm.const=rm.const, type=type,
+                         ##cont=cont,
+                         rm.const=rm.const, type=type,
                          k=k, power=power, base=base,
-                         binaryOffset=binaryOffset,
-                         binaryOffset2=binaryOffset2,
+                         ##binaryOffset=binaryOffset,
+                         ##binaryOffset2=binaryOffset2,
+                         offset=offset, offset2=offset2,
+                         tau.num=tau.num, ##tau.num2=tau.num2,
                          ntree=ntree, numcut=numcut,
                          ndpost=mc.ndpost, nskip=nskip,
                          keepevery = keepevery,
-                         nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
+                         ##nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
                          ##nkeeptestmean=mc.ndpost,
-                         nkeeptreedraws=mc.ndpost,
-                         printevery=printevery,
+                         ##nkeeptreedraws=mc.ndpost,
+                         printevery=printevery)},
                          ##treesaslists=FALSE,
-                         keeptrainfits=TRUE)},
+                         ##keeptrainfits=TRUE)},
               silent=(i!=1))
               ## to avoid duplication of output
               ## capture stdout from first posterior only
@@ -144,49 +156,61 @@ mc.crisk.bart <- function(
         post.list[[h]] <- parallel::mccollect()
     }
 
-    if((H==1 & mc.cores==1) | attr(post.list[[1]][[1]], 'class')!='criskbart') return(post.list[[1]][[1]])
+    if((H==1 & mc.cores==1) | attr(post.list[[1]][[1]], 'class')!='criskbart')
+        return(post.list[[1]][[1]])
     else {
         for(h in 1:H) for(i in mc.cores:1) {
             if(h==1 & i==mc.cores) {
                 post <- post.list[[1]][[mc.cores]]
-
+                post$ndpost <- H*mc.cores*mc.ndpost
                 p <- ncol(x.train[ , post$rm.const])
-                old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
-                ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+                old.text <- paste0(as.character(mc.ndpost), ' ',
+                                   as.character(ntree), ' ', as.character(p))
                 old.stop <- nchar(old.text)
 
                 post$treedraws$trees <- sub(old.text,
-                                            paste0(as.character(H*mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
-                                            ##paste0(as.character(H*mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
-                                                   as.character(p)),
+                                            paste0(as.character(post$ndpost),
+                                                   ' ', as.character(ntree),
+                                                   ' ', as.character(p)),
                                             post$treedraws$trees)
 
                 p <- ncol(x.train2[ , post$rm.const2])
-                old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
-                ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+                old.text <- paste0(as.character(mc.ndpost), ' ',
+                                   as.character(ntree), ' ', as.character(p))
                 old.stop2 <- nchar(old.text)
 
                 post$treedraws2$trees <- sub(old.text,
-                                            paste0(as.character(H*mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
-                                            ##paste0(as.character(H*mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
-                                                   as.character(p)),
+                                            paste0(as.character(post$ndpost),
+                                                   ' ', as.character(ntree),
+                                                   ' ', as.character(p)),
                                             post$treedraws2$trees)
             }
             else {
                 if(length(x.test)>0) {
-                    post$yhat.test <- rbind(post$yhat.test, post.list[[h]][[i]]$yhat.test)
-                    post$yhat.test2 <- rbind(post$yhat.test2, post.list[[h]][[i]]$yhat.test2)
-                    post$prob.test <- rbind(post$prob.test, post.list[[h]][[i]]$prob.test)
-                    post$prob.test2 <- rbind(post$prob.test2, post.list[[h]][[i]]$prob.test2)
-                    post$cif.test <- rbind(post$cif.test, post.list[[h]][[i]]$cif.test)
-                    post$cif.test2 <- rbind(post$cif.test2, post.list[[h]][[i]]$cif.test2)
-                    post$surv.test <- rbind(post$surv.test, post.list[[h]][[i]]$surv.test)
+                    post$yhat.test <- rbind(post$yhat.test,
+                                            post.list[[h]][[i]]$yhat.test)
+                    post$yhat.test2 <- rbind(post$yhat.test2,
+                                             post.list[[h]][[i]]$yhat.test2)
+                    post$prob.test <- rbind(post$prob.test,
+                                            post.list[[h]][[i]]$prob.test)
+                    post$prob.test2 <- rbind(post$prob.test2,
+                                             post.list[[h]][[i]]$prob.test2)
+                    post$cif.test <- rbind(post$cif.test,
+                                           post.list[[h]][[i]]$cif.test)
+                    post$cif.test2 <- rbind(post$cif.test2,
+                                            post.list[[h]][[i]]$cif.test2)
+                    post$surv.test <- rbind(post$surv.test,
+                                            post.list[[h]][[i]]$surv.test)
                 }
 
-                post$varcount <- rbind(post$varcount, post.list[[h]][[i]]$varcount)
-                post$varcount2 <- rbind(post$varcount2, post.list[[h]][[i]]$varcount2)
-                post$varprob <- rbind(post$varprob, post.list[[h]][[i]]$varprob)
-                post$varprob2 <- rbind(post$varprob2, post.list[[h]][[i]]$varprob2)
+                post$varcount <- rbind(post$varcount,
+                                       post.list[[h]][[i]]$varcount)
+                post$varcount2 <- rbind(post$varcount2,
+                                        post.list[[h]][[i]]$varcount2)
+                post$varprob <- rbind(post$varprob,
+                                      post.list[[h]][[i]]$varprob)
+                post$varprob2 <- rbind(post$varprob2,
+                                       post.list[[h]][[i]]$varprob2)
 
                 post$treedraws$trees <- paste0(post$treedraws$trees,
                                                substr(post.list[[h]][[i]]$treedraws$trees, old.stop+2,

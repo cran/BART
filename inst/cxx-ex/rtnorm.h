@@ -1,6 +1,7 @@
 /*
  *  BART: Bayesian Additive Regression Trees
- *  Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+ *  Copyright (C) 2017-2018 Robert McCulloch, Rodney Sparapani
+ *                          and Robert Gramacy
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,5 +24,11 @@
 #include "common.h"
 
 double rtnorm(double mean, double tau, double sd, rn& gen);
+
+#ifndef NoRcpp
+
+RcppExport SEXP crtnorm(SEXP, SEXP, SEXP);
+
+#endif
 
 #endif

@@ -189,9 +189,9 @@ Dirichlet prior as\\
 $\wrap{s_1, \dots, s_P} \prior \Dir{\theta/P, \dots, \theta/P}$ which
 is specified by the argument \code{sparse=TRUE} while the default is
 \code{sparse=FALSE} for uniform $1/P$.  The prior parameter $\theta$
-can be fixed or random; the default \code{alpha=0} means random, but
+can be fixed or random; the default \code{theta=0} means random, but
 fixed can be specified by supplying a positive number to the argument
-\code{alpha}.  Random $\theta$ is specified via
+\code{theta}.  Random $\theta$ is specified via
 $\frac{\theta}{\theta+\rho} \prior \Bet{a}{b}$ where the parameter
 $\rho$ can be specified by the argument \code{rho} (which defaults to
 \code{NULL} representing $P$; provide a value to over-ride), the

@@ -1,6 +1,6 @@
 
 ## BART: Bayesian Additive Regression Trees
-## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+## Copyright (C) 2017-2018 Robert McCulloch and Rodney Sparapani
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ mc.crisk.pwbart <- function(
    binaryOffset=0,	#mean to add on for cause 1
    binaryOffset2=0,	#mean to add on for cause 2
    mc.cores=2L,
+   type='pbart',
    transposed=FALSE,
    nice=19L
 )
@@ -98,28 +99,40 @@ mc.crisk.pwbart <- function(
     pred$yhat.test2 <- yhat.test2.list[[1]]
     if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
 
-    if(mc.cores>1) for(i in 2:mc.cores) {
-                       pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])
-                       pred$yhat.test2 <- cbind(pred$yhat.test2, yhat.test2.list[[i]])
-                   }
+    if(mc.cores>1)
+        for(i in 2:mc.cores) {
+            pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])
+            pred$yhat.test2 <- cbind(pred$yhat.test2, yhat.test2.list[[i]])
+        }
 
     H <- nrow(x.test)/K ## the number of different settings
 
-    pred$prob.test <- pnorm(pred$yhat.test)
-    pred$prob.test2 <- pnorm(pred$yhat.test2)
+    if(type=='pbart') {
+        pred$prob.test <- pnorm(pred$yhat.test)
+        pred$prob.test2 <- pnorm(pred$yhat.test2)
+    }
+    else if(type=='lbart') {
+        pred$prob.test <- plogis(pred$yhat.test)
+        pred$prob.test2 <- plogis(pred$yhat.test2)
+    }
+
     pred$surv.test <- (1-pred$prob.test)*(1-pred$prob.test2)
     pred$prob.test2 <- (1-pred$prob.test)*pred$prob.test2
     pred$cif.test <- pred$prob.test
     pred$cif.test2 <- pred$prob.test2
 
-    for(h in 1:H) for(j in 2:K) {
-                      l <- K*(h-1)+j
+    for(h in 1:H)
+        for(j in 2:K) {
+            l <- K*(h-1)+j
 
-                      pred$cif.test[ , l] <- pred$cif.test[ , l-1]+pred$surv.test[ , l-1]*pred$cif.test[ , l]
-                      pred$cif.test2[ , l] <- pred$cif.test2[ , l-1]+pred$surv.test[ , l-1]*pred$cif.test2[ , l]
-                      pred$surv.test[ , l] <- pred$surv.test[ , l-1]*pred$surv.test[ , l]
-                  }
-
+            pred$cif.test[ , l] <- pred$cif.test[ , l-1]+
+                pred$surv.test[ , l-1]*pred$cif.test[ , l]
+            pred$cif.test2[ , l] <- pred$cif.test2[ , l-1]+
+                pred$surv.test[ , l-1]*pred$cif.test2[ , l]
+            pred$surv.test[ , l] <- pred$surv.test[ , l-1]*
+                pred$surv.test[ , l]
+        }
+    
     pred$cif.test.mean <- apply(pred$cif.test, 2, mean)
     pred$cif.test2.mean <- apply(pred$cif.test2, 2, mean)
     pred$surv.test.mean <- apply(pred$surv.test, 2, mean)

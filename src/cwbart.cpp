@@ -247,7 +247,7 @@ void cwbart(
 
    //--------------------------------------------------
    //sigma
-   gen.set_df(n+nu);
+   //gen.set_df(n+nu);
    double *svec = new double[n];
    for(size_t i=0;i<n;i++) svec[i]=iw[i]*sigma;
 
@@ -290,7 +290,7 @@ void cwbart(
       //draw sigma
       rss=0.0;
       for(size_t k=0;k<n;k++) {restemp=(iy[k]-bm.f(k))/(iw[k]); rss += restemp*restemp;}
-      sigma = sqrt((nu*lambda + rss)/gen.chi_square());
+      sigma = sqrt((nu*lambda + rss)/gen.chi_square(n+nu));
       for(size_t k=0;k<n;k++) svec[k]=iw[k]*sigma;
       sdraw[i]=sigma;
       if(i>=burn) {

@@ -1,4 +1,6 @@
 
+library(BART)
+
 N <- 1000
 K <- 25
 set.seed(12)

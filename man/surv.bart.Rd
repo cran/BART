@@ -42,42 +42,52 @@ response case, \eqn{f} is the sum of many tree models.  }
 
 \usage{
 
-surv.bart( x.train=matrix(0.0,0,0),
+surv.bart( x.train=matrix(0,0,0),
            y.train=NULL, times=NULL, delta=NULL, K=NULL,
-           x.test=matrix(0.0,0,0),
-           sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
-           xinfo=matrix(0.0,0,0), usequants=FALSE,
-           cont=FALSE, rm.const=TRUE, type='pbart',
-           k=2.0, power=2.0, base=.95, binaryOffset=NULL, 
+           x.test=matrix(0,0,0),
+           sparse=FALSE, theta=0, omega=1,
+           a=0.5, b=1, augment=FALSE, rho=NULL,
+           xinfo=matrix(0,0,0), usequants=FALSE,
+           %cont=FALSE,
+           rm.const=TRUE, type='pbart',
+           ntype=as.integer(
+               factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+           k=2, power=2, base=.95,
+           offset=NULL, tau.num=c(NA, 3, 6)[ntype], %binaryOffset=NULL, 
            ntree=50, numcut=100, ndpost=1000, nskip=250,
            keepevery = 10L,
-           nkeeptrain=ndpost,
-           nkeeptest=ndpost,
+           %nkeeptrain=ndpost,
+           %nkeeptest=ndpost,
            %nkeeptestmean=ndpost,
-           nkeeptreedraws=ndpost,
+           %nkeeptreedraws=ndpost,
            printevery=100L, %treesaslists=FALSE,
-           keeptrainfits=TRUE,
+           %keeptrainfits=TRUE,
            id=NULL,    ## surv.bart only
            seed=99,    ## mc.surv.bart only
            mc.cores=2, ## mc.surv.bart only
            nice=19L    ## mc.surv.bart only
          )
 
-mc.surv.bart( x.train=matrix(0.0,0,0),
+mc.surv.bart( x.train=matrix(0,0,0),
               y.train=NULL, times=NULL, delta=NULL, K=NULL,
-              x.test=matrix(0.0,0,0), 
-              sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
-              xinfo=matrix(0.0,0,0), usequants=FALSE,
-              cont=FALSE, rm.const=TRUE, type='pbart',
-              k=2.0, power=2.0, base=.95, binaryOffset=NULL, 
+              x.test=matrix(0,0,0), 
+              sparse=FALSE, theta=0, omega=1,
+              a=0.5, b=1, augment=FALSE, rho=NULL,
+              xinfo=matrix(0,0,0), usequants=FALSE,
+              %cont=FALSE,
+              rm.const=TRUE, type='pbart',
+              ntype=as.integer(
+                  factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+              k=2, power=2, base=.95,
+              offset=NULL, tau.num=c(NA, 3, 6)[ntype], %binaryOffset=NULL,
               ntree=50, numcut=100, ndpost=1000, nskip=250,
               keepevery = 10L,
-              nkeeptrain=ndpost,
-              nkeeptest=ndpost,
+              %nkeeptrain=ndpost,
+              %nkeeptest=ndpost,
               %nkeeptestmean=ndpost,
-              nkeeptreedraws=ndpost,
+              %nkeeptreedraws=ndpost,
               printevery=100L, %treesaslists=FALSE,
-              keeptrainfits=TRUE,
+              %keeptrainfits=TRUE,
               id=NULL,    ## surv.bart only
               seed=99,    ## mc.surv.bart only
               mc.cores=2, ## mc.surv.bart only
@@ -129,6 +139,8 @@ that the definition of \code{x.train} is dependent on whether
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
@@ -148,12 +160,16 @@ that the definition of \code{x.train} is dependent on whether
     cutpoints in \code{xinfo} are generated uniformly; otherwise,
     if \code{TRUE}, uniform quantiles are used for the cutpoints. }
    
-   \item{cont}{ Whether or not to assume all variables are continuous.}
+   %\item{cont}{ Whether or not to assume all variables are continuous.}
 
    \item{rm.const}{ Whether or not to remove constant variables.}
 
    \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
      Holmes-Held, \code{'lbart'}. }
+
+ \item{ntype}{ The integer equivalent of \code{type} where
+  \code{'wbart'} is 1, \code{'pbart'} is 2 and
+  \code{'lbart'} is 3.}
    
    \item{k}{
    k is the number of prior standard deviations \eqn{f(t, x)} is away from +/-3.
@@ -168,20 +184,28 @@ that the definition of \code{x.train} is dependent on whether
    Base parameter for tree prior.
    }
 
-   \item{binaryOffset}{
-     The model is \eqn{P(Y=1 | t, x) = F(f(t, x) + \mu_0)}{P(Y=1 | t, x) = F(f(t, x) + mu0)}
-     where \eqn{\mu_0}{mu0} is specified by \code{binaryOffset}.\cr
-   The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
-   a probability other than .5.\cr
-   If \code{binaryOffset=NULL} when \code{times} and \code{delta} were provided, then
-   an exponential distribution offset is assumed independent of the covariates, i.e.
-   \code{binaryOffset=qnorm(1-exp(-mean.diff*sum(delta)/sum(times)))} where
-   \code{mean.diff} is the mean of the differences of the distinct
-   ordered adjacent \code{times},
-   i.e. \eqn{mean(t_{(1)}-t_{(0)}, ..., t_{(K)}-t_{(K-1)})}{mean(t(1)-t(0), ..., t(K)-t(K-1))}.\cr
-   If \code{binaryOffset=NULL} when \code{times} and \code{delta} were not provided, then
-   \code{binaryOffset=0}.
-   }
+   \item{offset}{  With binary
+   BART, the centering is \eqn{P(Y=1 | x) = F(f(x) + offset)} where
+   \code{offset} defaults to \code{F^{-1}(mean(y.train))}.  You can use
+   the \code{offset} parameter to over-ride these defaults.}
+
+   \item{tau.num}{ The numerator in the \code{tau} definition, i.e.,
+   \code{tau=tau.num/(k*sqrt(ntree))}. }   
+
+   %% \item{binaryOffset}{
+   %%   The model is \eqn{P(Y=1 | t, x) = F(f(t, x) + \mu_0)}{P(Y=1 | t, x) = F(f(t, x) + mu0)}
+   %%   where \eqn{\mu_0}{mu0} is specified by \code{binaryOffset}.\cr
+   %% The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
+   %% a probability other than .5.\cr
+   %% If \code{binaryOffset=NULL} when \code{times} and \code{delta} were provided, then
+   %% an exponential distribution offset is assumed independent of the covariates, i.e.
+   %% \code{binaryOffset=qnorm(1-exp(-mean.diff*sum(delta)/sum(times)))} where
+   %% \code{mean.diff} is the mean of the differences of the distinct
+   %% ordered adjacent \code{times},
+   %% i.e. \eqn{mean(t_{(1)}-t_{(0)}, ..., t_{(K)}-t_{(K-1)})}{mean(t(1)-t(0), ..., t(K)-t(K-1))}.\cr
+   %% If \code{binaryOffset=NULL} when \code{times} and \code{delta} were not provided, then
+   %% \code{binaryOffset=0}.
+   %% }
 
    %% \item{M}{
    %%   For large data sets, to efficiently sample \eqn{f} with Modified LISA MCMC
@@ -212,9 +236,9 @@ that the definition of \code{x.train} is dependent on whether
    the current draw of \eqn{f}.
    }
 
-   \item{keeptrainfits}{
-   If true the draws of \eqn{f(t, x)} for \eqn{x} = rows of x.train are returned.
-   }
+   %% \item{keeptrainfits}{
+   %% If true the draws of \eqn{f(t, x)} for \eqn{x} = rows of x.train are returned.
+   %% }
 
    \item{numcut}{
    The number of possible values of c (see usequants).
@@ -228,21 +252,21 @@ that the definition of \code{x.train} is dependent on whether
    corresponding columns of x.train - 1) c values are used.
    }
 
-   \item{nkeeptrain}{
-   Number of MCMC iterations to be returned for train data.
-   }
-
-   \item{nkeeptest}{
-   Number of MCMC iterations to be returned for test data.
-   }
-
-   %% \item{nkeeptestmean}{
-   %% Number of MCMC iterations to be returned for test mean.
+   %% \item{nkeeptrain}{
+   %% Number of MCMC iterations to be returned for train data.
    %% }
 
-   \item{nkeeptreedraws}{
-   Number of MCMC iterations to be returned for tree draws.
-   }
+   %% \item{nkeeptest}{
+   %% Number of MCMC iterations to be returned for test data.
+   %% }
+
+   %% %% \item{nkeeptestmean}{
+   %% %% Number of MCMC iterations to be returned for test mean.
+   %% %% }
+
+   %% \item{nkeeptreedraws}{
+   %% Number of MCMC iterations to be returned for tree draws.
+   %% }
 
    %% \item{treesaslists}{
    %%   The default behavior is to return the trees as a text string.  If you

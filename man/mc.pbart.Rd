@@ -3,9 +3,9 @@
 \alias{mc.pbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
-For numeric response \eqn{y}, we have
-\eqn{y = f(x) + \epsilon}{y = f(x) + e},
-where \eqn{\epsilon \sim N(0,\sigma^2)}{e ~ N(0,sigma^2)}.\cr
+%% For numeric response \eqn{y}, we have
+%% \eqn{y = f(x) + \epsilon}{y = f(x) + e},
+%% where \eqn{\epsilon \sim N(0,\sigma^2)}{e ~ N(0,sigma^2)}.\cr
 For a binary response \eqn{y}, \eqn{P(Y=1 | x) = F(f(x))}, where \eqn{F}
 denotes the standard normal cdf (probit link).
 
@@ -21,11 +21,12 @@ small amount to the overall fit.
 \usage{
 mc.pbart(
    x.train, y.train, x.test=matrix(0.0,0,0),
-   sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
+   sparse=FALSE, theta=0, omega=1,
+   a=0.5, b=1, augment=FALSE, rho=NULL,
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE,
    k=2.0, power=2.0, base=.95,
-   binaryOffset=0,
+   binaryOffset=NULL,
    ntree=50L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L, printevery=100,
@@ -48,10 +49,10 @@ mc.pbart(
    }
 
    \item{y.train}{
-   Dependent variable for training (in sample) data.\cr
-   If y is numeric a continous response model is fit (normal errors).\cr
-   If y is a factor (or just has values 0 and 1) then a binary response model
-   with a probit link is fit.
+   Binary dependent variable for training (in sample) data.\cr
+   %% If y is numeric a continous response model is fit (normal errors).\cr
+   %% If y is a factor (or just has values 0 and 1) then a binary response model
+   %% with a probit link is fit.
    }
 
    \item{x.test}{
@@ -62,6 +63,8 @@ mc.pbart(
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
+   \item{theta}{Set \eqn{theta} parameter; zero means random.}
+   \item{omega}{Set \eqn{omega} parameter; zero means random.}
    \item{a}{Sparse parameter for \eqn{Beta(a, b)} prior:
      \eqn{0.5<=a<=1} where lower values inducing more sparsity.}
    \item{b}{Sparse parameter for \eqn{Beta(a, b)} prior; typically,
@@ -86,12 +89,13 @@ mc.pbart(
    \item{rm.const}{ Whether or not to remove constant variables.}  
 
    \item{k}{
-   For numeric y,
-   k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
-   The response (y.train) is internally scaled to range from -.5 to .5.
+   %% For numeric y,
+   %% k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
+   %% The response (y.train) is internally scaled to range from -.5 to .5.
    For binary y,
    k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
-   In both cases, the bigger k is, the more conservative the fitting will be.
+   %In both cases,
+   The bigger k is, the more conservative the fitting will be.
    }
 
    \item{power}{
@@ -105,8 +109,8 @@ mc.pbart(
    \item{binaryOffset}{
    Used for binary \eqn{y}.\cr
    The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
-   The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
-   a probability other than .5.
+   %% The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
+   %% a probability other than .5.
    }
 
    \item{ntree}{
@@ -172,13 +176,15 @@ mc.pbart(
 }
 \details{
    BART is an Bayesian MCMC method.
-   At each MCMC interation, we produce a draw from the joint posterior
-   \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
-   and just \eqn{f} in the binary \eqn{y} case.
+   At each MCMC interation, we produce a draw from %% the joint posterior
+   %% \eqn{(f,\sigma) | (x,y)}{(f,sigma) \| (x,y)} in the numeric \eqn{y} case
+   %% and just
+   \eqn{f} in the binary \eqn{y} case.
 
    Thus, unlike a lot of other modelling methods in R, we do not produce a single model object
    from which fits and summaries may be extracted.  The output consists of values
-   \eqn{f^*(x)}{f*(x)} (and \eqn{\sigma^*}{sigma*} in the numeric case) where * denotes a particular draw.
+   \eqn{f^*(x)}{f*(x)} %(and \eqn{\sigma^*}{sigma*} in the numeric case)
+   where * denotes a particular draw.
    The \eqn{x} is either a row from the training data (x.train) or the test data (x.test).
 }
 \value{

@@ -9,7 +9,8 @@ N <- length(arth[ , 'riagendr'])
 table(arth[ , 'riagendr'])
 summary(arth[ , 'bmxbmi'])
 
-post <- mc.pbart(x.train=arth[ , 5:10], y.train=arth[ , 3], mc.cores=5, seed=99)
+post <- mc.pbart(x.train=arth[ , 5:10], y.train=arth[ , 3],
+                 mc.cores=8, seed=99)
 
 bmxbmi <- seq(15, 85, by=5)
 
@@ -24,18 +25,18 @@ for(i in 1:2) for(j in 1:15) {
 table(x.test[ , 'riagendr'])
 table(x.test[ , 'bmxbmi'])
 
-pred <- predict(post, newdata=x.test, mc.cores=5)
+pred <- predict(post, newdata=x.test, mc.cores=8)
 
-prob <- pnorm(pred)
+M <- nrow(pred$prob.test)
 
 ##Friedman's partial dependence function
-pd1 <- matrix(nrow=1000, ncol=15)
-pd2 <- matrix(nrow=1000, ncol=15)
+pd1 <- matrix(nrow=M, ncol=15)
+pd2 <- matrix(nrow=M, ncol=15)
 for(j in 1:15) {
     h <- (j-1)*N
-    pd1[ , j] <- apply(prob[ , h+1:N], 1, mean)
+    pd1[ , j] <- apply(pred$prob.test[ , h+1:N], 1, mean)
     h <- h+N*15
-    pd2[ , j] <- apply(prob[ , h+1:N], 1, mean)
+    pd2[ , j] <- apply(pred$prob.test[ , h+1:N], 1, mean)
 }
 
 pd1.mean <- apply(pd1, 2, mean)
@@ -45,15 +46,16 @@ plot(bmxbmi, pd1.mean, type='l', col='blue',
      ylim=0:1, xlab='BMI', ylab=expression(Phi(f(x))),
      sub='Unweighted NHANES chronic neck pain: M(blue) vs. F(red)')
 lines(bmxbmi, pd2.mean, type='l', col='red')
+##dev.copy2pdf(file='../vignettes/figures/neck.pdf')
 
 ##incorporate survey weights into the posterior
-wt.pd1 <- matrix(nrow=1000, ncol=15)
-wt.pd2 <- matrix(nrow=1000, ncol=15)
+wt.pd1 <- matrix(nrow=M, ncol=15)
+wt.pd2 <- matrix(nrow=M, ncol=15)
 for(j in 1:15) {
     h <- (j-1)*N
-    wt.pd1[ , j] <- prob[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
+    wt.pd1[ , j] <- pred$prob.test[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
     h <- h+N*15
-    wt.pd2[ , j] <- prob[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
+    wt.pd2[ , j] <- pred$prob.test[ , h+1:N] %*% (arth[ , 'wtint2yr']/sum(arth[ , 'wtint2yr']))
 }
 
 wt.pd1.mean <- apply(wt.pd1, 2, mean)

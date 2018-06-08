@@ -34,6 +34,7 @@ predict.lbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()
     else call <- mc.pwbart
 
     ##return(call(newdata, object$treedraws, mc.cores=mc.cores, mu=object$binaryOffset, ...))
+    if(length(object$binaryOffset)==0) object$binaryOffset=object$offset
 
     pred <- list(yhat.test=call(newdata, object$treedraws, mc.cores=mc.cores,
                                 mu=object$binaryOffset, ...))

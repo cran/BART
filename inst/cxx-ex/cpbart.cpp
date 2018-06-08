@@ -26,6 +26,7 @@
 #include "bd.h"
 #include "bart.h"
 #include "rtnorm.h"
+//#include "rtruncnorm.h"
 
 #ifndef NoRcpp
 
@@ -263,6 +264,10 @@ void cpbart(
   for(size_t k=0; k<n; k++) {
     if(iy[k]==0) iz[k]= -rtnorm(0., binaryOffset, 1., gen);
     else iz[k]=rtnorm(0., -binaryOffset, 1., gen);
+/*
+    if(iy[k]==0) iz[k]= -r_lefttruncnorm(0., binaryOffset, 1., gen);
+    else iz[k]=r_lefttruncnorm(0., -binaryOffset, 1., gen);
+*/
   }
 
    //--------------------------------------------------
@@ -297,6 +302,10 @@ void cpbart(
   for(size_t k=0; k<n; k++) {
     if(iy[k]==0) iz[k]= -rtnorm(-bm.f(k), binaryOffset, 1., gen);
     else iz[k]=rtnorm(bm.f(k), -binaryOffset, 1., gen);
+/*
+    if(iy[k]==0) iz[k]= -r_lefttruncnorm(-bm.f(k), binaryOffset, 1., gen);
+    else iz[k]=r_lefttruncnorm(bm.f(k), -binaryOffset, 1., gen);
+*/
   }
 
       if(i>=burn) {

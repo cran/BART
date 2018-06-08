@@ -23,6 +23,7 @@
 #include "tree.h"
 #include "treefuns.h"
 #include "info.h"
+#include <algorithm>
 
 //--------------------------------------------------
 //make xinfo = cutpoints
@@ -58,5 +59,11 @@ void dprop(tree& x, xinfo& xi, pinfo& pi, tree::npv& goodbots, double& PBx, tree
 //--------------------------------------------------
 //draw one mu from post 
 double drawnodemu(size_t n, double sy, double tau, double sigma, rn& gen);
-
+//--------------------------------------------------
+//draw variable splitting probabilities from Dirichlet (Linero, 2018)
+void draw_s(std::vector<size_t>& nv, std::vector<double>& lpv, double& theta, rn& gen);
+//--------------------------------------------------
+//draw Dirichlet sparsity parameter from posterior using grid
+void draw_theta0(bool const_theta, double& theta, std::vector<double>& lpv,
+		 double a, double b, double rho, rn& gen);
 #endif

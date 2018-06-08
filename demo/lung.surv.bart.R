@@ -51,7 +51,7 @@ pre <- surv.pre.bart(times=times, delta=delta, x.train=x.train,
                      x.test=x.train)##(, K=50)
 
 K <- pre$K
-M <- nrow(post$yhat.train)
+M <- post$ndpost
 
 pre$tx.test <- rbind(pre$tx.test, pre$tx.test)
 pre$tx.test[ , 2] <- c(rep(1, N*K), rep(2, N*K))
@@ -84,4 +84,4 @@ lines(c(0, pre$times), c(1, pd.975[males]), col='blue', type='s', lty=2)
 lines(c(0, pre$times), c(1, pd.mu[females]), col='red', type='s')
 lines(c(0, pre$times), c(1, pd.025[females]), col='red', type='s', lty=2)
 lines(c(0, pre$times), c(1, pd.975[females]), col='red', type='s', lty=2)
-
+##dev.copy2pdf(file='../vignettes/figures/lung.pdf')

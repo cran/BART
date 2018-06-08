@@ -19,6 +19,30 @@
 
 #include "latent.h"
 
+#ifndef NoRcpp
+
+RcppExport SEXP cdraw_lambda(SEXP lambda, SEXP mean, SEXP kmax, SEXP thin) {
+  rk_state *state;
+  newRNGstates();
+  state = states[0];
+  double x=draw_lambda_i(Rcpp::as<double>(lambda), Rcpp::as<double>(mean),
+			 Rcpp::as<int>(kmax), Rcpp::as<int>(thin), state);
+  deleteRNGstates();
+  return Rcpp::wrap(x);
+}
+
+RcppExport SEXP cdraw_z(SEXP mean, SEXP tau, SEXP lambda) {
+  rk_state *state;
+  newRNGstates();
+  state = states[0];
+  double z=rtnorm_reject(Rcpp::as<double>(mean), Rcpp::as<double>(tau),
+			 sqrt(Rcpp::as<double>(lambda)), state);
+  deleteRNGstates();
+  return Rcpp::wrap(z);
+}
+
+#endif
+
 /*
  * draw_lambda_prior:
  *

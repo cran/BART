@@ -245,3 +245,18 @@ double rtnorm_reject(double mean, double tau, double sd, rk_state* state)
   return(x);
 
 }
+
+#ifndef NoRcpp
+
+RcppExport SEXP crtnorm_reject(SEXP mean, SEXP tau, SEXP sd) {
+  rk_state *state;
+  newRNGstates();
+  state = states[0];
+  double z=rtnorm_reject(Rcpp::as<double>(mean),
+			   Rcpp::as<double>(tau), 
+			   Rcpp::as<double>(sd), state);
+  deleteRNGstates();
+  return Rcpp::wrap(z);
+}
+
+#endif

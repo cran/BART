@@ -1,3 +1,35 @@
+Changes and New Features in 1.7 (2018-06-08):
+
+	* enhancement: generalized, or generic, BART: gbart/mc.gbart
+	unites continuous and binary BART in one function call
+	re-based time-to-event BARTs on gbart as well
+
+	* enhancement: binaryOffset=NULL specifies 
+	binaryOffset=qXXXX(mean(y.train)) for pbart/mc.pbart,
+	lbart/mc.lbart, mbart/mc.mbart; offset=NULL does the
+	same for gbart/mc.gbart, surv.bart/mc.surv.bart, 
+	recur.bart/mc.recur.bart, crisk.bart/mc.crisk.bart
+	and crisk2.bart/mc.crisk2.bart (note: competing 
+	cause 2 is handled analogously for offset2=NULL)
+
+	* enhancement: multinomial BART rebased on probit BART for 
+	computational efficiency
+
+	* bug fix: several corrections in probit and logistic BART.
+	Note that this may change your results for binary and
+	time-to-event outcomes.  For probit BART, the correction
+	generally leads to a small change in the results.  However,
+	the logistic BART correction may lead to more substantial
+	changes.
+
+	* doc fix: correct docs for the binary case in pbart/mc.pbart, 
+	lbart and mbart; and correct docs for the numeric case in
+	wbart/mc.wbart
+
+	* enhancement: robust Gamma generation for small scale parameter
+
+	* enhancement: more robust sparse Dirichlet prior implementation
+
 Changes and New Features in 1.6 (2018-03-19):
 
 	* for binary outcomes, new default for ntree=50
@@ -10,18 +42,18 @@ Changes and New Features in 1.6 (2018-03-19):
 	  K parameter which coarsens time per the quantiles
           1/K, 2/K, ..., K/K.
 
-	* fix bug: x.test/x.test2 now properly transposed if needed
+	* bug fix: x.test/x.test2 now properly transposed if needed
 	  for post-processing
 
-	* fix bug: sparse Dirichlet prior now corrected for 
+	* bug fix: sparse Dirichlet prior now corrected for 
 	  random theta update.  Thanks to Antonio Linero for
 	  the detailed bug report.
 
 Changes and New Features in 1.5 (2018-02-08):
 
-        * fix bug: ambiguous call of floor surrounding integer division
+        * bug fix: ambiguous call of floor surrounding integer division
 
-	* fix bug: x.test is not an argument of recur.pre.bart
+	* bug fix: x.test is not an argument of recur.pre.bart
 
 Changes and New Features in 1.4 (2018-02-02):
 

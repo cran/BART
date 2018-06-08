@@ -40,3 +40,4 @@ plot(X, pnorm(X^3), type='l',
 lines(x, prob.mean, col='blue')
 lines(x, prob.025, col='red')
 lines(x, prob.975, col='red')
+dev.copy2pdf(file='cube-pbart.pdf')

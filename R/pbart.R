@@ -23,7 +23,7 @@ a=0.5, b=1, augment=FALSE, rho=NULL,
 xinfo=matrix(0.0,0,0), usequants=FALSE,
 cont=FALSE, rm.const=TRUE,
 k=2.0, power=2.0, base=.95,
-binaryOffset=0,
+binaryOffset=NULL,
 ntree=50L, numcut=100L,
 ndpost=1000L, nskip=100L, keepevery=1L,
 nkeeptrain=ndpost, nkeeptest=ndpost,
@@ -37,8 +37,7 @@ printevery=100L, transposed=FALSE
 #data
 n = length(y.train)
 
-##if(length(binaryOffset)==0) binaryOffset <- 0
-##else binaryOffset=qnorm(mean(y.train))
+if(length(binaryOffset)==0) binaryOffset=qnorm(mean(y.train))
 
 if(!transposed) {
     temp = bartModelMatrix(x.train, numcut, usequants=usequants,
@@ -108,6 +107,7 @@ if((nkeeptreedraws!=0) & ((ndpost %% nkeeptreedraws) != 0)) {
 ##    tau = sigmaf/sqrt(ntree)
 ## }
 #--------------------------------------------------
+ptm <- proc.time()
 #call
 res = .Call("cpbart",
             n,  #number of observations in training data
@@ -140,7 +140,9 @@ res = .Call("cpbart",
             ##treesaslists,
             xinfo
 )
-
+    
+res$proc.time <- proc.time()-ptm
+    
 if(nkeeptrain>0) {
     ##res$yhat.train.mean <- NULL
     ##res$yhat.train.mean = res$yhat.train.mean+binaryOffset
@@ -166,8 +168,8 @@ if(np>0) {
 if(nkeeptreedraws>0) ## & !treesaslists)
     names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
 
-dimnames(res$varcount)[[2]] = dimnames(x.train)[[1]]
-dimnames(res$varprob)[[2]] = dimnames(x.train)[[1]]
+dimnames(res$varcount)[[2]] = as.list(dimnames(x.train)[[1]])
+dimnames(res$varprob)[[2]] = as.list(dimnames(x.train)[[1]])
 res$varcount.mean <- apply(res$varcount, 2, mean)
 res$varprob.mean <- apply(res$varprob, 2, mean)
 res$rm.const <- rm.const

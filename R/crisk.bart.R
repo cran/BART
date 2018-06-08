@@ -18,32 +18,39 @@
 
 
 crisk.bart <- function(
-    x.train=matrix(0.0, 0L, 0L), y.train=NULL,
+    x.train=matrix(0,0,0), y.train=NULL,
     x.train2=x.train, y.train2=NULL,
     times=NULL, delta=NULL, K=NULL,
-    x.test=matrix(0.0, 0L, 0L), x.test2=x.test, cond=NULL,
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
-    xinfo=matrix(0.0,0,0), xinfo2=matrix(0.0,0,0), usequants=FALSE,
-    cont=FALSE, rm.const=TRUE, type='pbart',
-    k = 2.0, ## BEWARE: do NOT use k for other purposes below
-    power = 2.0, base = 0.95,
-    binaryOffset = NULL,
-    binaryOffset2 = NULL,
+    x.test=matrix(0,0,0), x.test2=x.test, cond=NULL,
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL, rho2=NULL,
+    xinfo=matrix(0,0,0), xinfo2=matrix(0,0,0), usequants=FALSE,
+    ##cont=FALSE,
+    rm.const=TRUE, type='pbart',
+    ntype=as.integer(
+        factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+    k = 2, ## BEWARE: do NOT use k for other purposes below
+    power = 2, base = 0.95,
+    offset = NULL, offset2 = NULL,
+    tau.num=c(NA, 3, 6)[ntype], ##tau.num2=c(NA, 3, 6)[ntype],
+    ##binaryOffset = NULL, binaryOffset2 = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L,
     keepevery = 10L,
-    nkeeptrain=ndpost, nkeeptest=ndpost,
+    ##nkeeptrain=ndpost, nkeeptest=ndpost,
     ##nkeeptestmean=ndpost,
-    nkeeptreedraws=ndpost,
+    ##nkeeptreedraws=ndpost,
     printevery=100L,
     ##treesaslists=FALSE,
-    keeptrainfits=TRUE,
+    ##keeptrainfits=TRUE,
     id = NULL,
     seed=99,    ## mc.crisk.bart only
     mc.cores=2, ## mc.crisk.bart only
     nice=19L    ## mc.crisk.bart only
 )
 {
+    if(is.na(ntype) || ntype==1)
+        stop("type argument must be set to either 'pbart' or 'lbart'")
 
     x.train2 <- bartModelMatrix(x.train2)
     x.test2 <- bartModelMatrix(x.test2)
@@ -68,8 +75,8 @@ crisk.bart <- function(
         K       <- pre$K
 
         if(length(cond)==0) cond <- pre$cond
-        if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
-        if(length(binaryOffset2)==0) binaryOffset2 <- pre$binaryOffset2
+        ##if(length(binaryOffset)==0) binaryOffset <- pre$binaryOffset
+        ##if(length(binaryOffset2)==0) binaryOffset2 <- pre$binaryOffset2
     }
     else {
         if(length(x.train)>0 & length(x.train2)>0 & nrow(x.train)!=nrow(x.train2))
@@ -78,8 +85,8 @@ crisk.bart <- function(
         if(length(x.test)>0 & length(x.test2)>0 & nrow(x.test)!=nrow(x.test2))
             stop('number of rows in x.test and x.test2 must be equal')
 
-        if(length(binaryOffset)==0) binaryOffset <- 0
-        if(length(binaryOffset2)==0) binaryOffset2 <- 0
+        ##if(length(binaryOffset)==0) binaryOffset <- 0
+        ##if(length(binaryOffset2)==0) binaryOffset2 <- 0
 
         times <- unique(sort(x.train[ , 1]))
         K     <- length(times)
@@ -87,7 +94,8 @@ crisk.bart <- function(
 
     if(length(xinfo)==0) {
         temp = bartModelMatrix(x.train2[cond, ], numcut, usequants=usequants,
-                               cont=cont, xinfo=xinfo, rm.const=rm.const)
+                               ##cont=cont,
+                               xinfo=xinfo, rm.const=rm.const)
         x.train2 = t(temp$X)
         numcut2 = temp$numcut
         xinfo2 = temp$xinfo
@@ -97,7 +105,8 @@ crisk.bart <- function(
         rm(temp)
 
         temp = bartModelMatrix(x.train, numcut, usequants=usequants,
-                               cont=cont, xinfo=xinfo, rm.const=rm.const)
+                               ##cont=cont,
+                               xinfo=xinfo, rm.const=rm.const)
         x.train = t(temp$X)
         numcut = temp$numcut
         xinfo = temp$xinfo
@@ -116,46 +125,63 @@ crisk.bart <- function(
         transposed <- FALSE
     }
 
-    if(type=='pbart') call <- pbart
-    else if(type=='lbart') {
-        binaryOffset <- 0
-        call <- lbart
-    }
+    ## if(length(binaryOffset)==0)
+    ##     binaryOffset <- qnorm(mean(y.train))
 
-    post <- call(x.train=x.train, y.train=y.train, x.test=x.test,
-                 sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+    ## if(length(binaryOffset2)==0)
+    ##     binaryOffset2 <- qnorm(mean(y.train2[cond]))
+
+    ## if(type=='pbart') call <- pbart
+    ## else if(type=='lbart') {
+    ##     ##binaryOffset <- 0
+    ##     ##binaryOffset2 <- 0
+    ##     call <- lbart
+    ## }
+
+    post <- gbart(x.train=x.train, y.train=y.train,
+                  x.test=x.test, type=type,
+                  sparse=sparse, theta=theta, omega=omega,
+                  a=a, b=b, augment=augment, rho=rho,
                   xinfo=xinfo, usequants=usequants,
-                  cont=cont, rm.const=rm.const,
+                  ##cont=cont,
+                  rm.const=rm.const,
                   k=k, power=power, base=base,
-                  binaryOffset=binaryOffset,
+                  offset=offset, tau.num=tau.num,
+                  ##binaryOffset=binaryOffset,
                   ntree=ntree, numcut=numcut,
                   ndpost=ndpost, nskip=nskip,
-                  keepevery=keepevery, nkeeptrain=0,
-                  nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
-                  nkeeptreedraws=nkeeptreedraws, printevery=printevery,
+                  keepevery=keepevery, ##nkeeptrain=0,
+                  ##nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
+                  ##nkeeptreedraws=nkeeptreedraws,
+                  printevery=printevery,
                   transposed=transposed) #, treesaslists=treesaslists)
 
     if(type!=attr(post, 'class')) return(post)
 
     ##post2 <- call(x.train=as.matrix(x.train2[cond, ]),
-    post2 <- call(x.train=x.train2,
-                   y.train=y.train2[cond], x.test=x.test2,
-                   sparse=sparse, a=a, b=b, augment=augment, rho=rho2,
+    post2 <- gbart(x.train=x.train2, y.train=y.train2[cond],
+                   x.test=x.test2, type=type,
+                   sparse=sparse, theta=theta, omega=omega,
+                   a=a, b=b, augment=augment, rho=rho2,
                    xinfo=xinfo2, usequants=usequants,
-                   cont=cont, rm.const=rm.const,
+                   ##cont=cont,
+                   rm.const=rm.const,
                    k=k, power=power, base=base,
-                   binaryOffset=binaryOffset2,
+                   offset=offset2, tau.num=tau.num,
+                   ##binaryOffset=binaryOffset2,
                    ntree=ntree, numcut=numcut2,
                    ndpost=ndpost, nskip=nskip,
-                   keepevery=keepevery, nkeeptrain=0,
-                   nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
-                   nkeeptreedraws=nkeeptreedraws, printevery=printevery,
+                   keepevery=keepevery, ##nkeeptrain=0,
+                   ##nkeeptest=nkeeptest, #nkeeptestmean=nkeeptestmean,
+                   ##nkeeptreedraws=nkeeptreedraws,
+                   printevery=printevery,
                    transposed=transposed) #, treesaslists=treesaslists)
 
     if(type!=attr(post2, 'class')) return(post2)
 
-    post$binaryOffset <- binaryOffset
-    post$binaryOffset2 <- binaryOffset2
+    ##post$binaryOffset <- binaryOffset
+    post$offset2 <- post2$offset
+    ##post$binaryOffset2 <- post2$binaryOffset
     post$id <- id
     post$times <- times
     post$K <- K

@@ -33,6 +33,8 @@ predict.recurbart <- function(object, newdata, mc.cores=1, openmp=(mc.cores.open
     if(.Platform$OS.type != "unix" || openmp || mc.cores==1) call <- recur.pwbart
     else call <- mc.recur.pwbart
 
+    if(length(object$binaryOffset)==0) object$binaryOffset=object$offset
+
     return(call(newdata, object$treedraws, mc.cores=mc.cores,
                 binaryOffset=object$binaryOffset,
                 type=object$type, ...))

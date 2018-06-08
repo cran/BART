@@ -24,7 +24,7 @@ mc.lbart <- function(
     cont=FALSE, rm.const=TRUE, tau.interval=0.95,
     k = 2.0, ## BEWARE: do NOT use k for other purposes below
     power = 2.0, base = 0.95,
-    binaryOffset = 0,
+    binaryOffset = NULL,
     ntree=50L, numcut=100L,
     ndpost=1000L, nskip=100L,
     keepevery=1L, printevery=100L,
@@ -91,27 +91,32 @@ mc.lbart <- function(
 
     if(mc.cores==1 | attr(post, 'class')!='lbart') return(post)
     else {
-        p <- nrow(x.train[ , post$rm.const])
+        if(class(rm.const)!='logical') post$rm.const <- rm.const
+        post$ndpost <- mc.cores*mc.ndpost
+        p <- nrow(x.train[post$rm.const, ])
 
         ##if(length(rm.const)==0) rm.const <- 1:p
         ##post$rm.const <- rm.const
 
-        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
-        ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+        old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree),
+                           ' ', as.character(p))
         old.stop <- nchar(old.text)
 
         post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
-                                    ##paste0(as.character(mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
+                                    paste0(as.character(post$ndpost), ' ',
+                                           as.character(ntree), ' ',
                                            as.character(p)),
                                     post$treedraws$trees)
 
         keeptestfits <- length(x.test)>0
 
         for(i in 2:mc.cores) {
-            if(keeptrainfits) post$yhat.train <- rbind(post$yhat.train, post.list[[i]]$yhat.train)
+            if(keeptrainfits)
+                post$yhat.train <- rbind(post$yhat.train,
+                                         post.list[[i]]$yhat.train)
 
-            if(keeptestfits) post$yhat.test <- rbind(post$yhat.test, post.list[[i]]$yhat.test)
+            if(keeptestfits) post$yhat.test <- rbind(post$yhat.test,
+                                                     post.list[[i]]$yhat.test)
 
             post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
             post$varprob <- rbind(post$varprob, post.list[[i]]$varprob)

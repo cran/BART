@@ -45,7 +45,7 @@ surv.pre.bart <- function(
     ## can be extended later
     ## most likely via the alternative counting process notation
 
-    binaryOffset <- qnorm(1-exp(-sum(delta)/sum(times)))
+    ##binaryOffset <- qnorm(1-exp(-sum(delta)/sum(times)))
 
     N <- length(times)
 
@@ -86,6 +86,8 @@ surv.pre.bart <- function(
 
     m <- length(y.train)
 
+    ##binaryOffset <- qnorm(mean(y.train))
+
     if(length(x.train)==0) {
         p <- 0
         n <- 1
@@ -122,6 +124,7 @@ surv.pre.bart <- function(
     }
     else X.test <- matrix(nrow=0, ncol=0)*0
 
-    return(list(y.train=y.train, tx.train=X.train, tx.test=X.test, times=events, K=K,
-                binaryOffset=binaryOffset))
+    return(list(y.train=y.train, tx.train=X.train, tx.test=X.test,
+                times=events, K=K))
+                ##binaryOffset=binaryOffset))
 }

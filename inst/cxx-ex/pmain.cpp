@@ -22,7 +22,8 @@ int main(void) {
    for(size_t i=0; i<nkeeptest; ++i) tedraw[i]=&_tedraw[i*np];
 
   cpbart(n, p, np, &xtrain[0], &y[0], &xtest[0], m, &nc[0], nd, burn,
-	 mybeta, alpha, binaryOffset, tau, false, 1., 1., p, true,
+	 mybeta, alpha, binaryOffset, tau, 0, 0., 0., NULL, 0., 0., 0., 0,
+//false, 1., 1., p, true,
 	 nkeeptrain, nkeeptest, nkeeptreedraws, printevery, 
 	 n1, n2, _trdraw, _tedraw);
 

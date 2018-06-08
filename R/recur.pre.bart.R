@@ -81,6 +81,8 @@ recur.pre.bart <- function(
 
     m <- length(y.train)
 
+    ##binaryOffset <- qnorm(mean(y.train))
+    
     if(length(x.train)==0) {
         p <- 0
         n <- 1
@@ -172,5 +174,5 @@ recur.pre.bart <- function(
     }
 
     return(list(y.train=y.train, tx.train=X.train, tx.test=X.test,
-                times=events, K=K))
+                times=events, K=K)) ##, binaryOffset=binaryOffset))
 }

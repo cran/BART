@@ -1,6 +1,7 @@
 /*
  *  BART: Bayesian Additive Regression Trees
- *  Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+ *  Copyright (C) 2017-2018 Robert McCulloch, Rodney Sparapani
+ *                          and Robert Gramacy
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +19,17 @@
  */
 
 #include "rtnorm.h"
+
+#ifndef NoRcpp
+
+RcppExport SEXP crtnorm(SEXP mean, SEXP tau, SEXP sd) {
+  arn gen;
+  return Rcpp::wrap(rtnorm(Rcpp::as<double>(mean),
+			   Rcpp::as<double>(tau), 
+			   Rcpp::as<double>(sd), gen));
+}
+
+#endif
 
 double rtnorm(double mean, double tau, double sd, rn& gen)
 {
@@ -39,7 +51,8 @@ double rtnorm(double mean, double tau, double sd, rn& gen)
 
     /* do the rejection sampling */
     do {
-      z = lambda*gen.exp() + tau;
+      z = gen.exp()/lambda + tau;
+      //z = lambda*gen.exp() + tau;
     } while (gen.uniform() > exp(-0.5*pow(z - lambda, 2.)));
   }
 

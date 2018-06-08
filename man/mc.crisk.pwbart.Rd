@@ -20,7 +20,8 @@ small amount to the overall fit.
 mc.crisk.pwbart( x.test, x.test2,
                  treedraws, treedraws2,
                  binaryOffset=0, binaryOffset2=0,
-                 mc.cores=2L, transposed=FALSE, nice=19L
+                 mc.cores=2L, type='pbart',
+                 transposed=FALSE, nice=19L
                )
 }
 \arguments{
@@ -50,6 +51,9 @@ mc.crisk.pwbart( x.test, x.test2,
    \item{mc.cores}{
    Number of threads to utilize.
    }
+
+   \item{type}{ Whether to employ Albert-Chib, \code{'pbart'}, or
+     Holmes-Held, \code{'lbart'}. }
 
    \item{transposed}{
    When running \code{pwbart} or \code{mc.pwbart} in parallel, it is more memory-efficient
@@ -116,22 +120,16 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 
 data(transplant)
 
-pfit <- survfit(Surv(futime, event) ~ abo, transplant)
-
-# competing risks for type O
-plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 1),
-       xlab='t (months)', ylab='Aalen-Johansen (AJ) CI(t)')
-legend(450, .4, c("Death", "Transplant", "Withdrawal"), col=1:3, lwd=2)
-
 delta <- (as.numeric(transplant$event)-1)
-
+## recode so that delta=1 is cause of interest; delta=2 otherwise
 delta[delta==1] <- 4
 delta[delta==2] <- 1
 delta[delta>1] <- 2
 table(delta, transplant$event)
 
-table(1+floor(transplant$futime/30.5)) ## months
-times <- 1+floor(transplant$futime/30.5)
+times <- pmax(1, ceiling(transplant$futime/7)) ## weeks
+##times <- pmax(1, ceiling(transplant$futime/30.5)) ## months
+table(times)
 
 typeO <- 1*(transplant$abo=='O')
 typeA <- 1*(transplant$abo=='A')
@@ -141,64 +139,62 @@ table(typeA, typeO)
 
 x.train <- cbind(typeO, typeA, typeB, typeAB)
 
+x.test <- cbind(1, 0, 0, 0)
+dimnames(x.test)[[2]] <- dimnames(x.train)[[2]]
+
 ## parallel::mcparallel/mccollect do not exist on windows
 if(.Platform$OS.type=='unix') {
 ##test BART with token run to ensure installation works
         post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta,
-                                  seed=99, mc.cores=2, nskip=5, ndpost=5, keepevery=1)
+                               seed=99, mc.cores=2, nskip=5, ndpost=5,
+                               keepevery=1)
 
-        N <- nrow(x.train)
-
-        x.test <- x.train
-
-        x.test[1:N, 1:4] <- matrix(c(1, 0, 0, 0), nrow=N, ncol=4, byrow=TRUE)
-
-        pre <- crisk.pre.bart(x.train=x.train, x.test=x.test, times=times, delta=delta)
+        pre <- surv.pre.bart(x.train=x.train, x.test=x.test,
+                             times=times, delta=delta)
 
         K <- post$K
 
-        pred <- mc.crisk.pwbart(pre$tx.test, pre$tx.test2,
+        pred <- mc.crisk.pwbart(pre$tx.test, pre$tx.test,
                                 post$treedraws, post$treedraws2,
                                 post$binaryOffset, post$binaryOffset2)
 }
 
 \dontrun{
-post <- mc.crisk.bart(x.train=x.train, times=times, delta=delta,
-                      seed=99, mc.cores=8)
 
-N <- nrow(x.train)
+## run one long MCMC chain in one process
+## set.seed(99)
+## post <- crisk.bart(x.train=x.train, times=times, delta=delta, x.test=x.test)
 
-x.test <- x.train
+## in the interest of time, consider speeding it up by parallel processing
+## run "mc.cores" number of shorter MCMC chains in parallel processes
+post <- mc.crisk.bart(x.train=x.train,
+                       times=times, delta=delta,
+                       x.test=x.test, seed=99, mc.cores=8)
 
-x.test[1:N, 1:4] <- matrix(c(1, 0, 0, 0), nrow=N, ncol=4, byrow=TRUE)
+check <- mc.crisk.pwbart(post$tx.test, post$tx.test,
+                          post$treedraws, post$treedraws2,
+                          post$binaryOffset,
+                          post$binaryOffset2, mc.cores=8)
+## check <- predict(post, newdata=post$tx.test, newdata2=post$tx.test2,
+##                  mc.cores=8)
 
-pre <- crisk.pre.bart(x.train=x.train, x.test=x.test, times=times, delta=delta)
+print(c(post$surv.test.mean[1], check$surv.test.mean[1],
+        post$surv.test.mean[1]-check$surv.test.mean[1]), digits=22)
 
-K <- post$K
+print(all(round(post$surv.test.mean, digits=9)==
+    round(check$surv.test.mean, digits=9)))
 
-pred <- mc.crisk.pwbart(pre$tx.test, pre$tx.test2,
-                        post$treedraws, post$treedraws2,
-                        post$binaryOffset, post$binaryOffset2)
+print(c(post$cif.test.mean[1], check$cif.test.mean[1],
+        post$cif.test.mean[1]-check$cif.test.mean[1]), digits=22)
 
-typeO.prob <- matrix(0, nrow=nrow(pred$prob.test), ncol=K)
+print(all(round(post$cif.test.mean, digits=9)==
+    round(check$cif.test.mean, digits=9)))
 
-for(i in 1:N) for(j in 1:K) {
-                  h <- (i-1)*K+j
-                  typeO.prob[ , j] <- typeO.prob[ , j]+ pred$prob.test[ , h]/N
-                  }
+print(c(post$cif.test2.mean[1], check$cif.test2.mean[1],
+        post$cif.test2.mean[1]-check$cif.test2.mean[1]), digits=22)
 
-typeO.prob.mean <- apply(typeO.prob, 2, mean)
-typeO.prob.025 <- apply(typeO.prob, 2, quantile, probs=0.025)
-typeO.prob.975 <- apply(typeO.prob, 2, quantile, probs=0.975)
-
-plot(pfit[4,], xscale=30.5, xmax=735, col=1:3, lwd=2, ylim=c(0, 0.8),
-       xlab='t (months)', ylab='CI(t)')
-points(c(0, post$times)*30.5, c(0, typeO.prob.mean), col=4, type='s', lwd=2)
-points(c(0, post$times)*30.5, c(0, typeO.prob.025), col=4, type='s', lwd=2, lty=2)
-points(c(0, post$times)*30.5, c(0, typeO.prob.975), col=4, type='s', lwd=2, lty=2)
-     legend(450, .4, c("Transplant(BART)", "Transplant(AJ)",
-                       "Death(AJ)", "Withdrawal(AJ)"),
-            col=c(4, 2, 1, 3), lwd=2)
+print(all(round(post$cif.test2.mean, digits=9)==
+    round(check$cif.test2.mean, digits=9)))
 
 }
 }

@@ -36,4 +36,10 @@ double rtnorm_reject(double mean, double tau, double sd, rk_state* state);
 double rexpo(double scale, rk_state* state);
 double expo_rand(rk_state *state);
 
+#ifndef NoRcpp
+
+RcppExport SEXP crtnorm_reject(SEXP, SEXP, SEXP);
+
+#endif
+
 #endif

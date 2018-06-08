@@ -17,22 +17,27 @@
 ## https://www.R-project.org/Licenses/GPL-2
 
 mc.recur.bart <- function(
-    x.train = matrix(0.0, 0L, 0L),
+    x.train = matrix(0,0,0),
     y.train=NULL, times=NULL, delta=NULL,
-    x.test = matrix(0.0, 0L, 0L),
+    x.test = matrix(0,0,0),
     x.test.nogrid = FALSE, ## you may not need the whole grid
-    sparse=FALSE, a=0.5, b=1, augment=FALSE, rho=NULL,
-    xinfo=matrix(0.0,0,0), usequants=FALSE,
-    cont=FALSE, rm.const=TRUE, type='pbart',
-    k = 2.0, ## BEWARE: do NOT use k for other purposes below
-    power = 2.0, base = 0.95,
-    binaryOffset = NULL,
+    sparse=FALSE, theta=0, omega=1,
+    a=0.5, b=1, augment=FALSE, rho=NULL,
+    xinfo=matrix(0,0,0), usequants=FALSE,
+    ##cont=FALSE,
+    rm.const=TRUE, type='pbart',
+    ntype=as.integer(
+        factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+    k = 2, ## BEWARE: do NOT use k for other purposes below
+    power = 2, base = 0.95,
+    offset = NULL, tau.num=c(NA, 3, 6)[ntype],
+    ##binaryOffset = NULL,
     ntree = 50L, numcut = 100L,
     ndpost = 1000L, nskip = 250L,
     keepevery = 10L,
-    nkeeptrain=ndpost, nkeeptest=ndpost,
+    ##nkeeptrain=ndpost, nkeeptest=ndpost,
     ##nkeeptestmean=ndpost,
-    nkeeptreedraws=ndpost,
+    ##nkeeptreedraws=ndpost,
     printevery=100L,
     ##treesaslists=FALSE,
     keeptrainfits=TRUE,
@@ -48,6 +53,9 @@ mc.recur.bart <- function(
     set.seed(seed)
     parallel::mc.reset.stream()
 
+    if(is.na(ntype) || ntype==1)
+        stop("type argument must be set to either 'pbart' or 'lbart'")
+
     x.train <- bartModelMatrix(x.train)
     ##x.test <- bartModelMatrix(x.test)
 
@@ -58,15 +66,15 @@ mc.recur.bart <- function(
         y.train <- recur$y.train
         x.train <- recur$tx.train
         x.test  <- recur$tx.test
-
-        if(length(binaryOffset)==0) {
-            lambda <- sum(delta, na.rm=TRUE)/
-                sum(apply(times, 1, max, na.rm=TRUE))
-            ##lambda <- sum(delta)/sum(times[ , ncol(times)])
-            binaryOffset <- qnorm(1-exp(-lambda))
-        }
     }
-    else if(length(binaryOffset)==0) binaryOffset <- 0
+    ##     if(length(binaryOffset)==0) {
+    ##         lambda <- sum(delta, na.rm=TRUE)/
+    ##             sum(apply(times, 1, max, na.rm=TRUE))
+    ##         ##lambda <- sum(delta)/sum(times[ , ncol(times)])
+    ##         binaryOffset <- qnorm(1-exp(-lambda))
+    ##     }
+    ## }
+    ## else if(length(binaryOffset)==0) binaryOffset <- 0
 
     H <- 1
     Mx <- 2^31-1
@@ -108,16 +116,19 @@ mc.recur.bart <- function(
             parallel::mcparallel({psnice(value=nice);
                 recur.bart(x.train=x.train, y.train=y.train,
                            x.test=x.test, x.test.nogrid=x.test.nogrid,
-                           sparse=sparse, a=a, b=b, augment=augment, rho=rho,
+                           sparse=sparse, theta=theta, omega=omega,
+                           a=a, b=b, augment=augment, rho=rho,
                            xinfo=xinfo, usequants=usequants,
-                           cont=cont, rm.const=rm.const, type=type,
+                           ##cont=cont,
+                           rm.const=rm.const, type=type,
                            k=k, power=power, base=base,
-                           binaryOffset=binaryOffset,
+                           offset=offset, tau.num=tau.num,
+                           ##binaryOffset=binaryOffset,
                            ntree=ntree, numcut=numcut,
                            ndpost=mc.ndpost, nskip=nskip, keepevery=keepevery,
-                           nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
+                           ##nkeeptrain=mc.ndpost, nkeeptest=mc.ndpost,
                            ##nkeeptestmean=mc.ndpost,
-                           nkeeptreedraws=mc.ndpost,
+                           ##nkeeptreedraws=mc.ndpost,
                            printevery=printevery, ##treesaslists=treesaslists,
                            keeptrainfits=keeptrainfits)},
                 silent=(i!=1))
@@ -133,25 +144,29 @@ mc.recur.bart <- function(
         for(h in 1:H) for(i in mc.cores:1) {
             if(h==1 & i==mc.cores) {
                 post <- post.list[[1]][[mc.cores]]
-
+                post$ndpost <- H*mc.cores*mc.ndpost
                 p <- ncol(x.train[ , post$rm.const])
 
-                old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree), ' ', as.character(p))
-                ##old.text <- paste0(as.character(mc.nkeep), ' ', as.character(ntree), ' ', as.character(p))
+                old.text <- paste0(as.character(mc.ndpost), ' ',
+                                   as.character(ntree), ' ', as.character(p))
                 old.stop <- nchar(old.text)
 
                 post$treedraws$trees <- sub(old.text,
-                                            paste0(as.character(H*mc.cores*mc.ndpost), ' ', as.character(ntree), ' ',
-                                            ##paste0(as.character(H*mc.cores*mc.nkeep), ' ', as.character(ntree), ' ',
-                                                   as.character(p)),
+                                            paste0(as.character(post$ndpost),
+                                                   ' ', as.character(ntree),
+                                                   ' ', as.character(p)),
                                             post$treedraws$trees)
             }
             else {
                 if(keeptrainfits) {
-                    post$yhat.train <- rbind(post$yhat.train, post.list[[h]][[i]]$yhat.train)
-                    post$prob.train <- rbind(post$prob.train, post.list[[h]][[i]]$prob.train)
-                    post$haz.train <- rbind(post$haz.train, post.list[[h]][[i]]$haz.train)
-                    post$cum.train <- rbind(post$cum.train, post.list[[h]][[i]]$cum.train)
+                    post$yhat.train <- rbind(post$yhat.train,
+                                             post.list[[h]][[i]]$yhat.train)
+                    post$prob.train <- rbind(post$prob.train,
+                                             post.list[[h]][[i]]$prob.train)
+                    post$haz.train <- rbind(post$haz.train,
+                                            post.list[[h]][[i]]$haz.train)
+                    post$cum.train <- rbind(post$cum.train,
+                                            post.list[[h]][[i]]$cum.train)
                 }
 
                 if(length(x.test)>0) {

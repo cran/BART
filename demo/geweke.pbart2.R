@@ -47,7 +47,8 @@ for(n in c(100, 1000, 10000)) {
 
     for(i in 1:10) {
         h <- (i-1)*n+1:n
-        pred[ , i] <- apply(pnorm(mc.test[ , h]), 1, mean)
+        pred[ , i] <- apply(mc.test$prob.test[ , h], 1, mean)
+        ##pred[ , i] <- apply(pnorm(mc.test[ , h]), 1, mean)
     }
 
     pred <- apply(pred, 2, mean)
@@ -103,7 +104,7 @@ for(n in c(100, 1000, 10000)) {
     text(c(1, 1), c(-3.891, 3.891), pos=2, cex=0.6, labels='0.9999')
     text(c(1, 1), c(-4.417, 4.417), pos=2, cex=0.6, labels='0.99999')
 
-    dev.copy2pdf(file=paste0('../inst/doc/geweke-pbart2-', n, '.pdf'))
+    dev.copy2pdf(file=paste0('../inst/bootcamp/geweke-pbart2-', n, '.pdf'))
 }
 
 par(mfrow=c(1, 1))

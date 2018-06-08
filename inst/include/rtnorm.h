@@ -1,6 +1,7 @@
 /*
  *  BART: Bayesian Additive Regression Trees
- *  Copyright (C) 2017 Robert Gramacy
+ *  Copyright (C) 2017-2018 Robert McCulloch, Rodney Sparapani
+ *                          and Robert Gramacy
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,23 +18,17 @@
  *  https://www.R-project.org/Licenses/GPL-2
  */
 
-#ifndef __RAND_DRAWS_H__
-#define __RAND_DRAWS_H__
+#ifndef GUARD_rtnorm
+#define GUARD_rtnorm
 
 #include "common.h"
-#include "randomkit.h"
-#include <stdlib.h>
-#include <assert.h>
 
-void newRNGstates(void);
-void deleteRNGstates(void);
-double runi(rk_state *state);
-void rnor(double *x, rk_state *state);
-double rexpo(double lambda, rk_state *state);
-double sq(double x);
-double rinvgauss(const double mu, const double lambda);
-double rtnorm_reject(double mean, double tau, double sd, rk_state* state);
-double rexpo(double scale, rk_state* state);
-double expo_rand(rk_state *state);
+double rtnorm(double mean, double tau, double sd, rn& gen);
+
+#ifndef NoRcpp
+
+RcppExport SEXP crtnorm(SEXP, SEXP, SEXP);
+
+#endif
 
 #endif

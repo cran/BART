@@ -25,7 +25,7 @@ mc.lbart(
    xinfo=matrix(0.0,0,0), usequants=FALSE,
    cont=FALSE, rm.const=TRUE, tau.interval=0.95,
    k=2.0, power=2.0, base=.95,
-   binaryOffset=0,
+   binaryOffset=NULL,
    ntree=50L, numcut=100L,
    ndpost=1000L, nskip=100L,
    keepevery=1L, printevery=100,
@@ -109,8 +109,8 @@ mc.lbart(
    \item{binaryOffset}{
    Used for binary \eqn{y}.\cr
    The model is \eqn{P(Y=1 | x) = F(f(x) + binaryOffset)}.\cr
-   The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
-   a probability other than .5.
+   %% The idea is that \eqn{f} is shrunk towards 0, so the offset allows you to shrink towards
+   %% a probability other than .5.
    }
 
    \item{ntree}{
@@ -206,11 +206,11 @@ mc.lbart(
    the total count of the number of times
    that variable is used in a tree decision rule (over all trees) is given.}
 
-   In addition the list
-   has a binaryOffset component giving the value used.
+   In addition, the list
+   has a \code{binaryOffset} giving the value used.
 
    Note that in the binary \eqn{y}, case yhat.train and yhat.test are
-   \eqn{f(x)} + binaryOffset.  If you want draws of the probability
+   \eqn{f(x) + binaryOffset}.  If you want draws of the probability
    \eqn{P(Y=1 | x)} you need to apply the Logistic cdf (\code{plogis})
    to these values.
 }

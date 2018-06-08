@@ -84,9 +84,9 @@ absorbing event, $\delta_i=1$, or right censoring, $\delta_i=0$, and
 $ \bm{x}_{i} $ is a vector of covariates (which can be time-dependent,
 but, for simplicity, we assume that they are known at time zero).  We
 construct a grid of the ordered distinct event times,
-$0=t_{(0)}<\dots<t_{(J)}<\infty$, and we consider the following time
+$0=t_{(0)}<\dots<t_{(K)}<\infty$, and we consider the following time
 intervals:
-$(0, t_{(1)}], (t_{(1)}, t_{(2)}], \. (t_{(J-1)}, t_{(J)}]$.  The
+$(0, t_{(1)}], (t_{(1)}, t_{(2)}], \. (t_{(K-1)}, t_{(K)}]$.  The
 general form of the Cox proportional hazard model is the following:
 $\lambda(t_{(j)},
 \bm{x}_i)=\lambda_0(t_{(j)})\exp(\bm{\beta}'\bm{x}_i)$
@@ -166,16 +166,20 @@ where $\Phi$ is the standard Normal cumulative distribution function.
 % an assumption of independence.
 
 If the event indicators, $y_{ij}$, have already been computed, then
-you can specify them with the \code{y.train} argument; this results in
-the default $\mu_0=0$ (which you can over-ride with the
-\code{binaryOffset} argument).  However, it is likely that the
+you can specify them with the \code{y.train} argument.
+%; this results in
+%the default $\mu_0=0$ (which you can over-ride with the
+%\code{binaryOffset} argument).  
+However, it is likely that the
 indicators would need to be constructed, so for convenience, you can
 specify $(s_i, \delta_i)$ by the arguments \code{times} and
-\code{delta} respectively.  In this case, the default value of $\mu_0$
-assumes that the times follow the Exponential distribution and the
-covariates are not involved, i.e.,
-$\mu_0=\Phi^{-1}\wrap{1-\exp\wrap[()]{\frac{\sum_i \delta_i}{\sum_i
-      s_i}}}$
+\code{delta} respectively.  In either case, the default value of $\mu_0$
+is $\Phi^{-1}(\bar{y})$
+% of $\mu_0$
+% assumes that the times follow the Exponential distribution and the
+% covariates are not involved, i.e.,
+% $\mu_0=\Phi^{-1}\wrap{1-\exp\wrap[()]{\frac{\sum_i \delta_i}{\sum_i
+%       s_i}}}$
 (which you can over-ride with the \code{binaryOffset} argument).  For
 BART with continuous outcomes, typically the outcome is centered and
 $\mu_0$ is taken to be $\b{y}$.  While centering can be helpful for
@@ -205,8 +209,9 @@ rows of $\wrap{t, \bm{x}}$, hence the name \code{tx.train} to
 distinguish it from the original \code{x.train}); \code{tx.test} for
 the covariates to predict $f(t, \bm{x})$ rather than to train;
 \code{times} which is the grid of ordered distinct time points;
-\code{K} which is the length of \code{times}; and \code{binaryOffset}
-which is $\mu_0$.  Here is a very simple example of a data set with
+and \code{K} which is the length of \code{times}.
+%; and \code{binaryOffset} which is $\mu_0$.  
+Here is a very simple example of a data set with
 three observations and no covariates re-formatted for display 
 (no covariates is an interesting special case but we
 will discuss the more common case with covariates further below).
@@ -215,8 +220,8 @@ times <- c(2.5, 1.5, 3.0)
 delta <- c(  1,   1,   0)
 surv.pre.bart(times=times, delta=delta)
 
-$y.train  $tx.train  $tx.test  $times    $K     $binaryOffset 
-[1]              t          t  [1]       [1] 3  [1] -0.6791459
+$y.train  $tx.train  $tx.test  $times    $K     
+[1]              t          t  [1]       [1] 3  
     0     [1,] 1.5   [1,] 1.5    1.5  
     1     [2,] 2.5   [2,] 2.5    2.5
     1     [3,] 1.5   [3,] 3.0    3.0
@@ -464,7 +469,7 @@ $(s_i, \delta_i)$ where $\delta_i=1$ for kind 1 events, $\delta_i=2$
 for kind 2 events, or $\delta_i=0$ for censoring times.  We create a
 single grid of time points for the ordered distinct times based on
 either kind of event or censoring:
-$0=t_{(0)}< t_{(1)}<\cdots < t_{(J)} < \infty$.  % To accomodate
+$0=t_{(0)}< t_{(1)}<\cdots < t_{(K)} < \infty$.  % To accomodate
 % competing risks, we adapt our notation slightly: $(s_i, \delta_i)$ are
 % death, $\delta_i=1$, or censoring, $\delta_i=0$, time; $t_{ik}$ are
 % hospital admissions; $i=1, \dots, n$ indexes patients;
@@ -566,8 +571,8 @@ hospitalized cannot be readmitted.  For instantaneous events (or
 roughly instantaneous events such as emergency department visits with
 time measured in days), the end times can be simply ignored.
 
-We denote the $J$ collectively distinct event start and end times for
-all subjects by $0<t_{(1)}< \dots< t_{(J)}<\infty$ thus taking
+We denote the $K$ collectively distinct event start and end times for
+all subjects by $0<t_{(1)}< \dots< t_{(K)}<\infty$ thus taking
 $t_{(j)}$ to be the $j^{th}$ order statistic among distinct
 observation times and, for convenience, $t_{(j')}=0 \where j' \le 0$
 (note that $t_{(j)}$ are constructed from all event start/end times

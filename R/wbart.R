@@ -110,6 +110,7 @@ if(is.na(sigmaf)) {
    tau = sigmaf/sqrt(ntree)
 }
 #--------------------------------------------------
+ptm <- proc.time()
 #call
 res = .Call("cwbart",
             n,  #number of observations in training data
@@ -144,6 +145,9 @@ res = .Call("cwbart",
             printevery,
             xinfo
 )
+    
+res$proc.time <- proc.time()-ptm
+    
 res$mu = fmean
 res$yhat.train.mean = res$yhat.train.mean+fmean
 res$yhat.train = res$yhat.train+fmean
@@ -151,8 +155,8 @@ res$yhat.test.mean = res$yhat.test.mean+fmean
 res$yhat.test = res$yhat.test+fmean
 if(nkeeptreedraws>0)
     names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
-    dimnames(res$varcount)[[2]] = dimnames(x.train)[[1]]
-    dimnames(res$varprob)[[2]] = dimnames(x.train)[[1]]
+    dimnames(res$varcount)[[2]] = as.list(dimnames(x.train)[[1]])
+    dimnames(res$varprob)[[2]] = as.list(dimnames(x.train)[[1]])
 ##res$nkeeptreedraws=nkeeptreedraws
     res$varcount.mean <- apply(res$varcount, 2, mean)
     res$varprob.mean <- apply(res$varprob, 2, mean)

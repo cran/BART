@@ -1,7 +1,7 @@
 /*
  *  BART: Bayesian Additive Regression Trees
- *  Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
- *
+ *  Copyright (C) 2017-2018 Robert McCulloch, Rodney Sparapani
+ *                          and Charles Spanbauer
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -58,7 +58,7 @@ public:
      this->dart=_dart; this->omega=_omega; 
      if(_theta==0.){
        this->const_theta=false;
-       this->theta=(double)p;
+       this->theta=1.;
      }
      else{
        this->const_theta=true;
@@ -72,6 +72,7 @@ public:
    void setxinfo(xinfo& _xi);
    std::vector<size_t>& getnv() {return nv;}
    std::vector<double>& getpv() {return pv;}
+   double gettheta() {return theta;}
    //------------------------------
    //public methods
    void birth(size_t i, size_t nid,size_t v, size_t c, double ml, double mr)
@@ -82,7 +83,7 @@ public:
    void tonull() {for(size_t i=0;i!=t.size();i++) t[i].tonull();}
    void predict(size_t p, size_t n, double *x, double *fp);
    void draw(double sigma, rn& gen);
-   void draw_s(rn& gen);
+//   void draw_s(rn& gen);
    double f(size_t i) {return allfit[i];}
 protected:
    size_t m;  //number of trees
@@ -100,7 +101,7 @@ protected:
    bool dart,dartOn,aug,const_theta;
    double a,b,rho,theta,omega;
    std::vector<size_t> nv;
-   std::vector<double> pv;
+   std::vector<double> pv, lpv;
 };
 
 #endif

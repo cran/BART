@@ -26,8 +26,10 @@
 #include "bd.h"
 #include "bart.h"
 #include "heterbart.h"
-#include "latent.h"
-#include "rand_draws.h"
+//#include "latent.h"
+//#include "rand_draws.h"
+#include "rtnorm.h"
+#include "lambda.h"
 
 #ifndef NoRcpp
 
@@ -84,7 +86,7 @@ RcppExport SEXP clbart(
    double mybeta = Rcpp::as<double>(_ipower);
    double alpha = Rcpp::as<double>(_ibase);
    // lbart does not currently employ the binaryOffset trick
-   //double binaryOffset = Rcpp::as<double>(_binaryOffset);
+   double binaryOffset = Rcpp::as<double>(_binaryOffset);
    double tau = Rcpp::as<double>(_itau);
    bool dart;
    if(Rcpp::as<int>(_idart)==1) dart=true;
@@ -234,7 +236,7 @@ void clbart(
    //z = f(x) + eps, eps ~N(0,lambda), f ~ BART
    double *z = new double[n]; //latent z's
    double *lambda = new double [n]; //latent lambda's
-   double *yf = new double[n]; //??
+//   double *yf = new double[n]; //??
    double *svec = new double[n]; //vector of standard dev for bart = sqrt(lambda)
    for(unsigned int i=0; i<n; i++) {
       if(iy[i]>0) z[i] = 1.0;
@@ -243,7 +245,7 @@ void clbart(
       lambda[i] = 1.0;
       svec[i]=1.0; //square root of 1 is 1.
    }
-   newRNGstates();
+   //newRNGstates();
    //--------------------------------------------------
    //set up BART model
    //heterbart bm(m);
@@ -281,10 +283,22 @@ void clbart(
       //draw bart
       bm.draw(svec,gen);
 
+      for(size_t k=0; k<n; k++) {
+	z[k]= iy[k]*rtnorm(iy[k]*bm.f(k), -iy[k]*binaryOffset, svec[k], gen);
+	lambda[k]=draw_lambda_i(lambda[k], iy[k]*bm.f(k), 1000, 1, gen);
+//lambda[k]=draw_lambda_i(lambda[k], iy[k]*bm.f(k), 1000, 1, states[0]);
+	svec[k] = sqrt(lambda[k]);
+      }
+/*
       for(unsigned int j=0; j<n; j++) yf[j] = iy[j]*bm.f(j);
       draw_z(n, yf, lambda, z);
-      for(unsigned int j=0; j<n; j++) z[j] *= iy[j];
+      //for(unsigned int j=0; j<n; j++) z[j] *= iy[j];
       draw_lambda(n, yf, 1000, 1, lambda);
+      for(unsigned int j=0; j<n; j++) {
+	z[j] *= iy[j];
+	svec[j] = sqrt(lambda[j]); 
+      }
+*/
       if(i>=burn) {
          //for(size_t k=0;k<n;k++) trmean[k]+=bm.f(k);
          if(nkeeptrain && (((i-burn+1) % skiptr) ==0)) {
@@ -346,14 +360,13 @@ void clbart(
    printf("trcnt,tecnt: %zu,%zu\n",trcnt,tecnt);
    //printf("trcnt,tecnt,temecnt,treedrawscnt: %zu,%zu,%zu,%zu\n",trcnt,tecnt,temecnt,treedrawscnt);
    //--------------------------------------------------
-   //PutRNGstate();
 
    if(fhattest) delete[] fhattest;
    delete[] z;
-   delete[] yf;
+//   delete[] yf;
    delete[] lambda;
    delete[] svec;
-   deleteRNGstates();
+   //deleteRNGstates();
 
 #ifndef NoRcpp
    //--------------------------------------------------

@@ -39,5 +39,9 @@ void heterbart::draw(double *sigma, rn& gen)
       fit(t[j],xi,p,n,x,ftemp);
       for(size_t k=0;k<n;k++) allfit[k] += ftemp[k];
    }
-   if(dartOn) draw_s(gen);
+   if(dartOn) {
+     draw_s(nv,lpv,theta,gen);
+     draw_theta0(const_theta,theta,lpv,a,b,rho,gen);
+     for(size_t j=0;j<p;j++) pv[j]=::exp(lpv[j]);
+   }
 }
