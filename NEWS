@@ -1,3 +1,9 @@
+Changes and New Features in 1.8 (2018-06-30):
+
+	* bug fix: fix typo in the recur.pwbart() which
+	prevented predict() from working when OpenMP
+	was not available
+
 Changes and New Features in 1.7 (2018-06-08):
 
 	* enhancement: generalized, or generic, BART: gbart/mc.gbart

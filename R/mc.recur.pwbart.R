@@ -89,7 +89,7 @@ mc.recur.pwbart <- function(
         }
     }
 
-    pred$yhat.prob.mean <- apply(pred$yhat.prob, 2, mean)
+    pred$prob.test.mean <- apply(pred$prob.test, 2, mean)
     pred$haz.test.mean <- apply(pred$haz.test, 2, mean)
     pred$cum.test.mean <- apply(pred$cum.test, 2, mean)
 

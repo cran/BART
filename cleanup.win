@@ -13,7 +13,8 @@ for i in README src/TAGS src/BROWSE demo/*.pdf \
 	 R/dpm*bart.R man/dpm*bart.Rd src/*dp*.* inst/cxx-ex/*dp*.* \
 	 demo/fat.tail.dpm*.R R/*crsk.*.R \
 	 inst/bootcamp/* src/rtruncnorm.* \
-	 src/randomkit.* src/rand_draws.* src/latent.* src/arms.*
+	 src/randomkit.* src/rand_draws.* src/latent.* \
+	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R
 do
     if [ -f $i ]
        then rm -rf $i
