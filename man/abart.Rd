@@ -1,7 +1,7 @@
-\name{gbart}
-\title{Generalized BART for continuous and binary outcomes}
-\alias{gbart}
-\alias{mc.gbart}
+\name{abart}
+\title{AFT BART for time-to-event outcomes}
+\alias{abart}
+\alias{mc.abart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For a numeric response \eqn{y}, we have
@@ -17,11 +17,10 @@ each tree is constrained by a prior to be a weak learner
 so that it contributes a small amount to the overall fit.
 }
 \usage{
-gbart(
-      x.train, y.train,
-      x.test=matrix(0,0,0), type='wbart',
-      ntype=as.integer(
-          factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+abart(
+      x.train, times, delta,
+      x.test=matrix(0,0,0), K=100,
+      type='abart', ntype=1,
       sparse=FALSE, theta=0, omega=1,
       a=0.5, b=1, augment=FALSE, rho=NULL,
       xinfo=matrix(0,0,0), usequants=FALSE,
@@ -30,22 +29,21 @@ gbart(
       k=2, power=2, base=0.95,
       %sigmaf=NA,
       lambda=NA, tau.num=c(NA, 3, 6)[ntype], %tau.interval=0.9973,
-      offset=NULL, w=rep(1, length(y.train)),
+      offset=NULL, w=rep(1, length(times)),
       ntree=c(200L, 50L, 50L)[ntype], numcut=100L,
       %ntree=200L, numcut=100L,
       ndpost=1000L, nskip=100L, %keepevery=1L,
       keepevery=c(1L, 10L, 10L)[ntype],
       printevery=100L, transposed=FALSE,
-      mc.cores = 1L, ## mc.gbart only
-      nice = 19L,    ## mc.gbart only
-      seed = 99L     ## mc.gbart only
+      mc.cores = 1L, ## mc.abart only
+      nice = 19L,    ## mc.abart only
+      seed = 99L     ## mc.abart only
 )
 
-mc.gbart(
-         x.train, y.train,
-         x.test=matrix(0,0,0), type='wbart',
-         ntype=as.integer(
-             factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+mc.abart(
+         x.train, times, delta,
+         x.test=matrix(0,0,0), K=100,
+         type='abart', ntype=1,
          sparse=FALSE, theta=0, omega=1,
          a=0.5, b=1, augment=FALSE, rho=NULL,
          xinfo=matrix(0,0,0), usequants=FALSE,
@@ -54,7 +52,7 @@ mc.gbart(
          k=2, power=2, base=0.95,
          %sigmaf=NA,
          lambda=NA, tau.num=c(NA, 3, 6)[ntype], %tau.interval=0.9973,
-         offset=NULL, w=rep(1, length(y.train)),
+         offset=NULL, w=rep(1, length(times)),
          %ntree=200L, numcut=100L,
          ntree=c(200L, 50L, 50L)[ntype], numcut=100L,
          ndpost=1000L, nskip=100L, %keepevery=1L,
@@ -73,29 +71,36 @@ mc.gbart(
     variable is a factor in a data frame, it is replaced with dummies.
     Note that \eqn{q} dummies are created if \eqn{q>2} and one dummy
     created if \eqn{q=2} where \eqn{q} is the number of levels of the
-    factor.  \code{gbart} will generate draws of \eqn{f(x)} for each
+    factor.  \code{abart} will generate draws of \eqn{f(x)} for each
     \eqn{x} which is a row of \code{x.train}.  }
+  
+   \item{times}{
+     The time of event or right-censoring.\cr
+     If \code{y.train} is \code{NULL}, then \code{times} (and \code{delta})
+     must be provided.
+   }
 
-   \item{y.train}{
-   Continuous or binary dependent variable for training (in sample) data.\cr
-If \eqn{y} is numeric, then a continuous BART model is fit (Normal errors).\cr
-If \eqn{y} is binary (has only 0's and 1's), then a binary BART model
-with a probit link is fit by default: you can over-ride the default via the
-argument \code{type} to specify a logistic BART model.
+   \item{delta}{
+     The event indicator: 1 is an event while 0 is censored.\cr
+     If \code{y.train} is \code{NULL}, then \code{delta} (and \code{times})
+     must be provided.
    }
 
    \item{x.test}{ Explanatory variables for test (out of sample)
    data. Should have same structure as \code{x.train}.
-   \code{gbart} will generate draws of \eqn{f(x)} for each \eqn{x} which
+   \code{abart} will generate draws of \eqn{f(x)} for each \eqn{x} which
    is a row of \code{x.test}.  }
 
+   \item{K}{
+     If provided, then coarsen \code{times} per the quantiles
+     \eqn{1/K, 2/K, ..., K/K}.
+   }
+   
  \item{type}{ You can use this argument to specify the type of fit.
-   \code{'wbart'} for continuous BART, \code{'pbart'} for probit BART or
-   \code{'lbart'} for logistic BART. }
+   \code{'abart'} for AFT BART. }
 
  \item{ntype}{ The integer equivalent of \code{type} where
-  \code{'wbart'} is 1, \code{'pbart'} is 2 and
-  \code{'lbart'} is 3.}
+  \code{'abart'} is 1.}
 
    \item{sparse}{Whether to perform variable selection based on a
      sparse Dirichlet prior rather than simply uniform; see Linero 2016.}
@@ -217,9 +222,9 @@ argument \code{type} to specify a logistic BART model.
    }
 
    \item{transposed}{
-   When running \code{gbart} in parallel, it is more memory-efficient
+   When running \code{abart} in parallel, it is more memory-efficient
    to transpose \code{x.train} and \code{x.test}, if any, prior to
-   calling \code{mc.gbart}.
+   calling \code{mc.abart}.
  }
     \item{seed}{
      Setting the seed required for reproducible MCMC.
@@ -245,14 +250,7 @@ argument \code{type} to specify a logistic BART model.
    The output consists of values \eqn{f^*(x)}{f*(x)} (and
    \eqn{\sigma^*}{sigma*} in the numeric case) where * denotes a
    particular draw.  The \eqn{x} is either a row from the training data,
-   \code{x.train} or the test data, \code{x.test}.
-
-   For \code{x.train}/{x.test} with missing data elements, \code{gbart}
-   will singly impute them with hot decking.  Since \code{mc.gbart}
-   runs multiple \code{gbart} threads in parallel, \code{mc.gbart}
-   performs multiple imputation with hot decking, i.e., a separate
-   imputation for each thread.
- }
+   \code{x.train} or the test data, \code{x.test}.  }
 
  \value{
    %% The \code{plot} method sets mfrow to c(1,2) and makes two plots.\cr
@@ -262,7 +260,7 @@ argument \code{type} to specify a logistic BART model.
    %% The second plot has \eqn{y} on the horizontal axis and posterior intervals for
    %% the corresponding \eqn{f(x)} on the vertical axis.
 
-   \code{gbart} returns an object of type \code{gbart} which is
+   \code{abart} returns an object of type \code{abart} which is
    essentially a list. % assigned class \sQuote{bart}.
    In the numeric \eqn{y} case, the list has components:
 
@@ -313,35 +311,52 @@ Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
 Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \seealso{
-\code{\link{pbart}}
+\code{\link{wbart}}
 }
 \examples{
-##simulate data (example from Friedman MARS paper)
-f = function(x){
-10*sin(pi*x[,1]*x[,2]) + 20*(x[,3]-.5)^2+10*x[,4]+5*x[,5]
-}
-sigma = 1.0  #y = f(x) + sigma*z , z~N(0,1)
-n = 100      #number of observations
-set.seed(99)
-x=matrix(runif(n*10),n,10) #10 variables, only first 5 matter
-Ey = f(x)
-y=Ey+sigma*rnorm(n)
-lmFit = lm(y~.,data.frame(x,y)) #compare lm fit to BART later
+
+N = 1000
+P = 5       #number of covariates
+M = 8
+
+set.seed(12)
+x.train=matrix(runif(N*P, -2, 2), N, P)
+mu = x.train[ , 1]^3
+y=rnorm(N, mu)
+offset=mean(y)
+T=exp(y)
+C=rexp(N, 0.05)
+delta=(T<C)*1
+table(delta)/N
+times=(T*delta+C*(1-delta))
 
 ##test BART with token run to ensure installation works
 set.seed(99)
-bartFit = wbart(x,y,nskip=5,ndpost=5)
+post1 = abart(x.train, times, delta, nskip=5, ndpost=10)
 
 \dontrun{
-##run BART
-set.seed(99)
-bartFit = wbart(x,y)
 
-##compare BART fit to linear matter and truth = Ey
-fitmat = cbind(y,Ey,lmFit$fitted,bartFit$yhat.train.mean)
-colnames(fitmat) = c('y','Ey','lm','bart')
-print(cor(fitmat))
+post1 = mc.abart(x.train, times, delta,
+                 mc.cores=M, seed=99)
+post2 = mc.abart(x.train, times, delta, offset=offset,
+                 mc.cores=M, seed=99)
+
+Z=8
+
+plot(mu, post1$yhat.train.mean, asp=1,
+     xlim=c(-Z, Z), ylim=c(-Z, Z))
+abline(a=0, b=1)
+
+plot(mu, post2$yhat.train.mean, asp=1,
+     xlim=c(-Z, Z), ylim=c(-Z, Z))
+abline(a=0, b=1)
+
+plot(post1$yhat.train.mean, post2$yhat.train.mean, asp=1,
+     xlim=c(-Z, Z), ylim=c(-Z, Z))
+abline(a=0, b=1)
+
 }
+
 }
 \keyword{nonparametric}
 \keyword{tree}

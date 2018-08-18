@@ -34,13 +34,14 @@
 #define TRDRAW(a, b) trdraw(a, b)
 #define TEDRAW(a, b) tedraw(a, b)
 
-RcppExport SEXP cgbart(
+RcppExport SEXP cabart(
    SEXP _type,          //1:wbart, 2:pbart, 3:lbart
    SEXP _in,            //number of observations in training data
    SEXP _ip,            //dimension of x
    SEXP _inp,           //number of observations in test data
    SEXP _ix,            //x, train,  pxn (transposed so rows are contiguous in memory)
    SEXP _iy,            //y, train,  nx1
+   SEXP _idelta,        //censoring indicator
    SEXP _ixp,           //x, test, pxnp (transposed so rows are contiguous in memory)
    SEXP _im,            //number of trees
    SEXP _inc,           //number of cut points
@@ -76,6 +77,8 @@ RcppExport SEXP cgbart(
    double *ix = &xv[0];
    Rcpp::NumericVector  yv(_iy); 
    double *iy = &yv[0];
+   Rcpp::IntegerVector  deltav(_idelta); 
+   int *delta = &deltav[0];
    Rcpp::NumericVector  xpv(_ixp);
    double *ixp = &xpv[0];
    size_t m = Rcpp::as<int>(_im);
@@ -136,13 +139,14 @@ RcppExport SEXP cgbart(
 #define TRDRAW(a, b) trdraw[a][b]
 #define TEDRAW(a, b) tedraw[a][b]
 
-void cgbart(
+void cabart(
    int type,            //1:wbart, 2:pbart, 3:lbart
    size_t n,            //number of observations in training data
    size_t p,		//dimension of x
    size_t np,		//number of observations in test data
    double* ix,		//x, train,  pxn (transposed so rows are contiguous in memory)
    double* iy,		//y, train,  nx1
+   int* delta,          //censoring indicator
    double* ixp,		//x, test, pxnp (transposed so rows are contiguous in memory)
    size_t m,		//number of trees
    int *numcut,		//number of cut points
@@ -192,48 +196,11 @@ void cgbart(
    heterbart bm(m);
 #endif
 
-   /* multiple imputation hot deck implementation
-      this will cause trouble for multiple threads
-      so it must be done prior to calling C++ */
-/*
-   bool hotdeck=false;
-
-   std::vector<int> _missing(n*p);
-   std::vector<int*> missing(n);
-   std::vector<double*> x(n);
-   Rcpp::NumericMatrix X(n, p); 
-
-   for(size_t i=0; i<n; ++i) {
-     missing[i]=&_missing[i*p];
-     x[i]=&ix[i*p];
-     for(size_t j=0; j<p; ++j) 
-       if(x[i][j]!=x[i][j]) {
-	 hotdeck=true;
-	 missing[i][j]=1;
-       }
-       else missing[i][j]=0;
-   }     
-
-   if(hotdeck) {
-     for(size_t i=0; i<n; ++i) {
-       for(size_t j=0; j<p; ++j) { 
-	 if(missing[i][j]==1) {
-	   while(x[i][j]!=x[i][j]) {
-	     size_t k=n*gen.uniform();
-	     x[i][j]=x[k][j];
-	   }
-	 }
-	 X(i, j)=x[i][j]; 
-       }
-     }    
-   } 
-*/
-
    std::stringstream treess;  //string stream to write trees to
    treess.precision(10);
    treess << nkeeptreedraws << " " << m << " " << p << endl;
 
-   printf("*****Calling gbart: type=%d\n", type);
+   printf("*****Calling abart: type=%d\n", type);
 
    size_t skiptr=thin, skipte=thin, skiptreedraws=thin;
 /*
@@ -252,8 +219,6 @@ void cgbart(
    printf("data:n,p,np: %zu, %zu, %zu\n",n,p,np);
    printf("y1,yn: %lf, %lf\n",iy[0],iy[n-1]);
    printf("x1,x[n*p]: %lf, %lf\n",ix[0],ix[n*p-1]);
-//   if(hotdeck) 
-//printf("warning: missing elements in x multiply imputed with hot decking\n");
    if(np) printf("xp1,xp[np*p]: %lf, %lf\n",ixp[0],ixp[np*p-1]);
    printf("*****Number of Trees: %zu\n",m);
    printf("*****Number of Cut Points: %d ... %d\n", numcut[0], numcut[p-1]);
@@ -336,28 +301,16 @@ if(type==1) {
       }
 
       for(size_t k=0; k<n; k++) {
-	if(type==1) svec[k]=iw[k]*sigma;
+	if(type==1) {
+	  svec[k]=iw[k]*sigma;
+	  if(delta[k]==0) z[k]= rtnorm(bm.f(k), iy[k], svec[k], gen);
+	}
 	else {
 	  z[k]= sign[k]*rtnorm(sign[k]*bm.f(k), -sign[k]*Offset, svec[k], gen);
 	  if(type==3) 
 	    svec[k]=sqrt(draw_lambda_i(pow(svec[k], 2.), sign[k]*bm.f(k), 1000, 1, gen));
 	  }
       }
-
-/*
-      if(hotdeck) {
-	//draw x
-	for(size_t h=0; h<n; ++h) {
-	  for(size_t j=0; j<p; ++j) {
-	    if(missing[h][j]==1) {
-	      size_t k=n*gen.uniform();
-	      x[h][j]=x[k][j];
-	    }
-	  }
-	}    
-      } 
-*/
-
       if(i>=burn) {
          if(nkeeptrain && (((i-burn+1) % skiptr) ==0)) {
             for(size_t k=0;k<n;k++) TRDRAW(trcnt,k)=Offset+bm.f(k);
@@ -402,7 +355,6 @@ if(type==1) {
 #ifndef NoRcpp
    //return list
    Rcpp::List ret;
-//   ret["X"]=X; 
    if(type==1) ret["sigma"]=sdraw;
    ret["yhat.train"]=trdraw;
    ret["yhat.test"]=tedraw;
@@ -420,7 +372,7 @@ if(type==1) {
    treesL["cutpoints"] = xiret;
    treesL["trees"]=Rcpp::CharacterVector(treess.str());
    ret["treedraws"] = treesL;
-
+   
    return ret;
 #else
 

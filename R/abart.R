@@ -16,11 +16,10 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-gbart=function(
-               x.train, y.train,
-               x.test=matrix(0,0,0), type='wbart',
-               ntype=as.integer(
-                   factor(type, levels=c('wbart', 'pbart', 'lbart'))),
+abart=function(
+               x.train, times, delta,
+               x.test=matrix(0,0,0), K=100,
+               type='abart', ntype=1,
                sparse=FALSE, theta=0, omega=1,
                a=0.5, b=1, augment=FALSE, rho=NULL,
                xinfo=matrix(0,0,0), usequants=FALSE,
@@ -30,7 +29,7 @@ gbart=function(
                ##sigmaf=NA,
                lambda=NA, tau.num=c(NA, 3, 6)[ntype],
                ##tau.interval=0.9973,
-               offset=NULL, w=rep(1, length(y.train)),
+               offset=NULL, w=rep(1, length(times)),
                ntree=c(200L, 50L, 50L)[ntype], numcut=100L,
                ndpost=1000L, nskip=100L,
                keepevery=c(1L, 10L, 10L)[ntype],
@@ -38,10 +37,18 @@ gbart=function(
                mc.cores = 1L, nice = 19L, seed = 99L
                )
 {
-    if(is.na(ntype))
-        stop("type argument must be set to either 'wbart', 'pbart' or 'lbart'")
+
+    if(type!='abart') stop('type must be "abart"')
+    if(ntype!=1) stop('ntype must be 1')
+
+    y.train=log(times)
 
     n = length(y.train)
+
+    if(n!=length(delta))
+       stop("length of times and delta must be equal")
+
+    delta=as.integer(delta)
 
     if(!transposed) {
         temp = bartModelMatrix(x.train, numcut, usequants=usequants,
@@ -61,7 +68,7 @@ gbart=function(
     }
 
     if(n!=ncol(x.train))
-        stop('The length of y.train and the number of rows in x.train must be identical')
+        stop('The length of times and the number of rows in x.train must be identical')
 
     p = nrow(x.train)
     np = ncol(x.test)
@@ -69,27 +76,11 @@ gbart=function(
     if(length(rm.const)==0) rm.const <- 1:p
     if(length(grp)==0) grp <- 1:p
 
-    check <- unique(sort(y.train))
-
-    if(length(check)==2) {
-        if(!all(check==0:1))
-            stop('Binary y.train must be coded as 0 and 1')
-        if(type=='wbart')
-            stop("The outcome is binary so set type to 'pbart' or 'lbart'")
-    }
-
-    ## check <- c('wbart', 'pbart', 'lbart')
-
-    ## if(!(type %in% check))
-    ##     stop("type argument must be set to either 'wbart', 'pbart' or 'lbart'")
-
     if(length(offset)==0) {
         offset=mean(y.train)
-        if(type=='pbart') offset=qnorm(offset)
-        else if(type=='lbart') offset=qlogis(offset)
     }
 
-    if(type=='wbart') {
+    if(type=='abart') {
         y.train = y.train-offset
 
         if(is.na(lambda)) {
@@ -122,46 +113,16 @@ gbart=function(
         ##     tau=qlogis(1-0.5*tau)/(k*sqrt(ntree))
     }
 
-    ## hot deck missing imputation
-    ## must be conducted here since it would
-    ## cause trouble with multi-threading on the C++ side
-
-    check=(np>0 && np==n)
-
-    for(i in 1:n)
-        for(j in 1:p) {
-            if(check) check=((is.na(x.train[j, i]) && is.na(x.test[j, i])) ||
-                             (!is.na(x.train[j, i]) && !is.na(x.test[j, i]) &&
-                              x.train[j, i]==x.test[j, i]))
-
-            while(is.na(x.train[j, i])) {
-                h=sample.int(n, 1)
-                x.train[j, i]=x.train[j, h]
-            }
-        }
-
-    if(check) x.test=x.train
-    else if(np>0) {
-       for(i in 1:np)
-        for(j in 1:p)
-            while(is.na(x.test[j, i])) {
-                h=sample.int(np, 1)
-                x.test[j, i]=x.test[j, h]
-            }
-    }
-
-    ## if(hotdeck) ## warnings are suppressed with mc.gbart anyways
-    ##     warning('missing elements of x imputed with hot decking')
-
     ptm <- proc.time()
 
-    res = .Call("cgbart",
+    res = .Call("cabart",
                 ntype, ##as.integer(factor(type, levels=check))-1,
                 n,  #number of observations in training data
                 p,  #dimension of x
                 np, #number of observations in test data
                 x.train,   #pxn training data x
                 y.train,   #pxn training data x
+                delta,     ## censoring indicator
                 x.test,    #p*np test data x
                 ntree,
                 numcut,
@@ -190,8 +151,30 @@ gbart=function(
 
     res$proc.time <- proc.time()-ptm
 
-    if(type=='wbart')
+    K <- min(n, K)
+    events=unique(sort(times))
+    if(length(events)>K) {
+        events <- unique(quantile(times, probs=(1:K)/K))
+        attr(events, 'names') <- NULL
+    }
+    K <- length(events)
+
+    if(type=='abart') {
+        res$surv.train <- matrix(nrow=ndpost, ncol=n*K)
+
+        for(i in 1:n)
+            for(j in 1:K) {
+                h <- (i-1)*K+j
+                res$surv.train[ , h] <-
+                    pnorm(log(events[j]),
+                          mean=res$yhat.train[ , i],
+                          sd=res$sigma[-(1:nskip)],
+                          lower.tail=FALSE)
+            }
+
         res$yhat.train.mean <- apply(res$yhat.train, 2, mean)
+        res$surv.train.mean <- apply(res$surv.train, 2, mean)
+    }
     else {
         if(type=='pbart') res$prob.train = pnorm(res$yhat.train)
         else if(type=='lbart') res$prob.train = plogis(res$yhat.train)
@@ -200,8 +183,22 @@ gbart=function(
     }
 
     if(np>0) {
-        if(type=='wbart')
+        if(type=='abart') {
+            res$surv.test <- matrix(nrow=ndpost, ncol=np*K)
+
+            for(i in 1:np)
+                for(j in 1:K) {
+                    h <- (i-1)*K+j
+                    res$surv.test[ , h] <-
+                        pnorm(log(events[j]),
+                              mean=res$yhat.test[ , i],
+                              sd=res$sigma[-(1:nskip)],
+                              lower.tail=FALSE)
+                }
+
             res$yhat.test.mean <- apply(res$yhat.test, 2, mean)
+            res$surv.test.mean <- apply(res$surv.test, 2, mean)
+        }
         else {
             if(type=='pbart') res$prob.test = pnorm(res$yhat.test)
             else if(type=='lbart') res$prob.test = plogis(res$yhat.test)
@@ -210,6 +207,8 @@ gbart=function(
         }
     }
 
+    res$times = events
+    res$K = K
     res$offset = offset
     names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
     dimnames(res$varcount)[[2]] = as.list(dimnames(x.train)[[1]])

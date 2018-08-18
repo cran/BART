@@ -322,13 +322,13 @@ that the definition of \code{x.train} is dependent on whether
    \eqn{P(Y=1 | t, x)} you need to apply the normal cdf (\code{pnorm})
    to these values.
 }
-\references{
-Sparapani, Rein, Tarima, Jackson, Meurer (2017).  Nonparametric recurrent
-events analysis with BART and an application to the hospital admissions
-of patients with diabetes.  MCW Biostatistics Technical Report 64
-\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
+\references{  
+RA Sparapani, LE Rein, SS Tarima, TA Jackson, JR Meurer (2018).
+Non-parametric recurrent events analysis with BART and an application to
+the hospital admissions of patients with diabetes.
+\emph{Biostatistics}, \url{https://doi.org/10.1093/biostatistics/kxy032}
 
-Linero, A.R. (2016)
+Linero, A.R. (2016).
   Bayesian regression trees for high dimensional prediction and variable
   selection. \emph{JASA},
   \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
@@ -348,9 +348,10 @@ data(xdm20.test)
 data(ydm20.train)
 
 ##test BART with token run to ensure installation works
-set.seed(99)
-post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-                   nskip=1, ndpost=1, keepevery=1)
+## with current technology even a token run will violate CRAN policy
+## set.seed(99)
+## post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+##                    nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
 

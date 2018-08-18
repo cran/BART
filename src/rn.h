@@ -151,7 +151,7 @@ class arn: public rn
   }
   virtual double gamma(double shape, double rate) {
     if(shape<0.01) return ::exp(this->log_gamma(shape))/rate;
-    else return ::rgamma(shape+1., 1.)/rate; 
+    else return ::rgamma(shape, 1.)/rate; 
   } 
   virtual double beta(double a, double b) {
     double x1=this->gamma(a, 1.), x2=this->gamma(b, 1.);
@@ -212,7 +212,7 @@ class arn: public rn
   }
   virtual double gamma(double shape, double rate) {
     if(shape<0.01) return ::exp(this->log_gamma(shape))/rate;
-    else return R::rgamma(shape+1., 1.)/rate; 
+    else return R::rgamma(shape, 1.)/rate; 
   } 
   virtual double beta(double a, double b) {
     double x1=this->gamma(a, 1.), x2=this->gamma(b, 1.);

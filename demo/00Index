@@ -4,6 +4,8 @@ bladder.recur.bart	   Bladder cancer example for recurrent events with BART
 c.surv.bart	   BART and the concordance probability
 cal.recur.bart	   Interval coverage calibration for recurrent events with BART
 concord.surv.bart  Concordance probability for survival analysis with BART
+cube.abart	   x-cubed example for log time with AFT BART
+cube.gbart	   x-cubed example for generic BART
 cube.pbart	   x-cubed example for binary outcomes with probit BART
 cube.lbart	   x-cubed example for binary outcomes with Logistic BART
 cube.mbart	   x-cubed example for binary outcomes with Multinomial BART
@@ -26,6 +28,7 @@ liver.crisk2.bart   Liver transplant example for competing risks alternative wit
 liver50.crisk.bart   Liver transplant example setting K=50 for competing risks with BART
 lung.surv.bart	   Lung cancer example for survival analysis with probit BART
 lung.surv.lbart	   Lung cancer example for survival analysis with logit BART
+missing.gbart	   Example of missing imputation with gbart
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
 np.recur.bart	   Nonproportional intensity for recurrent events with BART
@@ -33,5 +36,6 @@ sparse.lbart	   Dirichlet sparsity prior with logistic BART
 sparse.pbart	   Dirichlet sparsity prior with probit BART
 sparse.wbart	   Dirichlet sparsity prior with continuous BART
 test.rtnorm	   Test truncated Normal sampler for probit/logit BART
+test.srstepwise	   Test stepwise implementation for survreg
 test.draw_lambda_i	   Test truncated Normal variance sampler for logistic BART
 trees.pbart	   Concordant variable pairs probability with probit BART

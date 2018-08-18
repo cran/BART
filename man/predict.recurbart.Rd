@@ -86,9 +86,10 @@ data(xdm20.test)
 data(ydm20.train)
 
 ##test BART with token run to ensure installation works
-set.seed(99)
-post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
-                   nskip=1, ndpost=1, keepevery=1)
+## with current technology even a token run will violate CRAN policy
+## set.seed(99)
+## post <- recur.bart(x.train=xdm20.train, y.train=ydm20.train,
+##                    nskip=1, ndpost=1, keepevery=1)
 
 \dontrun{
 set.seed(99)

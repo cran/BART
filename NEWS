@@ -1,3 +1,14 @@
+Changes and New Features in 1.9 (2018-08-17):
+
+	* bug fix: off by one error fixed in robust Gamma 
+	generator for sparse Dirichlet prior
+
+	* new feature: for x.train/x.test with missing data elements, 
+	gbart will singly impute them with hot decking.  
+	Since mc.gbart runs multiple gbart threads in parallel, 
+	mc.gbart performs multiple imputation with hot decking, 
+	i.e., a separate imputation for each thread.
+
 Changes and New Features in 1.8 (2018-06-30):
 
 	* bug fix: fix typo in the recur.pwbart() which

@@ -10,6 +10,7 @@ extern SEXP cmbart(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 extern SEXP cpwbart(SEXP, SEXP, SEXP);
 extern SEXP cwbart(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP cgbart(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP cabart(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 /*extern SEXP cspbart(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);*/
 extern SEXP mc_cores_openmp();
 extern SEXP crtnorm(SEXP, SEXP, SEXP);
@@ -24,6 +25,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"cpwbart", (DL_FUNC) &cpwbart,  3},
     {"cwbart",  (DL_FUNC) &cwbart,  31},
     {"cgbart",  (DL_FUNC) &cgbart,  30},
+    {"cabart",  (DL_FUNC) &cabart,  31},
 /*  {"cspbart",  (DL_FUNC) &cspbart,  30}, */
     {"mc_cores_openmp",(DL_FUNC) &mc_cores_openmp,0},
     {"crtnorm", (DL_FUNC) &crtnorm, 3},
