@@ -35,42 +35,59 @@ predict.mbart <- function(object, newdata, mc.cores=1,
     if(.Platform$OS.type != "unix" || openmp || mc.cores==1) call <- pwbart
     else call <- mc.pwbart
 
+##call <- predict.gbart
+    
     ##return(call(newdata, object$treedraws, mc.cores=mc.cores, mu=object$binaryOffset, ...))
 
-    C <- object$C
-
-    pred <- as.list(1:C)
-
-    for(h in 1:C) {
-        eval(parse(text=paste0('object$treedraws$trees=',
-                               'object$treedraws$tree', h)))
-
+    K <- object$K
+    L <- K-1
+    pred <- as.list(1:L)
+    trees <- object$treedraws$trees
+    
+    for(h in 1:L) {
+        ## eval(parse(text=paste0('object$treedraws$trees=',
+        ##                        'object$treedraws$tree', h)))
+        object$treedraws$trees <- trees[[h]]
         pred[[h]] <- list(yhat.test=call(newdata, object$treedraws,
-                                    mc.cores=mc.cores,
-                                    mu=object$binaryOffset[h], ...))
+                                         mc.cores=mc.cores,
+                                         mu=object$offset[h], ...))
+        ## predict.gbart testing
+        ## pred[[h]] <- call(object, newdata, mc.cores=mc.cores,
+        ##                   openmp=openmp, type=object$type)
     }
-
     H <- dim(pred[[1]]$yhat.test)
+    ndpost <- H[1]
     np <- H[2]
     res <- list()
-    res$yhat.test <- matrix(nrow=H[1], ncol=C*np)
-    res$prob.test <- matrix(nrow=H[1], ncol=C*np)
+    res$yhat.test <- matrix(nrow=ndpost, ncol=K*np)
+    res$prob.test <- matrix(nrow=ndpost, ncol=K*np)
+    res$comp.test <- matrix(nrow=ndpost, ncol=K*np)
     
     for(i in 1:np) {
-        h <- (i-1)*C
-        for(j in 1:C) { 
-            res$yhat.test[ , h+j] <- pred[[j]]$yhat.test[ , i]
-            res$prob.test[ , h+j] <- pnorm(res$yhat.test[ , h+j])
+        for(j in 1:K) { 
+            h <- (i-1)*K+j
+            if(j<K) {
+                res$yhat.test[ , h] <- pred[[j]]$yhat.test[ , i]
+                if(object$type=='pbart')
+                    res$prob.test[ , h] <- pnorm(res$yhat.test[ , h])
+                else if(object$type=='lbart')
+                    res$prob.test[ , h] <- plogis(res$yhat.test[ , h])
+                if(j==1) res$comp.test[ , h] <- 1-res$prob.test[ , h]
+                else {
+                    res$comp.test[ , h] <- res$comp.test[ , h-1]*
+                         (1-res$prob.test[ , h])
+                    res$prob.test[ , h] <- res$comp.test[ , h-1]*
+                        res$prob.test[ , h] 
+                }
+            } else res$prob.test[ , h] <- res$comp.test[ , h-1]
         }
-        total <- apply(res$prob.test[ , h+1:C], 1, sum)
-        for(j in 1:C) 
-            res$prob.test[ , h+j] <- res$prob.test[ , h+j]/total
     }
 
     res$prob.test.mean <- apply(res$prob.test, 2, mean)
     res$yhat.test.mean <- NULL
-    res$C <- C
-    res$binaryOffset <- object$binaryOffset
+    res$comp.test <- NULL
+    res$K <- K
+    res$offset <- object$offset
     attr(res, 'class') <- 'mbart'
     
     return(res)

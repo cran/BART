@@ -1,5 +1,6 @@
 aids.itr.pbart	   AIDS example for individualized treatment rules with probit BART
 aids.itr.lbart	   AIDS example for individualized treatment rules with logit BART
+alligator	   Alligator feeding example with Multinomial BART
 bladder.recur.bart	   Bladder cancer example for recurrent events with BART
 c.surv.bart	   BART and the concordance probability
 cal.recur.bart	   Interval coverage calibration for recurrent events with BART
@@ -32,6 +33,7 @@ missing.gbart	   Example of missing imputation with gbart
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
 np.recur.bart	   Nonproportional intensity for recurrent events with BART
+sigma.known.gbart	Sigma is fixed and known
 sparse.lbart	   Dirichlet sparsity prior with logistic BART
 sparse.pbart	   Dirichlet sparsity prior with probit BART
 sparse.wbart	   Dirichlet sparsity prior with continuous BART

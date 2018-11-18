@@ -32,7 +32,7 @@ prob.025 <- 0
 prob.975 <- 0
 for(i in 1:M) {
    j <- (i-1)*K+1:K
-   prob <- apply(pred$prob.test[ , 2*j], 1, mean)
+   prob <- 1-apply(pred$prob.test[ , 2*j], 1, mean)
    ##prob <- apply(pred[[2]]$prob.test[ , j], 1, mean)
    prob.mean[i] <- mean(prob)
    prob.025[i] <- quantile(prob, probs=0.025)
@@ -45,4 +45,4 @@ plot(X, pnorm(X^3), type='l',
 lines(x, prob.mean, col='blue')
 lines(x, prob.025, col='red')
 lines(x, prob.975, col='red')
-dev.copy2pdf(file='cube-mbart.pdf')
+##dev.copy2pdf(file='cube-mbart.pdf')

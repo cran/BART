@@ -36,6 +36,7 @@ gbart(
       ndpost=1000L, nskip=100L, %keepevery=1L,
       keepevery=c(1L, 10L, 10L)[ntype],
       printevery=100L, transposed=FALSE,
+      hostname=FALSE,
       mc.cores = 1L, ## mc.gbart only
       nice = 19L,    ## mc.gbart only
       seed = 99L     ## mc.gbart only
@@ -60,6 +61,7 @@ mc.gbart(
          ndpost=1000L, nskip=100L, %keepevery=1L,
          keepevery=c(1L, 10L, 10L)[ntype],
          printevery=100L, transposed=FALSE,
+         hostname=FALSE,
          mc.cores = 2L, nice = 19L, seed = 99L
 )
 
@@ -163,7 +165,9 @@ argument \code{type} to specify a logistic BART model.
    %% }
 
    \item{lambda}{
-   The scale of the prior for the variance.  Not used if \eqn{y} is binary.
+   The scale of the prior for the variance.  If \code{lambda} is zero,
+     then the variance is to be considered fixed and known at the given
+     value of \code{sigest}.  Not used if \eqn{y} is binary.
  }
  
  \item{tau.num}{ The numerator in the \code{tau} definition, i.e.,
@@ -221,6 +225,13 @@ argument \code{type} to specify a logistic BART model.
    to transpose \code{x.train} and \code{x.test}, if any, prior to
    calling \code{mc.gbart}.
  }
+
+ \item{hostname}{
+   When running on a cluster occasionally it is useful
+   to track on which node each chain is running; to do so
+   set this argument to \code{TRUE}.
+ }
+ 
     \item{seed}{
      Setting the seed required for reproducible MCMC.
    }
@@ -248,10 +259,17 @@ argument \code{type} to specify a logistic BART model.
    \code{x.train} or the test data, \code{x.test}.
 
    For \code{x.train}/{x.test} with missing data elements, \code{gbart}
-   will singly impute them with hot decking.  Since \code{mc.gbart}
-   runs multiple \code{gbart} threads in parallel, \code{mc.gbart}
-   performs multiple imputation with hot decking, i.e., a separate
-   imputation for each thread.
+   will singly impute them with hot decking. For one or more missing
+   covariates, record-level hot-decking imputation \cite{deWaPann11} is
+   employed that is biased towards the null, i.e., nonmissing values
+   from another record are randomly selected regardless of the
+   outcome. Since \code{mc.gbart} runs multiple \code{gbart} threads in
+   parallel, \code{mc.gbart} performs multiple imputation with hot
+   decking, i.e., a separate imputation for each thread.  This
+   record-level hot-decking imputation is biased towards the null, i.e.,
+   nonmissing values from another record are randomly selected
+   regardless of \code{y.train}.
+
  }
 
  \value{
@@ -299,9 +317,21 @@ Chipman, H., George, E., and McCulloch R. (2006)
    Advances in Neural Information Processing Systems 19,
    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 
+De Waal, T., Pannekoek, J. and Scholtus, S. (2011)
+   Handbook of statistical data editing and imputation.
+   John Wiley & Sons, Hoboken, NJ.
+  
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
    \emph{The Annals of Statistics}, \bold{19}, 1--67.
+
+Gramacy, RB and Polson, NG (2012)
+   Simulation-based regularized logistic regression.
+   \emph{Bayesian Analysis}, \bold{7}, 567--590.
+
+Holmes, C and Held, L (2006)
+   Bayesian auxiliary variable models for binary and multinomial regression.
+   \emph{Bayesian Analysis}, \bold{1}, 145--68.
 
 Linero, A.R. (2016)
   Bayesian regression trees for high dimensional prediction and variable

@@ -234,24 +234,23 @@ Chipman, H., George, E., and McCulloch R. (2010)
    Bayesian Additive Regression Trees.
    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi: 10.1214/09-AOAS285>.
 
-Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning.
-   Advances in Neural Information Processing Systems 19,
-   Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
-
-   Entezari, R., Craiu, R.V., and Rosenthal, J.S. (2017)
-   Likelihood Inflating Sampling Algorithm.
-   \url{https://arxiv.org/pdf/1605.02113.pdf}.
-
 Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
    \emph{The Annals of Statistics}, \bold{19}, 1--67.
 
-Linero, A.R. (2016)
+Gramacy, RB and Polson, NG (2012)
+   Simulation-based regularized logistic regression.
+   \emph{Bayesian Analysis}, \bold{7}, 567--590.
+
+Holmes, C and Held, L (2006)
+   Bayesian auxiliary variable models for binary and multinomial regression.
+   \emph{Bayesian Analysis}, \bold{1}, 145--68.
+	
+Linero, A.R. (2018)
   Bayesian regression trees for high dimensional prediction and variable
-  selection. \emph{JASA},
-  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
+  selection. \emph{JASA}, \bold{113}, 626--36.
 }
+
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
 Rodney Sparapani: \email{rsparapa@mcw.edu}.

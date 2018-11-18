@@ -342,14 +342,31 @@ dependent on whether \code{y.train} has been specified; see below).  }
    this variable is used for cause 2 in a tree decision rule is given.}
 }
 \references{
-  Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
-  Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
-   
-Linero, A.R. (2016)
+Chipman, H., George, E., and McCulloch R. (2010)
+   Bayesian Additive Regression Trees.
+   \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi: 10.1214/09-AOAS285>.
+
+Friedman, J.H. (1991)
+   Multivariate adaptive regression splines.
+   \emph{The Annals of Statistics}, \bold{19}, 1--67.
+
+Gramacy, RB and Polson, NG (2012)
+   Simulation-based regularized logistic regression.
+   \emph{Bayesian Analysis}, \bold{7}, 567--590.
+
+Holmes, C and Held, L (2006)
+   Bayesian auxiliary variable models for binary and multinomial regression.
+   \emph{Bayesian Analysis}, \bold{1}, 145--68.
+	
+Linero, A.R. (2018)
   Bayesian regression trees for high dimensional prediction and variable
-  selection. \emph{JASA},
-  \url{http://dx.doi.org/10.1080/01621459.2016.1264957} 
+  selection. \emph{JASA}, \bold{113}, 626--36.
+
+Sparapani, Logan, McCulloch, Laud (2018)
+  Nonparametric competing risks analysis using
+  Bayesian Additive Regression Trees (BART).
+  arXiv preprint arXiv:1806.11237
+  
 }
 \author{
 Rodney Sparapani: \email{rsparapa@mcw.edu}

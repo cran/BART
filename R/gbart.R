@@ -35,6 +35,7 @@ gbart=function(
                ndpost=1000L, nskip=100L,
                keepevery=c(1L, 10L, 10L)[ntype],
                printevery=100L, transposed=FALSE,
+               hostname=FALSE,
                mc.cores = 1L, nice = 19L, seed = 99L
                )
 {
@@ -49,8 +50,12 @@ gbart=function(
         x.train = t(temp$X)
         numcut = temp$numcut
         xinfo = temp$xinfo
-        if(length(x.test)>0)
-            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        ## if(length(x.test)>0)
+        ##     x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        if(length(x.test)>0) {
+            x.test = bartModelMatrix(x.test)
+            x.test = t(x.test[ , temp$rm.const])
+        }
         rm.const <- temp$rm.const
         grp <- temp$grp
         rm(temp)
@@ -92,7 +97,10 @@ gbart=function(
     if(type=='wbart') {
         y.train = y.train-offset
 
-        if(is.na(lambda)) {
+        if(!is.na(sigest) && !is.na(lambda) && lambda==0) {
+            ##no op: sigma is fixed and known at given sigest value
+        }
+        else if(is.na(lambda)) {
             if(is.na(sigest)) {
                 if(p < n)
                     sigest = summary(lm(y.train~.,
@@ -142,17 +150,21 @@ gbart=function(
 
     if(check) x.test=x.train
     else if(np>0) {
-       for(i in 1:np)
-        for(j in 1:p)
-            while(is.na(x.test[j, i])) {
-                h=sample.int(np, 1)
-                x.test[j, i]=x.test[j, h]
-            }
+        for(i in 1:np)
+            for(j in 1:p)
+                while(is.na(x.test[j, i])) {
+                    h=sample.int(np, 1)
+                    x.test[j, i]=x.test[j, h]
+                }
     }
 
     ## if(hotdeck) ## warnings are suppressed with mc.gbart anyways
     ##     warning('missing elements of x imputed with hot decking')
-
+    
+    if(.Platform$OS.type!='unix') hostname <- FALSE
+    else if(hostname)
+        hostname <- system('hostname', intern=TRUE)
+    
     ptm <- proc.time()
 
     res = .Call("cgbart",
@@ -189,6 +201,7 @@ gbart=function(
                 )
 
     res$proc.time <- proc.time()-ptm
+    res$hostname <- hostname
 
     if(type=='wbart')
         res$yhat.train.mean <- apply(res$yhat.train, 2, mean)

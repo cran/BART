@@ -268,10 +268,9 @@ Friedman, J.H. (1991)
    Multivariate adaptive regression splines.
    \emph{The Annals of Statistics}, \bold{19}, 1--67.
 
-Linero, A.R. (2016)
+Linero, A.R. (2018)
   Bayesian regression trees for high dimensional prediction and variable
-  selection. \emph{JASA},
-  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
+  selection. \emph{JASA}, \bold{113}, 626--36.
 }
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr

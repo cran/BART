@@ -99,8 +99,12 @@ crisk.bart <- function(
         x.train2 = t(temp$X)
         numcut2 = temp$numcut
         xinfo2 = temp$xinfo
-        if(length(x.test2)>0)
-            x.test2 = t(bartModelMatrix(x.test2[ , temp$rm.const]))
+        ## if(length(x.test2)>0)
+        ##     x.test2 = t(bartModelMatrix(x.test2[ , temp$rm.const]))
+        if(length(x.test2)>0) {
+            x.test2 = bartModelMatrix(x.test2)
+            x.test2 = t(x.test2[ , temp$rm.const])
+        }
         rm.const2 <- temp$rm.const
         rm(temp)
 
@@ -110,8 +114,12 @@ crisk.bart <- function(
         x.train = t(temp$X)
         numcut = temp$numcut
         xinfo = temp$xinfo
-        if(length(x.test)>0)
-            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        ## if(length(x.test)>0)
+        ##     x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        if(length(x.test)>0) {
+            x.test = bartModelMatrix(x.test)
+            x.test = t(x.test[ , temp$rm.const])
+        }
         rm.const <- temp$rm.const
         rm(temp)
 

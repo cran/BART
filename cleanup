@@ -2,7 +2,7 @@
 
 rm -rf config.* src/Makevars
 
-for i in README src/TAGS src/BROWSE demo/*.pdf \
+for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 inst/cxx-ex/*.o inst/cxx-ex/*.out inst/cxx-ex/core* \
 	 demo/myeloid.multi.state.R vignettes/wbart.Rmd vignettes/jss.* \
 	 vignettes/Sweave.sty vignettes/jsslogo.* \
@@ -14,7 +14,8 @@ for i in README src/TAGS src/BROWSE demo/*.pdf \
 	 demo/fat.tail.dpm*.R R/*crsk.*.R \
 	 inst/bootcamp/* src/rtruncnorm.* \
 	 src/randomkit.* src/rand_draws.* src/latent.* \
-	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R
+	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R \
+	 R/class.ind.R man/class.ind.Rd src/cmbart.cpp
 do
     if [ -f $i ]
        then rm -rf $i

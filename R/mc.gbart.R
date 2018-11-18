@@ -37,6 +37,7 @@ mc.gbart <- function(
                      ndpost=1000L, nskip=100L,
                      keepevery=c(1L, 10L, 10L)[ntype],
                      printevery=100L, transposed=FALSE,
+                     hostname=FALSE,
                      mc.cores = 2L, nice = 19L, seed = 99L
                      )
 {
@@ -65,8 +66,12 @@ mc.gbart <- function(
         x.train = t(temp$X)
         numcut = temp$numcut
         xinfo = temp$xinfo
-        if(length(x.test)>0)
-            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        ## if(length(x.test)>0)
+        ##     x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        if(length(x.test)>0) {
+            x.test = bartModelMatrix(x.test)
+            x.test = t(x.test[ , temp$rm.const])
+        }
         rm.const <- temp$rm.const
         rm(temp)
     }
@@ -94,7 +99,7 @@ mc.gbart <- function(
                   w=w, ntree=ntree, numcut=numcut,
                   ndpost=mc.ndpost, nskip=nskip,
                   keepevery=keepevery, printevery=printevery,
-                  transposed=TRUE)},
+                  transposed=TRUE, hostname=hostname)},
             silent=(i!=1))
         ## to avoid duplication of output
         ## capture stdout from first posterior only
@@ -125,6 +130,8 @@ mc.gbart <- function(
         keeptest <- length(x.test)>0
 
         for(i in 2:mc.cores) {
+            post$hostname[i] <- post.list[[i]]$hostname
+            
             post$yhat.train <- rbind(post$yhat.train,
                                      post.list[[i]]$yhat.train)
 

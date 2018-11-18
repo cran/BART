@@ -1,163 +1,205 @@
-mbart = function(
-x.train, y.train, x.test=matrix(0.0,0,0),
-sparse=FALSE, theta=0, omega=1,
-a=0.5, b=1, augment=FALSE, rho=NULL,
-xinfo=matrix(0.0,0,0), usequants=FALSE,
-cont=FALSE, rm.const=TRUE, ##tau.interval=0.95,
-k=2.0, power=2.0, base=.95,
-binaryOffset=NULL,
-ntree=50L, numcut=100L,
-ndpost=1000L, nskip=100L,
-keepevery=1L,
-nkeeptrain=ndpost, nkeeptest=ndpost,
-#nkeeptestmean=ndpost,
-nkeeptreedraws=ndpost,
-printevery=100, transposed=FALSE
-#treesaslists=FALSE
-)
+
+## BART: Bayesian Additive Regression Trees
+## Copyright (C) 2018 Robert McCulloch and Rodney Sparapani
+
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, a copy is available at
+## https://www.R-project.org/Licenses/GPL-2
+
+
+mbart <- function(
+                  x.train, y.train,
+                  x.test=matrix(0,0,0), type='pbart',
+                  ntype=as.integer(
+                      factor(type,
+                             levels=c('wbart', 'pbart', 'lbart'))),
+                  sparse=FALSE, theta=0, omega=1,
+                  a=0.5, b=1, augment=FALSE, rho=NULL,
+                  xinfo=matrix(0,0,0), usequants=FALSE,
+                  rm.const=TRUE,
+                  k=2, power=2, base=0.95,
+                  ##sigest=NA, sigdf=3, sigquant=0.90, lambda=NA,
+                  tau.num=c(NA, 3, 6)[ntype],
+                  offset=NULL, ##w=rep(1, length(y.train)),
+                  ntree=c(200L, 50L, 50L)[ntype], numcut=100L,
+                  ndpost=1000L, nskip=100L,
+                  keepevery=c(1L, 10L, 10L)[ntype],
+                  printevery=100L, transposed=FALSE,
+                  hostname=FALSE,
+                  mc.cores = 2L, nice = 19L, seed = 99L
+                  )
 {
+    if(type=='wbart' || is.na(ntype))
+        stop("type argument must be set to either 'pbart' or 'lbart'")
 
-n = length(y.train)
+    cats <- unique(sort(y.train))
+    K <- length(cats)
 
-## if(binaryOffset!=0)
-##     stop('binaryOffset not supported by mbart')
+    if(K<2)
+        stop("there must be at least 2 categories")
 
-if(length(binaryOffset)==0)
-    binaryOffset <- qnorm(as.integer(table(y.train))/n)
+    L=length(offset)
 
-if(!transposed) {
-    temp = bartModelMatrix(x.train, numcut, usequants=usequants,
-                           cont=cont, xinfo=xinfo, rm.const=rm.const)
-    x.train = t(temp$X)
-    numcut = temp$numcut
-    xinfo = temp$xinfo
-    if(length(x.test)>0)
-            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
-    rm.const <- temp$rm.const
-    grp <- temp$grp
-    rm(temp)
-}
-else {
-    rm.const <- NULL
-    grp <- NULL
-}
+    if(!(L %in% c(0, K)))
+        stop(paste0("length of offset argument must be 0 or ", K))
 
-if(n!=ncol(x.train))
-    stop('The length of y.train and the number of rows in x.train must be identical')
+    if(!transposed) {
+        temp = bartModelMatrix(x.train, numcut, usequants=usequants,
+                               xinfo=xinfo, rm.const=rm.const)
+        x.train = t(temp$X)
+        numcut = temp$numcut
+        xinfo = temp$xinfo
+        ## if(length(x.test)>0)
+        ##     x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        if(length(x.test)>0) {
+            x.test = bartModelMatrix(x.test)
+            x.test = t(x.test[ , temp$rm.const])
+        }
+        rm.const <- temp$rm.const
+        rm(temp)
+    }
 
-p = nrow(x.train)
-np = ncol(x.test)
-if(length(rho)==0) rho <- p
-if(length(rm.const)==0) rm.const <- 1:p
-if(length(grp)==0) grp <- 1:p
+    post <- list()
+    post$K <- K
+    post$cats <- cats
+    N <- length(y.train)
+    P <- nrow(x.train) ## transposed
+    ## post$yhat.train <- matrix(nrow=ndpost, ncol=N*K)
+    ## post$prob.train <- matrix(nrow=ndpost, ncol=N*K)
+    ## post$comp.train <- matrix(nrow=ndpost, ncol=N*K)
+    if(length(x.test)) {
+        Q <- ncol(x.test) ## transposed
+        post$yhat.test <- matrix(nrow=ndpost, ncol=Q*K)
+        post$prob.test <- matrix(nrow=ndpost, ncol=Q*K)
+        post$comp.test <- matrix(nrow=ndpost, ncol=Q*K)
+    }
+    else Q <- 0
 
-## if(tau.interval>0.5) tau.interval=1-tau.interval
+    L <- K-1
+    post$varcount <- as.list(1:L)
+    post$varprob <- as.list(1:L)
+    ##post$varcount <- array(dim=c(ndpost, P, L))
+    post$varcount.mean <- matrix(nrow=L, ncol=P)
+    ##post$varprob <- array(dim=c(ndpost, P, L))
+    post$varprob.mean <- matrix(nrow=L, ncol=P)
+    post$offset <- 0
+    post$treedraws <- list()
+    post$treedraws$trees <- as.list(1:L)
+    ##post$rm.const <- as.list(1:L)
+    post.list <- as.list(1:L)
 
-## tau=qlogis(1-0.5*tau.interval)/(k*sqrt(ntree))
+    for(h in 1:K) {
+        cond <- which(y.train>=cats[h])
+        if(h<K) {
+            post.list[[h]] <-
+                gbart(x.train=x.train[ , cond],
+                      y.train=(y.train[cond]==h)*1,
+                      x.test=x.test,
+                      type=type, ntype=ntype,
+                      sparse=sparse, theta=theta, omega=omega,
+                      a=a, b=b, augment=augment, rho=rho,
+                      xinfo=xinfo, usequants=usequants,
+                      rm.const=rm.const,
+                      k=k, power=power, base=base,
+                      tau.num=tau.num,
+                      offset=offset[h],
+                      ntree=ntree, numcut=numcut,
+                      ndpost=ndpost, nskip=nskip,
+                      keepevery=keepevery,
+                      printevery=printevery, transposed=TRUE,
+                      hostname=hostname)
 
-#--------------------------------------------------
-#set  nkeeps for thinning
-if((nkeeptrain!=0) & ((ndpost %% nkeeptrain) != 0)) {
-   nkeeptrain=ndpost
-   cat('*****nkeeptrain set to ndpost\n')
-}
-if((nkeeptest!=0) & ((ndpost %% nkeeptest) != 0)) {
-   nkeeptest=ndpost
-   cat('*****nkeeptest set to ndpost\n')
-}
-## if((nkeeptestmean!=0) & ((ndpost %% nkeeptestmean) != 0)) {
-##    nkeeptestmean=ndpost
-##    cat('*****nkeeptestmean set to ndpost\n')
-## }
-if((nkeeptreedraws!=0) & ((ndpost %% nkeeptreedraws) != 0)) {
-   nkeeptreedraws=ndpost
-   cat('*****nkeeptreedraws set to ndpost\n')
-}
-C <- length(unique(sort(y.train)))
-res = .Call("cmbart",
-            n,  #number of observations in training data
-            p,  #dimension of x
-            np, #number of observations in test data
-            x.train,   #p*n training data x
-            as.integer(as.factor(y.train))-1, #0,1,,,,C-1 n*1 y
-            C, #number of categories
-            x.test,    #p*np test data x
-            ntree,
-            numcut,
-            ndpost*keepevery,
-            nskip,
-            power,
-            base,
-            binaryOffset,
-            3/(k*sqrt(ntree)),##tau,
-            sparse,
-            theta,
-            omega,
-            grp,
-            a,
-            b,
-            rho,
-            augment,
-            nkeeptrain,
-            nkeeptest,
-#            nkeeptestmean,
-            nkeeptreedraws,
-            printevery,
-            xinfo
-)
-res$C <- C
+            if(attr(post.list[[h]], 'class')!=type)
+                return(post.list[[h]])
+        }
 
-if(nkeeptrain>0) {
-    res$prob.train <- pnorm(res$yhat.train)
-    for(i in 1:n) {
-        h <- (i-1)*C
-        total <- apply(res$prob.train[ , h+1:C], 1, sum)
-        for(j in 1:C) {
-            res$prob.train[ , h+j] <- res$prob.train[ , h+j]/total
+        ## for(i in 1:N) {
+        ##     j <- (i-1)*K+h
+        ##     if(i %in% cond) {
+        ##         l <- which(i==cond)
+        ##         post$yhat.train[ , j] <- post.list[[h]]$yhat.train[ , l]
+        ##         if(h==1) {
+        ##             post$comp.train[ , j] <-
+        ##                 1-post.list[[h]]$prob.train[ , l]
+        ##             post$prob.train[ , j] <- post.list[[h]]$prob.train[ , l]
+        ##         } else {
+        ##             post$comp.train[ , j] <- post$comp.train[ , j-1]*
+        ##                 (1-post.list[[h]]$prob.train[ , l])
+        ##             post$prob.train[ , j] <- post$comp.train[ , j-1]*
+        ##                 post.list[[h]]$prob.train[ , l]
+        ##         }
+        ##     }
+        ##     else {
+        ##         post$yhat.train[ , j] <- -Inf
+        ##         post$prob.train[ , j] <- 0
+        ##         post$comp.train[ , j] <- 1
+        ##     }
+        ## }
+
+        if(Q>0)
+            for(i in 1:Q) {
+                j <- (i-1)*K+h
+                if(h==K)
+                    post$prob.test[ , j] <- post$comp.test[ , j-1]
+                else {
+                    post$yhat.test[ , j] <- post.list[[h]]$yhat.test[ , i]
+                    if(h==1) {
+                        post$comp.test[ , j] <-
+                            1-post.list[[h]]$prob.test[ , i]
+                        post$prob.test[ , j] <- post.list[[h]]$prob.test[ , i]
+                    }
+                    else {
+                        post$comp.test[ , j] <- post$comp.test[ , j-1]*
+                            (1-post.list[[h]]$prob.test[ , i])
+                        post$prob.test[ , j] <- post$comp.test[ , j-1]*
+                            post.list[[h]]$prob.test[ , i]
+                    }
+                }
+            }
+
+        if(h<K) {
+            post$varcount[[h]] <- post.list[[h]]$varcount
+            post$varprob[[h]] <- post.list[[h]]$varprob
+
+            for(j in 1:P) {
+                ##post$varcount[ , j, h] <- post.list[[h]]$varcount[ , j]
+                post$varcount.mean[h, j] <- post.list[[h]]$varcount.mean[j]
+                ##post$varprob[ , j, h] <- post.list[[h]]$varprob[ , j]
+                post$varprob.mean[h, j] <- post.list[[h]]$varprob.mean[j]
+            }
+
+            post$offset[h] <- post.list[[h]]$offset
+            ##post$rm.const[[h]] <- post.list[[h]]$rm.const
+            post$treedraws$trees[[h]] <- post.list[[h]]$treedraws$trees
         }
     }
-    res$prob.train.mean <- apply(res$prob.train, 2, mean)
-    res$yhat.train.mean <- NULL
-} else {
-    res$yhat.train <- NULL
-    res$yhat.train.mean <- NULL
-}
 
-if(np>0) {
-    res$prob.test <- pnorm(res$yhat.test)
-    for(i in 1:np) {
-        h <- (i-1)*C
-        total <- apply(res$prob.test[ , h+1:C], 1, sum)
-        for(j in 1:C) {
-            res$prob.test[ , h+j] <- res$prob.test[ , h+j]/total
-        }
-    }
-    res$prob.test.mean <- apply(res$prob.test, 2, mean)
-    res$yhat.test.mean <- NULL
-} else {
-    res$yhat.test <- NULL
-    res$yhat.test.mean <- NULL
-}
+    post$treedraws$cutpoints <- post.list[[1]]$treedraws$cutpoints
+    dimnames(post$varcount.mean)[[2]] <- dimnames(post$varcount[[1]])[[2]]
+    dimnames(post$varprob.mean)[[2]] <- dimnames(post$varprob[[1]])[[2]]
+    post$rm.const <- post.list[[1]]$rm.const
+    post$type <- type
+    post$comp.test <- NULL
 
-names. <- dimnames(x.train)[[1]]
+    ## post$prob.train.mean <- apply(post$prob.train, 2, mean)
+    ## post$comp.train.mean <- apply(post$comp.train, 2, mean)
 
-if(nkeeptreedraws>0)
-    names(res$treedraws$cutpoints) = names.
-
-names. <- rep(names., each=C)
-
-for(i in 1:p)
-    for(j in 1:C) {
-        h <- (i-1)*C+j
-        names.[h] <- paste0(names.[h], '.', j)
+    if(Q>0) {
+        post$prob.test.mean <- apply(post$prob.test, 2, mean)
+        ##post$comp.test.mean <- apply(post$comp.test, 2, mean)
     }
 
-dimnames(res$varcount)[[2]] = as.list(names.)
-dimnames(res$varprob)[[2]] = as.list(names.)
-res$varcount.mean <- apply(res$varcount, 2, mean)
-res$varprob.mean <- apply(res$varprob, 2, mean)
-res$rm.const <- rm.const
-res$binaryOffset=binaryOffset
-attr(res, 'class')='mbart'
-return(res)
+    attr(post, 'class') <- 'mbart'
+
+    return(post)
 }

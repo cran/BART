@@ -49,8 +49,12 @@ mc.wbart <- function(
         x.train = t(temp$X)
         numcut = temp$numcut
         xinfo = temp$xinfo
-        if(length(x.test)>0)
-            x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        ## if(length(x.test)>0)
+        ##     x.test = t(bartModelMatrix(x.test[ , temp$rm.const]))
+        if(length(x.test)>0) {
+            x.test = bartModelMatrix(x.test)
+            x.test = t(x.test[ , temp$rm.const])
+        }
         rm.const <- temp$rm.const
         rm(temp)
     }

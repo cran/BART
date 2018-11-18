@@ -314,7 +314,7 @@ if(type==1) {
    //size_t index;
    size_t trcnt=0; //count kept train draws
    size_t tecnt=0; //count kept test draws
-   bool keeptest,/*keeptestme*/keeptreedraw;
+   bool keeptest,/*keeptestme*/keeptreedraw,type1sigest=(type==1 && lambda!=0.);
 
    time_t tp;
    int time1 = time(&tp), total=nd+burn;
@@ -327,7 +327,7 @@ if(type==1) {
       //draw bart
       bm.draw(svec,gen);
 
-      if(type==1) {
+      if(type1sigest) {
       //draw sigma
 	double rss=0.;
 	for(size_t k=0;k<n;k++) rss += pow((iy[k]-bm.f(k))/(iw[k]), 2.); 
@@ -403,7 +403,7 @@ if(type==1) {
    //return list
    Rcpp::List ret;
 //   ret["X"]=X; 
-   if(type==1) ret["sigma"]=sdraw;
+   if(type1sigest) ret["sigma"]=sdraw;
    ret["yhat.train"]=trdraw;
    ret["yhat.test"]=tedraw;
    ret["varcount"]=varcnt;
