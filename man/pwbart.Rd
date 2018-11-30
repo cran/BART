@@ -19,10 +19,12 @@ small amount to the overall fit.
 }
 \usage{
 pwbart( x.test, treedraws, mu=0, mc.cores=1L, transposed=FALSE,
+        dodraws=TRUE,
         nice=19L ## mc.pwbart only
       )
 
 mc.pwbart( x.test, treedraws, mu=0, mc.cores=2L, transposed=FALSE,
+           dodraws=TRUE,
            nice=19L ## mc.pwbart only
          )
 }
@@ -48,6 +50,11 @@ mc.pwbart( x.test, treedraws, mu=0, mc.cores=2L, transposed=FALSE,
    to transpose \code{x.test} prior to calling the internal versions of these functions.
    }
 
+   \item{dodraws}{
+     Whether to return the draws themselves (the default), or whether to
+     return the mean of the draws as specified by \code{dodraws=FALSE}.
+   }
+   
    \item{nice}{
      Set the job niceness.  The default
      niceness is 19: niceness goes from 0 (highest) to 19 (lowest).

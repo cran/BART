@@ -28,8 +28,8 @@ for(i in 1:3) {
 
     for(j in c(TRUE, FALSE)) {
         h <- (i-1)*2+j+1
-        post[[h]] = mc.wbart(x.train, y.train, mc.cores=C, sparse=TRUE, augment=j,
-                             seed=99, ndpost=ndpost, nskip=nskip)
+        post[[h]] = mc.wbart(x.train, y.train, mc.cores=C, sparse=TRUE,
+                             augment=j, seed=99, ndpost=ndpost, nskip=nskip)
 
         plot(post[[h]]$varprob.mean, col=c(rep(2, 5), rep(1, k-5)),
              main=paste0('N:', n, ', P:', k, ', Assumption:', c(2.2, 2.1)[j+1]),
@@ -41,4 +41,17 @@ for(i in 1:3) {
 
 par(mfrow=c(1, 1))
 
-dev.copy2pdf(file='sparse.wbart.pdf')
+##dev.copy2pdf(file='sparse.wbart.pdf')
+
+## check1=pwbart(x.train, post[[6]]$treedraws, post[[6]]$mu)
+## plot(apply(check1, 2, mean), post[[6]]$yhat.train.mean)
+
+## check2=pwbart(x.train, post[[6]]$treedraws, post[[6]]$mu, dodraws=FALSE)
+## plot(check2, post[[6]]$yhat.train.mean)
+
+## check1=mc.pwbart(x.train, post[[6]]$treedraws, post[[6]]$mu, mc.cores=C)
+## plot(apply(check1, 2, mean), post[[6]]$yhat.train.mean)
+
+## check2=mc.pwbart(x.train, post[[6]]$treedraws, post[[6]]$mu, mc.cores=C,
+##                  dodraws=FALSE)
+## plot(check2, post[[6]]$yhat.train.mean)

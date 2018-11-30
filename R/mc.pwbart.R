@@ -1,6 +1,6 @@
 
 ## BART: Bayesian Additive Regression Trees
-## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+## Copyright (C) 2017-2018 Robert McCulloch and Rodney Sparapani
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ mc.pwbart = function(
    mu=0,		#mean to add on
    mc.cores=2L,
    transposed=FALSE,
+   dodraws=TRUE,
    nice=19L
 )
 {
@@ -72,5 +73,6 @@ mc.pwbart = function(
 
     if(mc.cores>1) for(i in 2:mc.cores) pred <- cbind(pred, pred.list[[i]])
 
-    return(pred)
+    if(dodraws) return(pred+mu)
+    else return(apply(pred, 2, mean)+mu)
 }

@@ -83,7 +83,7 @@ mc.gbart(
 If \eqn{y} is numeric, then a continuous BART model is fit (Normal errors).\cr
 If \eqn{y} is binary (has only 0's and 1's), then a binary BART model
 with a probit link is fit by default: you can over-ride the default via the
-argument \code{type} to specify a logistic BART model.
+argument \code{type} to specify a logit BART model.
    }
 
    \item{x.test}{ Explanatory variables for test (out of sample)
@@ -93,7 +93,7 @@ argument \code{type} to specify a logistic BART model.
 
  \item{type}{ You can use this argument to specify the type of fit.
    \code{'wbart'} for continuous BART, \code{'pbart'} for probit BART or
-   \code{'lbart'} for logistic BART. }
+   \code{'lbart'} for logit BART. }
 
  \item{ntype}{ The integer equivalent of \code{type} where
   \code{'wbart'} is 1, \code{'pbart'} is 2 and

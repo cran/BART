@@ -10,12 +10,17 @@ AC_PREREQ(2.62)
 
 dnl AC_INIT([ARTP2],[0.9.30],[],[ARTP2],[])
 dnl derived from the ARTP2 R package v 0.9.30
-AC_INIT([BART],[1.0],[],[],[])
+AC_INIT([BART],[2.1],[],[],[])
 
-CXX1X=`"${R_HOME}/bin/R" CMD config CXX1X`
-CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
-CXX="${CXX1X} ${CXX1XSTD}"
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
+dnl CXX1X=`"${R_HOME}/bin/R" CMD config CXX1X`
+dnl CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
+dnl CXX="${CXX1X} ${CXX1XSTD}"
+dnl CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
+
+CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+CXX="${CXX11} ${CXX11STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
 
 AC_LANG(C++)
 dnl this the meat of R's m4/openmp.m4

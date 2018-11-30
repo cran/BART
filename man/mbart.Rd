@@ -93,7 +93,7 @@ mc.mbart(
  }
 
  \item{type}{ You can use this argument to specify the type of fit.
-   \code{'pbart'} for probit BART or \code{'lbart'} for Logistic BART. }
+   \code{'pbart'} for probit BART or \code{'lbart'} for logit BART. }
 
  \item{ntype}{ The integer equivalent of \code{type} where
   \code{'pbart'} is 2 and \code{'lbart'} is 3.}

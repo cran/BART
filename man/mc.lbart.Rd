@@ -1,5 +1,5 @@
 \name{mc.lbart}
-\title{BART for dichotomous outcomes with Logistic latents and parallel computation}
+\title{Logit BART for dichotomous outcomes with Logistic latents and parallel computation}
 \alias{mc.lbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr

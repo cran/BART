@@ -8,7 +8,7 @@ concord.surv.bart  Concordance probability for survival analysis with BART
 cube.abart	   x-cubed example for log time with AFT BART
 cube.gbart	   x-cubed example for generic BART
 cube.pbart	   x-cubed example for binary outcomes with probit BART
-cube.lbart	   x-cubed example for binary outcomes with Logistic BART
+cube.lbart	   x-cubed example for binary outcomes with logit BART
 cube.mbart	   x-cubed example for binary outcomes with Multinomial BART
 data.recur.pre.bart	   Data construction for recurrent events with BART
 ex.mbart	   Example for multinomial BART
@@ -34,10 +34,10 @@ nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes wit
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
 np.recur.bart	   Nonproportional intensity for recurrent events with BART
 sigma.known.gbart	Sigma is fixed and known
-sparse.lbart	   Dirichlet sparsity prior with logistic BART
+sparse.lbart	   Dirichlet sparsity prior with logit BART
 sparse.pbart	   Dirichlet sparsity prior with probit BART
 sparse.wbart	   Dirichlet sparsity prior with continuous BART
 test.rtnorm	   Test truncated Normal sampler for probit/logit BART
 test.srstepwise	   Test stepwise implementation for survreg
-test.draw_lambda_i	   Test truncated Normal variance sampler for logistic BART
+test.draw_lambda_i	   Test truncated Normal variance sampler for logit BART
 trees.pbart	   Concordant variable pairs probability with probit BART

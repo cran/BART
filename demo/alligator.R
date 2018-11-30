@@ -71,16 +71,37 @@ size.test.mean=apply(size.test, 2, mean)
 size.test.025=apply(size.test, 2, quantile, probs=0.025)
 size.test.975=apply(size.test, 2, quantile, probs=0.975)
 
-plot(factor(1:K, labels=c('bird', 'fish', 'invert', 'other', 'reptile')),
-     rep(1, K), col=1:K, type='n', lwd=2, lty=0,
-             xlim=c(1, K), ylim=c(0, 0.5), ylab='Prob.',
+k=1:K
+size.test.LH1=double(2*K)
+size.test.LH1[2*k-1]=size.test.025[k]
+size.test.LH1[2*k]=size.test.975[k]
+size.test.LH2=double(2*K)
+size.test.LH2[2*k-1]=size.test.025[k+K]
+size.test.LH2[2*k]=size.test.975[k+K]
+plot(factor(k, labels=c('bird', 'fish', 'invert', 'other', 'reptile')),
+     rep(1, K), col=k, type='n', lwd=2, lty=0,
+             xlim=c(1, K), ylim=c(0, 0.6), ylab='Probability',
      sub="Multinomial BART\nFriedman's partial dependence function")
-points(1:K, size.test.mean[1:K+K], lwd=2, col=1)
-lines(1:K, size.test.025[1:K+K], lwd=2, col=1, lty=2)
-lines(1:K, size.test.975[1:K+K], lwd=2, col=1, lty=2)
-points(1:K, size.test.mean[1:K], lwd=2, col=2)
-lines(1:K, size.test.025[1:K], lwd=2, col=2, lty=2)
-lines(1:K, size.test.975[1:K], lwd=2, col=2, lty=2)
+points(k-0.05, size.test.mean[k+K], lwd=2, col=1)
+points(k+0.05, size.test.mean[k], lwd=2, col=2)
+for(k in 1:K) {
+    lines(rep(k+0.05, 2), size.test.LH1[c(2*k-1, 2*k)], lwd=2, col=2)
+    lines(rep(k-0.05, 2), size.test.LH2[c(2*k-1, 2*k)], lwd=2, lty=2)
+}
 legend('topright', legend=c('Small', 'Large'),
-        pch=1, col=1:2)
+        pch=1, col=1:2, lty=2:1, lwd=2)
+dev.copy2pdf(file='../vignettes/figures/alligator.pdf')
+
+## plot(factor(1:K, labels=c('bird', 'fish', 'invert', 'other', 'reptile')),
+##      rep(1, K), col=1:K, type='n', lwd=2, lty=0,
+##              xlim=c(1, K), ylim=c(0, 0.5), ylab='Prob.',
+##      sub="Multinomial BART\nFriedman's partial dependence function")
+## points(1:K, size.test.mean[1:K+K], lwd=2, col=1)
+## lines(1:K, size.test.025[1:K+K], lwd=2, col=1, lty=2)
+## lines(1:K, size.test.975[1:K+K], lwd=2, col=1, lty=2)
+## points(1:K, size.test.mean[1:K], lwd=2, col=2)
+## lines(1:K, size.test.025[1:K], lwd=2, col=2, lty=2)
+## lines(1:K, size.test.975[1:K], lwd=2, col=2, lty=2)
+## legend('topright', legend=c('Small', 'Large'),
+##         pch=1, col=1:2)
 ##dev.copy2pdf(file='../vignettes/figures/alligator.pdf')

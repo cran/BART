@@ -1,5 +1,5 @@
 \name{pbart}
-\title{BART for dichotomous outcomes with Normal latents}
+\title{Probit BART for dichotomous outcomes with Normal latents}
 \alias{pbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr

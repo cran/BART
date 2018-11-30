@@ -1,6 +1,6 @@
 
 ## BART: Bayesian Additive Regression Trees
-## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+## Copyright (C) 2017-2018 Robert McCulloch and Rodney Sparapani
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ pwbart = function(
    mu=0,		#mean to add on
    mc.cores=1L,         #thread count
    transposed=FALSE,	
+   dodraws=TRUE,
    nice=19L             #mc.pwbart only	
 )
 {
@@ -33,9 +34,10 @@ if(p!=nrow(x.test))
     stop(paste0('The number of columns in x.test must be equal to ', p))
 
 res = .Call("cpwbart",
-   treedraws,	#trees list returned as returned from fbart
-   x.test,      #the test x.
+   treedraws,	#trees list
+   x.test,      #the test x
    mc.cores   	#thread count
 )
-return(res$yhat.test+mu)
+if(dodraws) return(res$yhat.test+mu)
+else return(apply(res$yhat.test, 2, mean)+mu)
 }

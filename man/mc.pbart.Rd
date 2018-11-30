@@ -1,5 +1,5 @@
 \name{mc.pbart}
-\title{BART for dichotomous outcomes with parallel computation}
+\title{Probit BART for dichotomous outcomes with Normal latents and parallel computation}
 \alias{mc.pbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr

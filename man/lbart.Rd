@@ -1,5 +1,5 @@
 \name{lbart}
-\title{BART for dichotomous outcomes with Logistic latents}
+\title{Logit BART for dichotomous outcomes with Logistic latents}
 \alias{lbart}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
