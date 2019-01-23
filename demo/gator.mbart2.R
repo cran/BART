@@ -1,11 +1,8 @@
 
 library(BART)
 
-B <- getOption('mc.cores', 1)
-figures = getOption('figures', default='NONE')
-
 data(alligator)
-     
+
 ## nnet::multinom Multinomial logit model fit with neural nets
 fit <- multinom(food ~ lake+size+sex, data=alligator, weights=count)
 
@@ -31,9 +28,11 @@ for(i in 1:L) {
 }
 table(y.train)
 
-post=mc.mbart(x.train, y.train, x.test, mc.cores=B, seed=99)
-##check=predict(post, x.test, mc.cores=B)
-##print(cor(post$prob.test.mean, check$prob.test.mean)^2)
+##set.seed(99)
+##post=mbart2(x.train, y.train, x.test, type='pbart')
+post=mc.mbart2(x.train, y.train, x.test, type='pbart', mc.cores=8, seed=99)
+## check=predict(post, x.test, mc.cores=8)
+## print(cor(post$prob.test.mean, check$prob.test.mean)^2)
 
 par(mfrow=c(3, 2))
 K=5
@@ -60,7 +59,7 @@ for(size in 1:2)
 x.test
 
 ## two sizes: 1=large: >2.3m, 2=small: <=2.3m
-pred=predict(post, x.test, mc.cores=B)
+pred=predict(post, x.test, mc.cores=8)
 ndpost=nrow(pred$prob.test)
 
 size.test=matrix(nrow=ndpost, ncol=K*2)
@@ -93,8 +92,7 @@ for(k in 1:K) {
 }
 legend('topright', legend=c('Small', 'Large'),
         pch=1, col=1:2, lty=2:1, lwd=2)
-if(figures!='NONE')
-    dev.copy2pdf(file=paste(figures, 'alligator.pdf', sep='/'))
+dev.copy2pdf(file='../vignettes/figures/alligator.pdf')
 
 ## plot(factor(1:K, labels=c('bird', 'fish', 'invert', 'other', 'reptile')),
 ##      rep(1, K), col=1:K, type='n', lwd=2, lty=0,
@@ -108,3 +106,4 @@ if(figures!='NONE')
 ## lines(1:K, size.test.975[1:K], lwd=2, col=2, lty=2)
 ## legend('topright', legend=c('Small', 'Large'),
 ##         pch=1, col=1:2)
+##dev.copy2pdf(file='../vignettes/figures/alligator.pdf')

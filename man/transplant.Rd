@@ -33,7 +33,9 @@ while on the list.
 
 Blood type is an important consideration.  Donor livers from subjects
 with blood type O can be used by patients with A, B, AB or O blood
-types, whereas an AB liver can only be used by an AB recipient.
+types, whereas a donor liver from the other types will only be
+transplanted to a matching recipient.
+%whereas an AB liver can only be used by an AB recipient.
 Thus type O subjects on the waiting list are at a disadvantage, since
 the pool of competitors is larger for type O donor livers.
 

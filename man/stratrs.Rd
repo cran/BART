@@ -5,7 +5,7 @@
   sampling to balance outcomes among the shards.
 }
 \usage{
-stratrs(y, C=floor(length(y)/2000))
+stratrs(y, C=5)
 }
 
 \arguments{

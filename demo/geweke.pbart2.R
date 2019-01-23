@@ -1,6 +1,9 @@
 
 library(BART)
 
+B <- getOption('mc.cores', 1)
+figures = getOption('figures', default='NONE')
+
 ##simulate from Friedman's five-dimensional test function
 ##Friedman JH. Multivariate adaptive regression splines
 ##(with discussion and a rejoinder by the author).
@@ -14,18 +17,17 @@ k = 50       #number of covariates
 thin = 10
 ndpost = 1000
 nskip = 100
-C = 8
 
 par(mfrow=c(2, 2))
 
-for(n in c(100, 1000, 10000)) {
+for(n in c(200, 1000, 10000)) {
     set.seed(12)
     x.train=matrix(runif(n*k), n, k)
     Ey.train = f(x.train)
     y.train=(Ey.train+sigma*rnorm(n)>0)*1
 
-    ##run BART with C cores in parallel
-    mc.train = mc.pbart(x.train, y.train, mc.cores=C, keepevery=thin,
+    ##run BART with B cores in parallel
+    mc.train = mc.pbart(x.train, y.train, mc.cores=B, keepevery=thin,
                         seed=99, ndpost=ndpost, nskip=nskip)
 
     x <- x.train
@@ -39,8 +41,8 @@ for(n in c(100, 1000, 10000)) {
         else x.test <- rbind(x.test, x)
     }
 
-    ##run predict with C cores in parallel
-    mc.test <- predict(mc.train, newdata=x.test, mc.cores=C)
+    ##run predict with B cores in parallel
+    mc.test <- predict(mc.train, newdata=x.test, mc.cores=B)
 
     ##create Friedman's partial dependence function for x4
     pred <- matrix(nrow=ndpost, ncol=10)
@@ -104,7 +106,9 @@ for(n in c(100, 1000, 10000)) {
     text(c(1, 1), c(-3.891, 3.891), pos=2, cex=0.6, labels='0.9999')
     text(c(1, 1), c(-4.417, 4.417), pos=2, cex=0.6, labels='0.99999')
 
-    dev.copy2pdf(file=paste0('../inst/bootcamp/geweke-pbart2-', n, '.pdf'))
+    if(figures!='NONE')
+    dev.copy2pdf(file=paste(figures, paste0('geweke-pbart2-', n, '.pdf'),
+                            sep='/'))
 }
 
 par(mfrow=c(1, 1))

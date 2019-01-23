@@ -389,7 +389,7 @@ void draw_theta0(bool const_theta, double& theta, std::vector<double>& lpv,
     std::vector<double> lwt_g (1000,0.);
     for(size_t j=0;j<p;j++) sumlpv+=lpv[j];
     for(size_t k=0;k<1000;k++){
-      lambda_g[k]=(double)(k+1)/10001.;
+      lambda_g[k]=(double)(k+1)/1001.;
       theta_g[k]=(lambda_g[k]*rho)/(1.-lambda_g[k]);
       double theta_log_lik=lgamma(theta_g[k])-(double)p*lgamma(theta_g[k]/(double)p)+(theta_g[k]/(double)p)*sumlpv;
       double beta_log_prior=(a-1.)*log(lambda_g[k])+(b-1.)*log(1.-lambda_g[k]);

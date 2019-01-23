@@ -1,12 +1,14 @@
 aids.itr.pbart	   AIDS example for individualized treatment rules with probit BART
 aids.itr.lbart	   AIDS example for individualized treatment rules with logit BART
-alligator	   Alligator feeding example with Multinomial BART
+alligator	   Alligator feeding example with mbart
 bladder.recur.bart	   Bladder cancer example for recurrent events with BART
+boston			   Boston housing data example with wbart
 c.surv.bart	   BART and the concordance probability
 cal.recur.bart	   Interval coverage calibration for recurrent events with BART
 concord.surv.bart  Concordance probability for survival analysis with BART
 cube.abart	   x-cubed example for log time with AFT BART
 cube.gbart	   x-cubed example for generic BART
+cube.gbmm 	   x-cubed example for the Generalized BART Mixed Model
 cube.pbart	   x-cubed example for binary outcomes with probit BART
 cube.lbart	   x-cubed example for binary outcomes with logit BART
 cube.mbart	   x-cubed example for binary outcomes with Multinomial BART
@@ -14,6 +16,7 @@ data.recur.pre.bart	   Data construction for recurrent events with BART
 ex.mbart	   Example for multinomial BART
 exp.recur.bart	   Proportional intensity for recurrent events with BART
 friedman.wbart     Friedman's five dimensional test function and multi-threading with BART
+gator.mbart2	   Alligator feeding example with mbart2
 geweke.pbart1 	   Geweke diagnostics for binary outcomes with BART part 1
 geweke.pbart2 	   Geweke diagnostics for binary outcomes with BART part 2
 geweke.pbart3 	   Geweke diagnostics for binary outcomes with BART part 3
@@ -33,11 +36,13 @@ missing.gbart	   Example of missing imputation with gbart
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
 np.recur.bart	   Nonproportional intensity for recurrent events with BART
+replication	   Replication script for JSS article
 sigma.known.gbart	Sigma is fixed and known
 sparse.lbart	   Dirichlet sparsity prior with logit BART
 sparse.pbart	   Dirichlet sparsity prior with probit BART
 sparse.wbart	   Dirichlet sparsity prior with continuous BART
 test.rtnorm	   Test truncated Normal sampler for probit/logit BART
+test.rtgamma	   Test truncated Gamma sampler for generalized mixed BART
 test.srstepwise	   Test stepwise implementation for survreg
 test.draw_lambda_i	   Test truncated Normal variance sampler for logit BART
 trees.pbart	   Concordant variable pairs probability with probit BART

@@ -1,8 +1,8 @@
-\name{mbart}
+\name{mbart2}
 
-\title{Multinomial BART for categorical outcomes with fewer categories}
-\alias{mbart}
-\alias{mc.mbart}
+\title{Multinomial BART for categorical outcomes with more categories}
+\alias{mbart2}
+\alias{mc.mbart2}
 
 \description{
   BART is a Bayesian \dQuote{sum-of-trees} model.\cr
@@ -22,9 +22,9 @@ so that it contributes a
 small amount to the overall fit.
 }
 \usage{
-mbart(
+mbart2(
       x.train, y.train,
-      x.test=matrix(0,0,0), type='pbart',
+      x.test=matrix(0,0,0), type='lbart',
       ntype=as.integer(
           factor(type,
                  levels=c('wbart', 'pbart', 'lbart'))),
@@ -45,9 +45,9 @@ mbart(
       seed = 99L     ## mc.bart only
      )
 
-mc.mbart(
+mc.mbart2(
          x.train, y.train,
-         x.test=matrix(0,0,0), type='pbart',
+         x.test=matrix(0,0,0), type='lbart',
          ntype=as.integer(
              factor(type,
                     levels=c('wbart', 'pbart', 'lbart'))),
@@ -77,7 +77,7 @@ mc.mbart(
    If a variable is a factor in a data frame, it is replaced with dummies.
    Note that q dummies are created if q>2 and
    one dummy is created if q=2, where q is the number of levels of the factor.
-   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x}
+   \code{mbart2} will generate draws of \eqn{f(x)} for each \eqn{x}
    which is a row of \code{x.train}.
    }
 
@@ -91,7 +91,7 @@ mc.mbart(
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
    Should have same structure as \code{x.train}.\cr
-   \code{mbart} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of \code{x.test}.
+   \code{mbart2} will generate draws of \eqn{f(x)} for each \eqn{x} which is a row of \code{x.test}.
  }
 
  \item{type}{ You can use this argument to specify the type of fit.
@@ -196,9 +196,9 @@ mc.mbart(
    %% }
 
    \item{transposed}{
-   When running \code{mbart} in parallel, it is more memory-efficient
+   When running \code{mbart2} in parallel, it is more memory-efficient
    to transpose \code{x.train} and \code{x.test}, if any, prior to
-   calling \code{mc.mbart}.
+   calling \code{mc.mbart2}.
    }
 
  \item{hostname}{
@@ -235,7 +235,7 @@ mc.mbart(
    The \eqn{x} is either a row from the training data (x.train).
 }
 \value{
-   \code{mbart} returns an object of type \code{mbart} which is
+   \code{mbart2} returns an object of type \code{mbart2} which is
    essentially a list. % assigned class \sQuote{bart}.
 
    \item{yhat.train}{ A matrix with \code{ndpost} rows and
@@ -308,14 +308,14 @@ for(i in 1:N)
     y.train[i]=sum((1:3)*rmultinom(1, 1, x.train[i, ]))
 table(y.train)/N
 
-##test mbart with token run to ensure installation works
+##test mbart2 with token run to ensure installation works
 set.seed(99)
-post = mbart(x.train, y.train, nskip=1, ndpost=1)
+post = mbart2(x.train, y.train, nskip=1, ndpost=1)
 
 \dontrun{
 set.seed(99)
-post=mbart(x.train, y.train, x.train)
-##mc.post=mbart(x.train, y.train, x.test, mc.cores=8, seed=99)
+post=mbart2(x.train, y.train, x.train)
+##mc.post=mbart2(x.train, y.train, x.test, mc.cores=8, seed=99)
 
 K=3
 i=seq(1, N*K, K)-1

@@ -1,6 +1,9 @@
 
 library(BART)
 
+B <- getOption('mc.cores', 1)
+figures = getOption('figures', default='NONE')
+
 data(bladder)
 subset <- -which(bladder1$stop==0)
 bladder0 <- bladder1[subset, ]
@@ -103,7 +106,7 @@ pre$tx.test[ , 6] <- c(rep(0, 2*NK), rep(1, NK))          ## Th
 ## post <- recur.bart(y.train=pre$y.train, x.train=pre$tx.train, x.test=pre$tx.test)
 ## depending on your performance, you may want to run in parallel if available
 post <- mc.recur.bart(y.train=pre$y.train, x.train=pre$tx.train,
-                      x.test=pre$tx.test, mc.cores=8, seed=99)
+                      x.test=pre$tx.test, mc.cores=B, seed=99)
 
 M <- nrow(post$yhat.test)
 RI.B6.Pl <- matrix(0, nrow=M, ncol=K)
@@ -138,7 +141,9 @@ plot(post$times, RI.Th.Pl.mu, col='blue',
 lines(post$times, RI.Th.Pl.025, col='red')
 lines(post$times, RI.Th.Pl.975, col='red')
 abline(h=1)
-dev.copy2pdf(file='../vignettes/figures/RI-Th-Pl.pdf')
+if(figures!='NONE')
+    dev.copy2pdf(file=paste(figures, 'RI-Th-Pl.pdf', sep='/'))
+
 
 plot(post$times, RI.B6.Pl.mu, col='blue',
      log='y', main='Bladder cancer ex: Vitamin B6 vs. Placebo',
@@ -146,7 +151,9 @@ plot(post$times, RI.B6.Pl.mu, col='blue',
 lines(post$times, RI.B6.Pl.025, col='red')
 lines(post$times, RI.B6.Pl.975, col='red')
 abline(h=1)
-dev.copy2pdf(file='../vignettes/figures/RI-B6-Pl.pdf')
+if(figures!='NONE')
+    dev.copy2pdf(file=paste(figures, 'RI-B6-Pl.pdf', sep='/'))
+
 
 plot(post$times, RI.Th.B6.mu, col='blue',
      log='y', main='Bladder cancer ex: Thiotepa vs. Vitamin B6',
@@ -154,4 +161,6 @@ plot(post$times, RI.Th.B6.mu, col='blue',
 lines(post$times, RI.Th.B6.025, col='red')
 lines(post$times, RI.Th.B6.975, col='red')
 abline(h=1)
-dev.copy2pdf(file='../vignettes/figures/RI-Th-B6.pdf')
+if(figures!='NONE')
+    dev.copy2pdf(file=paste(figures, 'RI-Th-B6.pdf', sep='/'))
+

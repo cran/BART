@@ -1,6 +1,7 @@
 \name{predict.mbart}
 \title{Predicting new observations with a previously fitted BART model}
 \alias{predict.mbart}
+\alias{predict.mbart2}
 \description{
 BART is a Bayesian \dQuote{sum-of-trees} model.\cr
 For a numeric response \eqn{y}, we have
@@ -18,11 +19,12 @@ small amount to the overall fit.
 }
 \usage{
 \method{predict}{mbart}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
+\method{predict}{mbart2}(object, newdata, mc.cores=1, openmp=(mc.cores.openmp()>0), ...)
 }
 \arguments{
    \item{object}{
-     \code{object} returned from previous BART fit with \code{surv.bart}
-     or \code{mc.surv.bart}.
+     \code{object} returned from previous BART fit with \code{mbart}
+     or \code{mbart2}.
    }
 
    \item{newdata}{
@@ -77,7 +79,7 @@ Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
 Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \seealso{
-\code{\link{surv.bart}}, \code{\link{mc.surv.bart}}, \code{\link{surv.pwbart}}, \code{\link{mc.surv.pwbart}}, \code{\link{mc.cores.openmp}}
+\code{\link{mbart}}, \code{\link{mbart2}}
 }
 \examples{
 

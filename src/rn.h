@@ -214,6 +214,23 @@ class arn: public rn
     if(shape<0.01) return ::exp(this->log_gamma(shape))/rate;
     else return R::rgamma(shape, 1.)/rate; 
   } 
+/*
+  virtual double gamma_left(double shape, double rate, double a) {
+// left truncated gamma: shape must be greater than 1!
+// Random Number Generation and Monte Carlo Methods, Second Edition, pp. 180-1
+    if(shape<=1.) return -1.;
+    double y, x=1., c=2., a_scale=a*rate, shape_shift=shape-1.,
+    lambda=0.5*(a_scale-shape+sqrt(pow(a_scale-shape, 2.)+4.*a_scale))/a_scale,
+      lambda_shift=1.-lambda, 
+      C=1.+log(lambda_shift/shape_shift);
+    while(c>x) { // do at least once
+      x=R::exp_rand(); 
+      y=a_scale+R::exp_rand()/lambda; 
+      c=lambda_shift*y-shape_shift*(log(y)+C);
+    }
+    return y/rate;
+  } 
+*/
   virtual double beta(double a, double b) {
     double x1=this->gamma(a, 1.), x2=this->gamma(b, 1.);
     return x1/(x1+x2);

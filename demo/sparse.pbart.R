@@ -1,6 +1,9 @@
 
 library(BART)
 
+B <- getOption('mc.cores', 1)
+figures = getOption('figures', default='NONE')
+
 ##simulate from Friedman's five-dimensional test function
 ##Friedman JH. Multivariate adaptive regression splines
 ##(with discussion and a rejoinder by the author).
@@ -11,7 +14,6 @@ f = function(x) #only the first 5 matter
 
 sigma = 1.0  #y = f(x) + sigma*z where z~N(0, 1)
 P = 100      #number of covariates
-C = 8
 thin <- c(10, 10, 10)
 n <- c(200, 1000, 5000)
 
@@ -24,7 +26,7 @@ for(i in 1:3) {
     Ey.train = f(x.train)
     y.train=((Ey.train+sigma*rnorm(N))>0)*1
 
-    post[[i]] = mc.pbart(x.train, y.train, mc.cores=C,
+    post[[i]] = mc.pbart(x.train, y.train, mc.cores=B,
                          keepevery=thin[i], sparse=TRUE, seed=99)
 }
 
@@ -43,4 +45,5 @@ for(i in 1:3) {
 
 par(mfrow=c(1, 1))
 
-##dev.copy2pdf(file='sparse-pbart.pdf')
+if(figures!='NONE')
+    dev.copy2pdf(file=paste(figures, 'sparse-pbart.pdf', sep='/'))

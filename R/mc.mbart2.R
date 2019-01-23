@@ -17,9 +17,9 @@
 ## https://www.R-project.org/Licenses/GPL-2
 
 
-mc.gbart <- function(
+mc.mbart2 <- function(
                      x.train, y.train,
-                     x.test=matrix(0,0,0), type='wbart',
+                     x.test=matrix(0,0,0), type='lbart',
                      ntype=as.integer(
                          factor(type,
                                 levels=c('wbart', 'pbart', 'lbart'))),
@@ -27,12 +27,10 @@ mc.gbart <- function(
                      a=0.5, b=1, augment=FALSE, rho=NULL,
                      xinfo=matrix(0,0,0), usequants=FALSE,
                      rm.const=TRUE,
-                     sigest=NA, sigdf=3, sigquant=0.90,
                      k=2, power=2, base=0.95,
-                     ##sigmaf=NA,
-                     lambda=NA, tau.num=c(NA, 3, 6)[ntype],
-                     ##tau.interval=0.9973,
-                     offset=NULL, w=rep(1, length(y.train)),
+                     ##sigest=NA, sigdf=3, sigquant=0.90, lambda=NA,
+                     tau.num=c(NA, 3, 6)[ntype],
+                     offset=NULL, ##w=rep(1, length(y.train)),
                      ntree=c(200L, 50L, 50L)[ntype], numcut=100L,
                      ndpost=1000L, nskip=100L,
                      keepevery=c(1L, 10L, 10L)[ntype],
@@ -41,24 +39,24 @@ mc.gbart <- function(
                      mc.cores = 2L, nice = 19L, seed = 99L
                      )
 {
-    if(is.na(ntype))
-        stop("type argument must be set to either 'wbart', 'pbart' or 'lbart'")
-
-    check <- unique(sort(y.train))
-
-    if(length(check)==2) {
-        if(!all(check==0:1))
-            stop('Binary y.train must be coded as 0 and 1')
-        if(type=='wbart')
-            stop("The outcome is binary so set type to 'pbart' or 'lbart'")
-    }
-
     if(.Platform$OS.type!='unix')
         stop('parallel::mcparallel/mccollect do not exist on windows')
 
     RNGkind("L'Ecuyer-CMRG")
     set.seed(seed)
     parallel::mc.reset.stream()
+
+    if(type=='wbart' || is.na(ntype))
+        stop("type argument must be set to either 'pbart' or 'lbart'")
+
+    cats <- unique(sort(y.train))
+    K <- length(cats)
+    if(K<2)
+        stop("there must be at least 2 categories")
+
+    L <- length(offset)
+    if(!(L %in% c(0, K)))
+        stop(paste0("length of offset argument must be 0 or ", K))
 
     if(!transposed) {
         temp = bartModelMatrix(x.train, numcut, usequants=usequants,
@@ -84,22 +82,21 @@ mc.gbart <- function(
 
     for(i in 1:mc.cores) {
         parallel::mcparallel({psnice(value=nice);
-            gbart(x.train=x.train, y.train=y.train,
-                  x.test=x.test, type=type, ntype=ntype,
+            mbart2(x.train=x.train, y.train=y.train,
+                  x.test=x.test,
+                  type=type, ntype=ntype,
                   sparse=sparse, theta=theta, omega=omega,
                   a=a, b=b, augment=augment, rho=rho,
                   xinfo=xinfo, usequants=usequants,
                   rm.const=rm.const,
-                  sigest=sigest, sigdf=sigdf, sigquant=sigquant,
                   k=k, power=power, base=base,
-                  ##sigmaf=sigmaf,
-                  lambda=lambda, tau.num=tau.num,
-                  ##tau.interval=tau.interval,
+                  tau.num=tau.num,
                   offset=offset,
-                  w=w, ntree=ntree, numcut=numcut,
+                  ntree=ntree, numcut=numcut,
                   ndpost=mc.ndpost, nskip=nskip,
-                  keepevery=keepevery, printevery=printevery,
-                  transposed=TRUE, hostname=hostname)},
+                  keepevery=keepevery,
+                  printevery=printevery, transposed=TRUE,
+                  hostname=hostname)},
             silent=(i!=1))
         ## to avoid duplication of output
         ## capture stdout from first posterior only
@@ -109,68 +106,64 @@ mc.gbart <- function(
 
     post <- post.list[[1]]
 
-    if(mc.cores==1 | attr(post, 'class')!=type) return(post)
+    if(mc.cores==1 | attr(post, 'class')!='mbart2') return(post)
     else {
         if(class(rm.const)!='logical') post$rm.const <- rm.const
-
         post$ndpost <- mc.cores*mc.ndpost
+        p <- nrow(x.train[ , post$rm.const])
 
-        p <- nrow(x.train[post$rm.const, ])
+        if(length(rm.const)==0) rm.const <- 1:p
+
+        post$rm.const <- rm.const
 
         old.text <- paste0(as.character(mc.ndpost), ' ', as.character(ntree),
                            ' ', as.character(p))
         old.stop <- nchar(old.text)
 
-        post$treedraws$trees <- sub(old.text,
-                                    paste0(as.character(post$ndpost), ' ',
-                                           as.character(ntree), ' ',
-                                           as.character(p)),
-                                    post$treedraws$trees)
+        for(j in 1:K)
+            post$treedraws$trees[[j]] <- sub(old.text,
+                                       paste0(as.character(post$ndpost), ' ',
+                                              as.character(ntree), ' ',
+                                              as.character(p)),
+                                       post$treedraws$trees[[j]])
 
-        keeptest <- length(x.test)>0
+        keeptestfits <- length(x.test)>0
 
         for(i in 2:mc.cores) {
-            post$hostname[i] <- post.list[[i]]$hostname
-            
             post$yhat.train <- rbind(post$yhat.train,
-                                     post.list[[i]]$yhat.train)
+                                    post.list[[i]]$yhat.train)
+            post$prob.train <- rbind(post$prob.train,
+                                    post.list[[i]]$prob.train)
+            if(keeptestfits) {
+                post$yhat.test <- rbind(post$yhat.test,
+                                        post.list[[i]]$yhat.test)
+                post$prob.test <- rbind(post$prob.test,
+                                        post.list[[i]]$prob.test)
+            }
 
-            if(keeptest) post$yhat.test <- rbind(post$yhat.test,
-                                                 post.list[[i]]$yhat.test)
+            for(j in 1:K) {
+                post$varcount[[j]] <- rbind(post$varcount[[j]],
+                                            post.list[[i]]$varcount[[j]])
+                post$varprob[[j]] <- rbind(post$varprob[[j]],
+                                           post.list[[i]]$varprob[[j]])
 
-            if(type=='wbart')
-                post$sigma <- cbind(post$sigma, post.list[[i]]$sigma)
+                post$treedraws$trees[[j]] <- paste0(post$treedraws$trees[[j]],
+                         substr(post.list[[i]]$treedraws$trees[[j]], old.stop+2,
+                                    nchar(post.list[[i]]$treedraws$trees[[j]])))
+            }
 
-            post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
-            post$varprob <- rbind(post$varprob, post.list[[i]]$varprob)
-
-            post$treedraws$trees <- paste0(post$treedraws$trees,
-                                           substr(post.list[[i]]$treedraws$trees, old.stop+2,
-                                                  nchar(post.list[[i]]$treedraws$trees)))
-
-            post$proc.time['elapsed'] <- max(post$proc.time['elapsed'],
-                                             post.list[[i]]$proc.time['elapsed'])
-            for(j in 1:5)
-                if(j!=3)
-                    post$proc.time[j] <- post$proc.time[j]+post.list[[i]]$proc.time[j]
         }
 
-        if(type=='wbart') {
-            post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
+        post$prob.train.mean <- apply(post$prob.train, 2, mean)
 
-            if(keeptest)
-                post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
-        } else {
-            post$prob.train.mean <- apply(post$prob.train, 2, mean)
+        if(keeptestfits) post$prob.test.mean <- apply(post$prob.test, 2, mean)
 
-            if(keeptest)
-                post$prob.test.mean <- apply(post$prob.test, 2, mean)
+        for(j in 1:K) {
+            post$varcount.mean[j, ] <- apply(post$varcount[[j]], 2, mean)
+            post$varprob.mean[j, ] <- apply(post$varprob[[j]], 2, mean)
         }
 
-        post$varcount.mean <- apply(post$varcount, 2, mean)
-        post$varprob.mean <- apply(post$varprob, 2, mean)
-
-        attr(post, 'class') <- type
+        attr(post, 'class') <- 'mbart2'
 
         return(post)
     }

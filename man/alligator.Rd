@@ -1,9 +1,7 @@
-\name{Alligator}
-\alias{Alligator}
+\name{alligator}
+\alias{alligator}
 \docType{data}
-\title{
-American alligator Food Choice
-}
+\title{ American alligator Food Choice }
 
 \description{ In 1985, American alligators were harvested by hunters
 from August 26 to September 30 in peninsular Florida from lakes Oklawaha
@@ -19,7 +17,7 @@ primary food choice: Fish
 crayfish, etc.), Reptile (turtles, alligators), Bird, and Other
 (amphibians, plants, household pets, stones, and other debris).  }
 
-\usage{data(Alligator)}
+\usage{data(alligator)}
 \format{
   A data frame with 80 observations on the following 5 variables.
   \describe{
@@ -51,28 +49,28 @@ Delany MF, Linda SB, Moore CT (1999).
 
 \examples{
 
-data(Alligator)
+data(alligator)
      
 ## nnet::multinom Multinomial logit model fit with neural nets
-fit <- multinom(food ~ lake+size+sex, data=Alligator, weights=count)
+fit <- multinom(food ~ lake+size+sex, data=alligator, weights=count)
 
 summary(fit$fitted.values)
 ## 1=bird, 2=fish, 3=invert, 4=other, 5=reptile
 
-(L=length(Alligator$count))
-(N=sum(Alligator$count))
+(L=length(alligator$count))
+(N=sum(alligator$count))
 y.train=integer(N)
 x.train=matrix(nrow=N, ncol=3)
 x.test=matrix(nrow=L, ncol=3)
 k=1
 for(i in 1:L) {
     x.test[i, ]=as.integer(
-        c(Alligator$lake[i], Alligator$size[i], Alligator$sex[i]))
-    if(Alligator$count[i]>0)
-        for(j in 1:Alligator$count[i]) {
-            y.train[k]=as.integer(Alligator$food[i])
+        c(alligator$lake[i], alligator$size[i], alligator$sex[i]))
+    if(alligator$count[i]>0)
+        for(j in 1:alligator$count[i]) {
+            y.train[k]=as.integer(alligator$food[i])
             x.train[k, ]=as.integer(
-                c(Alligator$lake[i], Alligator$size[i], Alligator$sex[i]))
+                c(alligator$lake[i], alligator$size[i], alligator$sex[i]))
             k=k+1
         }
 }

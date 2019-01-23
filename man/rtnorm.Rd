@@ -22,6 +22,12 @@ rtnorm(mean, tau, sd)
   Returns a truncated Normal, i.e., \eqn{N(mean, sd)I(tau, infinity)}.
 }
 
+\references{
+Robert, C.P. (1995)
+   Simulation of truncated normal variables.
+   \emph{Statistics and computing}, \bold{5(2)}, 121--125.
+}
+
 \author{
 Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
 Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
