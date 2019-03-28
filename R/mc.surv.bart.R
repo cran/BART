@@ -20,8 +20,9 @@
 
 mc.surv.bart <- function(
     x.train = matrix(0,0,0),
-    y.train=NULL, times=NULL, delta=NULL, K=NULL,
+    y.train=NULL, times=NULL, delta=NULL, 
     x.test = matrix(0,0,0),
+    K=NULL, events=NULL, ztimes=NULL, zdelta=NULL,
     sparse=FALSE, theta=0, omega=1,
     a=0.5, b=1, augment=FALSE, rho=NULL,
     xinfo=matrix(0,0,0), usequants=FALSE,
@@ -60,7 +61,8 @@ mc.surv.bart <- function(
     x.test <- bartModelMatrix(x.test)
 
     if(length(y.train)==0) {
-        pre <- surv.pre.bart(times, delta, x.train, x.test, K=K)
+        pre <- surv.pre.bart(times, delta, x.train, x.test, K=K,
+                             events=events, ztimes=ztimes, zdelta=zdelta)
 
         y.train <- pre$y.train
         x.train <- pre$tx.train

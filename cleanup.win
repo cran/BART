@@ -16,7 +16,11 @@ for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 src/randomkit.* src/rand_draws.* src/latent.* \
 	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R \
 	 R/class.ind.R man/class.ind.Rd src/cmbart.cpp \
-	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp
+	 vignettes/bincat.Rnw vignettes/computing.Rnw \
+	 vignettes/cont1.Rnw vignettes/cont2.Rnw \
+	 vignettes/time-to-event.Rnw vignettes/hwbart.Rmd \
+	 data/datafromsection13.txt data/leukemia.R
+##	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp
 do
     if [ -f $i ]
        then rm -rf $i

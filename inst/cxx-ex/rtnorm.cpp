@@ -22,11 +22,16 @@
 
 #ifndef NoRcpp
 
-RcppExport SEXP crtnorm(SEXP mean, SEXP tau, SEXP sd) {
+RcppExport SEXP crtnorm(SEXP n, SEXP mean, SEXP tau, SEXP sd) {
   arn gen;
-  return Rcpp::wrap(rtnorm(Rcpp::as<double>(mean),
-			   Rcpp::as<double>(tau), 
-			   Rcpp::as<double>(sd), gen));
+  size_t N = Rcpp::as<int>(n);
+//double a=Rcpp::as<double>(mean), b=Rcpp::as<double>(tau), 
+//c=Rcpp::as<double>(sd);
+  Rcpp::NumericVector z(N), a(mean), b(tau), c(sd);
+  size_t A=a.size(), B=b.size(), C=c.size();
+  for(size_t i=0; i<N; ++i) z[i]=rtnorm(a[i%A], b[i%B], c[i%C], gen);
+//for(size_t i=0; i<N; ++i) z[i]=rtnorm(a, b, c, gen);
+  return Rcpp::wrap(z);
 }
 
 #endif

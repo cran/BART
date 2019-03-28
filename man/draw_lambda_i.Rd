@@ -34,7 +34,7 @@ Robert Gramacy: \email{rbg@vt.edu}.
 set.seed(12)
 
 draw_lambda_i(1, 2)
-rtnorm(2, 6, sqrt(6.773462))
+rtnorm(1, 2, sqrt(6.773462), 6)
 draw_lambda_i(6.773462, 2)
 
 }

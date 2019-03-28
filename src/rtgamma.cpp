@@ -21,11 +21,16 @@
 
 #ifndef NoRcpp
 
-RcppExport SEXP crtgamma(SEXP shape, SEXP rate, SEXP a) {
+RcppExport SEXP crtgamma(SEXP n, SEXP shape, SEXP rate, SEXP a) {
   arn gen;
-  return Rcpp::wrap(rtgamma(Rcpp::as<double>(shape),
-			   Rcpp::as<double>(rate), 
-			   Rcpp::as<double>(a), gen));
+  size_t N = Rcpp::as<int>(n);
+//double arg1=Rcpp::as<double>(shape), arg2=Rcpp::as<double>(rate), 
+//  arg3=Rcpp::as<double>(a);
+  Rcpp::NumericVector z(N), A(shape), B(rate), C(a);
+  size_t nA=A.size(), nB=B.size(), nC=C.size();
+  for(size_t i=0; i<N; ++i) z[i]=rtgamma(A[i%nA], B[i%nB], C[i%nC], gen);
+//for(size_t i=0; i<N; ++i) z[i]=rtgamma(arg1, arg2, arg3, gen);
+  return Rcpp::wrap(z);
 }
 
 #endif

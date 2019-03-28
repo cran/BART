@@ -5,12 +5,11 @@ dnl which in turn is based on autoconf's openmp.m4,
 dnl with is licensed under GPL-3 with the 
 dnl Autoconf Configure Script Exception, version 3.0.
 
-
 AC_PREREQ(2.62)
 
 dnl AC_INIT([ARTP2],[0.9.30],[],[ARTP2],[])
 dnl derived from the ARTP2 R package v 0.9.30
-AC_INIT([BART],[2.1],[],[],[])
+AC_INIT([BART],[2.3],[],[],[])
 
 dnl CXX1X=`"${R_HOME}/bin/R" CMD config CXX1X`
 dnl CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
@@ -23,7 +22,7 @@ CXX="${CXX11} ${CXX11STD}"
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
 
 AC_LANG(C++)
-dnl this the meat of R's m4/openmp.m4
+dnl the meat of R's m4/openmp.m4
   OPENMP_[]_AC_LANG_PREFIX[]FLAGS=
   AC_ARG_ENABLE([openmp],
     [AS_HELP_STRING([--disable-openmp], [do not use OpenMP])])
@@ -33,7 +32,7 @@ dnl this the meat of R's m4/openmp.m4
       [AC_LINK_IFELSE([_AC_LANG_OPENMP],
 	 [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp='none needed'],
 	 [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp='unsupported'
-	  for ac_option in -fopenmp -xopenmp -qopenmp \
+	  for ac_option in -xopenmp -fopenmp -qopenmp \
                            -openmp -mp -omp -qsmp=omp -homp \
 			   -fopenmp=libomp \
                            -Popenmp --openmp; do

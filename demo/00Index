@@ -27,6 +27,7 @@ geweke.lung.surv.bart   Geweke diagnostics for advanced lung cancer survival ana
 inform.null.gbart  Specifying an informative null hypothesis prior with BART
 inform.alt.gbart   Specifying an informative alternative hypothesis prior with BART
 dm.recur.bart	   Diabetes and hospital admission example for recurrent events with BART
+leuk		   Multi-state model example with leukemia data set
 liver.crisk.bart   Liver transplant example for competing risks with BART
 liver.crisk2.bart   Liver transplant example for competing risks alternative with BART
 liver50.crisk.bart   Liver transplant example setting K=50 for competing risks with BART
@@ -36,6 +37,7 @@ missing.gbart	   Example of missing imputation with gbart
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1
 nhanes.pbart2 	   Friedman's partial dependence function for binary outcomes with BART part 2
 np.recur.bart	   Nonproportional intensity for recurrent events with BART
+nox		   Boston air pollution: Nitrogen Oxides and Housing Values
 replication	   Replication script for JSS article
 sigma.known.gbart	Sigma is fixed and known
 sparse.lbart	   Dirichlet sparsity prior with logit BART

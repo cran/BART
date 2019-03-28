@@ -26,7 +26,7 @@ double rtgamma(double shape, double rate, double a, rn& gen);
 
 #ifndef NoRcpp
 
-RcppExport SEXP crtgamma(SEXP, SEXP, SEXP);
+RcppExport SEXP crtgamma(SEXP, SEXP, SEXP, SEXP);
 
 #endif
 

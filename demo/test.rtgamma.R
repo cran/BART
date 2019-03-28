@@ -1,16 +1,17 @@
 library(BART)
 
+N <- 1
 A <- 3
 SHAPE <- 5
 RATE <- 0.5
 
 set.seed(12)
 
-rtgamma(SHAPE, RATE, A)
+rtgamma(N, SHAPE, RATE, A)
 
 set.seed(12)
 
-rtgamma(SHAPE, RATE, A)
+rtgamma(N, SHAPE, RATE, A)
 
 set.seed(12)
 
@@ -18,7 +19,8 @@ N <- 10000
 
 y <- 0
 
-for(i in 1:N) y[i] <- rtgamma(SHAPE, RATE, A)
+y <- rtgamma(N, SHAPE, RATE, A)
+##for(i in 1:N) y[i] <- rtgamma(SHAPE, RATE, A)
 
 x <- seq(A, 4*A, length.out=1000)
 plot(x, dgamma(x, SHAPE, RATE)/pgamma(A, SHAPE, RATE, lower.tail=FALSE),

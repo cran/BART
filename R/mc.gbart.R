@@ -129,6 +129,8 @@ mc.gbart <- function(
 
         keeptest <- length(x.test)>0
 
+        if(type=='wbart') sigma <- post$sigma[-(1:nskip)]
+        
         for(i in 2:mc.cores) {
             post$hostname[i] <- post.list[[i]]$hostname
             
@@ -138,34 +140,57 @@ mc.gbart <- function(
             if(keeptest) post$yhat.test <- rbind(post$yhat.test,
                                                  post.list[[i]]$yhat.test)
 
-            if(type=='wbart')
+            if(type=='wbart') {
                 post$sigma <- cbind(post$sigma, post.list[[i]]$sigma)
+                sigma <- c(sigma, post.list[[i]]$sigma[-(1:nskip)])
+            }
 
             post$varcount <- rbind(post$varcount, post.list[[i]]$varcount)
             post$varprob <- rbind(post$varprob, post.list[[i]]$varprob)
 
-            post$treedraws$trees <- paste0(post$treedraws$trees,
-                                           substr(post.list[[i]]$treedraws$trees, old.stop+2,
-                                                  nchar(post.list[[i]]$treedraws$trees)))
+            post$treedraws$trees <-
+                paste0(post$treedraws$trees,
+                       substr(post.list[[i]]$treedraws$trees, old.stop+2,
+                              nchar(post.list[[i]]$treedraws$trees)))
 
-            post$proc.time['elapsed'] <- max(post$proc.time['elapsed'],
-                                             post.list[[i]]$proc.time['elapsed'])
+            post$proc.time['elapsed'] <-
+                max(post$proc.time['elapsed'],
+                    post.list[[i]]$proc.time['elapsed'])
+
             for(j in 1:5)
                 if(j!=3)
-                    post$proc.time[j] <- post$proc.time[j]+post.list[[i]]$proc.time[j]
+                    post$proc.time[j] <-
+                        post$proc.time[j]+post.list[[i]]$proc.time[j]
         }
-
+        
+        n=length(y.train)
+        Y=t(matrix(y.train, nrow=n, ncol=post$ndpost))
+        
         if(type=='wbart') {
             post$yhat.train.mean <- apply(post$yhat.train, 2, mean)
-
+            SD=matrix(sigma, nrow=post$ndpost, ncol=n)
+            ##CPO=1/apply(1/dnorm(Y, post$yhat.train, SD), 2, mean)
+            log.pdf=dnorm(Y, post$yhat.train, SD, TRUE)
+            post$sigma.mean=mean(SD[ , 1])
+            
             if(keeptest)
                 post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
         } else {
             post$prob.train.mean <- apply(post$prob.train, 2, mean)
+            ##CPO=1/apply(1/dbinom(Y, 1, post$prob.train), 2, mean)
+            log.pdf=dbinom(Y, 1, post$prob.train, TRUE)
 
             if(keeptest)
                 post$prob.test.mean <- apply(post$prob.test, 2, mean)
         }
+
+        min.log.pdf=t(matrix(apply(log.pdf, 2, min),
+                             nrow=n, ncol=post$ndpost))
+        log.CPO=log(post$ndpost)+min.log.pdf[1, ]-
+            log(apply(exp(min.log.pdf-log.pdf), 2, sum))
+
+        post$LPML=sum(log.CPO) 
+        ##post$LPML=sum(log(CPO))
 
         post$varcount.mean <- apply(post$varcount, 2, mean)
         post$varprob.mean <- apply(post$varprob, 2, mean)

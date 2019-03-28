@@ -8,18 +8,19 @@
 }
 
 \usage{
-rtnorm(mean, tau, sd)
+rtnorm(n, mean, sd, tau)
 %rtnorm_reject(mean, tau, sd)
 }
 
 \arguments{
-   \item{mean}{ Mean of truncated Normal. }
-   \item{tau}{ Truncation point of truncated Normal. }
-   \item{sd}{ Standard deviation of truncated Normal. }
+   \item{n}{ Number of samples. }
+   \item{mean}{ Mean. }
+   \item{sd}{ Standard deviation. }
+   \item{tau}{ Truncation point. }
  }
  
 \value{
-  Returns a truncated Normal, i.e., \eqn{N(mean, sd)I(tau, infinity)}.
+  Returns \code{n} truncated Normals, i.e., \eqn{N(mean, sd)I(tau, infinity)}.
 }
 
 \references{
@@ -40,8 +41,8 @@ Robert Gramacy: \email{rbg@vt.edu}.
 
 set.seed(12)
 
-rtnorm(0, 3, 1)
-rtnorm(0, 3, 1)
+rtnorm(1, 0, 1, 3)
+rtnorm(1, 0, 1, 3)
 
 
 }

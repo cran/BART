@@ -6,7 +6,8 @@ Survival data contained in \eqn{(t,\delta, x)} must be translated to data
 suitable for the BART survival analysis model; see \code{surv.bart} for more details.
 }
 \usage{
-surv.pre.bart( times, delta, x.train=NULL, x.test=NULL, K=NULL )
+surv.pre.bart( times, delta, x.train=NULL, x.test=NULL,
+               K=NULL, events=NULL, ztimes=NULL, zdelta=NULL )
 }
 \arguments{
    \item{times}{
@@ -31,6 +32,22 @@ surv.pre.bart( times, delta, x.train=NULL, x.test=NULL, K=NULL )
    \item{K}{
      If provided, then coarsen \code{times} per the quantiles
      \eqn{1/K, 2/K, ..., K/K}.
+   }
+  
+   \item{events}{
+     If provided, then use for the grid of time points.
+   }
+
+   \item{ztimes}{
+     If provided, then these columns of \code{x.train} (and
+     \code{x.test} if any) are the times for time-dependent covariates.
+     They will be transformed into time-dependent covariate sojourn times.
+   }
+   
+   \item{zdelta}{
+     If provided, then these columns of \code{x.train} (and
+     \code{x.test} if any) are the delta for time-dependent covariates.
+     They will be transformed into time-dependent covariate binary events.
    }
 }
 

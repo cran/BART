@@ -38,8 +38,15 @@ surv.pre.bart <- function(
                       x.test=NULL,
                       ## matrix of covariate regressors at tx.test settings
 
-                      K=NULL
+                      K=NULL,
                       ## if specified, then use K quantiles for time grid
+
+                      events=NULL,
+                      ## if specified, then use events for time grid
+
+                      ztimes=NULL,
+                      zdelta=NULL
+                      ## column numbers of (ztimes, zdelta) time-dependent pairs
                       ) {
     ## currently does not handle time dependent Xs
     ## can be extended later
@@ -55,6 +62,11 @@ surv.pre.bart <- function(
     if(length(x.train)>0 && N!=nrow(x.train))
         stop('The length of times and the number of rows in x.train, if any, must be identical')
 
+    L <- length(ztimes)
+
+    if(L!=length(zdelta))
+        stop('The length of ztimes and zdelta, if any, must be identical')
+
     if(length(K)>0) {
         events <- unique(quantile(times, probs=(1:K)/K))
         attr(events, 'names') <- NULL
@@ -64,7 +76,7 @@ surv.pre.bart <- function(
             times[i] <- events[k]
         }
     }
-    else {
+    else if(length(events)==0) {
         events <- unique(sort(times))
         ## time grid of events including censoring times
     }
@@ -124,6 +136,22 @@ surv.pre.bart <- function(
     }
     else X.test <- matrix(nrow=0, ncol=0)*0
 
+    if(L>0) {
+        ztimes=ztimes+1
+        zdelta=zdelta+1
+
+        for(l in 1:L) {
+            i=ztimes[l]
+            j=zdelta[l]
+            X.train[ , j]=X.train[ , j]*(X.train[ , 1]>=X.train[ , i])
+            X.train[ , i]=X.train[ , 1]-X.train[ , j]*X.train[ , i]
+            if(length(x.test)>0) {
+                X.test[ , j]=X.test[ , j]*(X.test[ , 1]>=X.test[ , i])
+                X.test[ , i]=X.test[ , 1]-X.test[ , j]*X.test[ , i]
+            }
+        }
+    }
+        
     return(list(y.train=y.train, tx.train=X.train, tx.test=X.test,
                 times=events, K=K))
                 ##binaryOffset=binaryOffset))

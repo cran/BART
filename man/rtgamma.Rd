@@ -7,10 +7,11 @@
 }
 
 \usage{
-rtgamma(shape, rate, a)
+rtgamma(n, shape, rate, a)
 }
 
 \arguments{
+   \item{n}{ Number of samples. }
   \item{shape}{ Sampling from a truncated Gamma where
     \eqn{E[x]=shape/rate}.}
   \item{rate}{ This parameter is the inverse of the scale
@@ -19,7 +20,7 @@ rtgamma(shape, rate, a)
  }
  
 \value{
-  Returns a truncated Gamma, i.e., \eqn{Gam(shape, rate)I(a, infinity)}.
+  Returns \code{n} truncated Gamma, i.e., \eqn{Gam(shape, rate)I(a, infinity)}.
 }
 
 \references{
@@ -39,12 +40,10 @@ Robert Gramacy: \email{rbg@vt.edu}.
 \examples{
 
 set.seed(12)
-rtgamma(3, 1, 4)
-rtgamma(3, 1, 4)
+rtgamma(1, 3, 1, 4)
+rtgamma(1, 3, 1, 4)
 
-N=10000
-a=double(N)
-for(i in 1:N) a[i]=rtgamma(10, 2, 1)
+a=rtgamma(10000, 10, 2, 1)
 mean(a)
 min(a)
 

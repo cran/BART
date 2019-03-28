@@ -1,3 +1,20 @@
+Changes and New Features in 2.3 (2019-03-27):
+	* new feature: adding arguments to surv.pre.bart, surv.bart
+	and mc.surv.bart to fine-tune grid of time points and 
+	automate creation of time dependent covariates.  These are
+	convenience features to make multi-state models easier to
+	handle; see new demo leuk
+
+	* change: arguments to rtnorm and rtgamma more user friendly
+
+	* new feature: re-organized vignettes into a single vignette
+
+	* new feature: gbart now calculates log pseudo-marginal
+	likelihood (LPML) for computing pseudo-Bayes factors
+
+	* new feature: new Generalized BART Mixed Models, see the
+	function gbmm
+
 Changes and New Features in 2.2 (2019-01-22):
 
 	* bug fix: fix typo in size of theta grid for sparse prior

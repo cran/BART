@@ -43,8 +43,9 @@ response case, \eqn{f} is the sum of many tree models.  }
 \usage{
 
 surv.bart( x.train=matrix(0,0,0),
-           y.train=NULL, times=NULL, delta=NULL, K=NULL,
+           y.train=NULL, times=NULL, delta=NULL,
            x.test=matrix(0,0,0),
+           K=NULL, events=NULL, ztimes=NULL, zdelta=NULL,
            sparse=FALSE, theta=0, omega=1,
            a=0.5, b=1, augment=FALSE, rho=NULL,
            xinfo=matrix(0,0,0), usequants=FALSE,
@@ -69,8 +70,9 @@ surv.bart( x.train=matrix(0,0,0),
          )
 
 mc.surv.bart( x.train=matrix(0,0,0),
-              y.train=NULL, times=NULL, delta=NULL, K=NULL,
+              y.train=NULL, times=NULL, delta=NULL, 
               x.test=matrix(0,0,0), 
+              K=NULL, events=NULL, ztimes=NULL, zdelta=NULL,
               sparse=FALSE, theta=0, omega=1,
               a=0.5, b=1, augment=FALSE, rho=NULL,
               xinfo=matrix(0,0,0), usequants=FALSE,
@@ -125,16 +127,32 @@ that the definition of \code{x.train} is dependent on whether
      If \code{y.train} is \code{NULL}, then \code{delta} (and \code{times})
      must be provided.
    }
-
-   \item{K}{
-     If provided, then coarsen \code{times} per the quantiles
-     \eqn{1/K, 2/K, ..., K/K}.
-   }
    
    \item{x.test}{
    Explanatory variables for test (out of sample) data.\cr
    Must be a matrix and have the same structure as x.train.\cr
    \code{surv.bart} will generate draws of \eqn{f(t, x)} for each \eqn{x} which is a row of x.test.
+   }
+
+   \item{K}{
+     If provided, then coarsen \code{times} per the quantiles
+     \eqn{1/K, 2/K, ..., K/K}.
+   }
+  
+   \item{events}{
+     If provided, then use for the grid of time points.
+   }
+
+   \item{ztimes}{
+     If provided, then these columns of \code{x.train} (and
+     \code{x.test} if any) are the times for time-dependent covariates.
+     They will be transformed into time-dependent covariate sojourn times.
+   }
+   
+   \item{zdelta}{
+     If provided, then these columns of \code{x.train} (and
+     \code{x.test} if any) are the delta for time-dependent covariates.
+     They will be transformed into time-dependent covariate binary events.
    }
 
    \item{sparse}{Whether to perform variable selection based on a

@@ -17,5 +17,5 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-rtnorm=function(mean, tau, sd) .Call("crtnorm", mean, tau, sd)
+rtnorm=function(n, mean, sd, tau) .Call("crtnorm", n, mean, tau, sd)
 
