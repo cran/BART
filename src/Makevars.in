@@ -5,6 +5,6 @@ PKG_LIBS = @OPENMP_CXXFLAGS@
 
 ## C++ especially with header libs like Rcpp generate large libs on Linux
 ## this will slim down the size of the libs considerably and make CRAN happy
-stripUnneeded: $(SHLIB)
-	if [[ -e "/usr/bin/strip" && -e "/bin/uname" && `uname` == "Linux" ]] ; then /usr/bin/strip --strip-unneeded -K R_registerRoutines -K R_useDynamicSymbols $(SHLIB); fi
+##stripUnneeded: $(SHLIB)
+##	if [[ -e "/usr/bin/strip" && -e "/bin/uname" && `uname` == "Linux" ]] ; then /usr/bin/strip --strip-unneeded -K R_registerRoutines -K R_useDynamicSymbols $(SHLIB); fi
 

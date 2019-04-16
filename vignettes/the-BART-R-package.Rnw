@@ -85,17 +85,14 @@
 %\Plaintitle{A Short Demo Article: Regression Models for Count Data in R}
 %\Shorttitle{A Short Demo Article in \proglang{R}}
 
-\title{Nonparametric machine learning\\ and efficient computation\\
-  with Bayesian Additive Regression Trees:\\ the {\bf BART}
-  \proglang{R} package} 
+\title{The \pkg{BART} \proglang{R} package} 
 
-\Plaintitle{Nonparametric machine learning and efficient computation
-  with Bayesian Additive Regression Trees: the BART R package}
+\Plaintitle{The BART R package}
 
-\Shorttitle{The {\bf BART} \proglang{R} package}
+\Shorttitle{The \pkg{BART} package}
 
 %% - \Abstract{} almost as usual
-\Abstract{ In this article, we introduce the {\bf BART} \proglang{R}
+\Abstract{ In this article, we introduce the \pkg{ BART} \proglang{R}
   package which is an acronym for Bayesian Additive Regression Trees.
   BART is a Bayesian nonparametric, machine learning, ensemble
   predictive modeling method for continuous, binary, categorical and
@@ -103,19 +100,19 @@
   black-box method which fits the outcome to an arbitrary random
   function, $f$, of the covariates.  The BART technique is relatively
   computationally efficient as compared to its competitors, but large
-  sample sizes can be demanding.  Therefore, the {\bf BART} package
+  sample sizes can be demanding.  Therefore, the \pkg{ BART} package
   includes efficient state-of-the-art implementations for continuous,
   binary, categorical and time-to-event outcomes that can take
   advantage of modern off-the-shelf hardware and software
-  multi-threading technology.  The {\bf BART} package is written in
+  multi-threading technology.  The \pkg{ BART} package is written in
   \proglang{C++} for both programmer and execution efficiency.  The
-  {\bf BART} package takes advantage of multi-threading via forking as
-  provided by the {\bf parallel} package and OpenMP when available and
+  \pkg{ BART} package takes advantage of multi-threading via forking as
+  provided by the \pkg{ parallel} package and OpenMP when available and
   supported by the platform.  The ensemble of binary trees produced by
   a BART fit can be stored and re-used later via the \proglang{R}
   \code{predict} function.  In addition to being an \proglang{R}
   package, the installed BART routines can be called directly from
-  \proglang{C++}.  The {\bf BART} package provides the tools for your
+  \proglang{C++}.  The \pkg{ BART} package provides the tools for your
   BART toolbox.  }
 
 %% - \Keywords{} with LaTeX markup, at least one required
@@ -200,7 +197,7 @@ relationship, nor the interactions considered, to be pre-specified.
 
 \section{Continuous Outcomes with BART}
 
-The {\bf BART} package \citep{McCuSpar18} is GNU General Public
+The \pkg{ BART} package \citep{McCuSpar18} is GNU General Public
 License (GPL) software available on the Comprehensive R Archive
 Network (CRAN).  You can install it from CRAN as follows.
 \begin{verbatim}
@@ -239,7 +236,7 @@ article (with the options as specified above), then do the following.
 \code{source(system.file('demo/replication.R', package='BART'))}
 
 In this section, we document the analysis of continuous outcomes with
-the {\bf BART} \proglang{R} package.  We provide two functions for
+the \pkg{ BART} \proglang{R} package.  We provide two functions for
 continuous outcomes: 1)~\code{wbart} named for weighted BART; and
 2)~\code{gbart} named for generic, or generalized, BART.  Both functions
 have roughly the same functionality.  \code{wbart} has a verbose
@@ -259,7 +256,7 @@ where $(f,\sigma) \prior \mathrm{BART}$.
 We use Markov Chain Monte Carlo (MCMC) to get draws from the posterior
 distribution of the parameter $(f,\sigma)$.  In this section, we
 describe the functionality of \code{BART::wbart} which is the basic
-function in the {\bf BART} \proglang{R} package.  But first, we
+function in the \pkg{ BART} \proglang{R} package.  But first, we
 delve into the details of the BART prior itself.
 \end{comment}
 
@@ -614,7 +611,7 @@ BIRTH/DEATH proposals are essential (the two other proposals
 % However, because the branch regularization
 % typically generates trees with few nodes, all four proposals are not
 % necessary to explore the ensemble sample space. 
- For programming simplicity, the {\bf BART} package only implements
+ For programming simplicity, the \pkg{ BART} package only implements
  the BIRTH and DEATH proposals each with equal probability.  BIRTH
  selects a leaf and turns it into a branch, i.e., selects a new
  variable and cutpoint with two leaves ``born'' as its
@@ -810,7 +807,7 @@ draws from the posterior.
 Often it is impractical to provide \code{x.test} in the call to
 \code{wbart}/\code{gbart} due to the large number of predictions 
 considered, or all of the settings to be evaluated are not known
-at that time.  To allow for this common problem, the {\bf BART}
+at that time.  To allow for this common problem, the \pkg{ BART}
 package returns the trees encoded in an ASCII string,
 \code{treedraws\$trees}, and provides a \code{predict} function to
 generate any predictions needed.  Note that if you need to perform the
@@ -1277,7 +1274,7 @@ partial dependence function.  The marginal estimate and its
 
 \section{Binary and Categorical Outcomes with BART}
 
-The {\bf BART} package supports binary outcomes via probit BART with
+The \pkg{ BART} package supports binary outcomes via probit BART with
 Normal latents and logit BART with Logistic latents.  Categorical
 outcomes are supported with Multinomial BART which defaults to probit
 for computational efficiency, but logit is available as an option.
@@ -1285,7 +1282,7 @@ Convergence diagnostics are provided and variable selection as well.
 
 \subsection{Probit BART for Binary Outcomes}
 
-Probit BART for binary outcomes is provided by the {\bf BART} package
+Probit BART for binary outcomes is provided by the \pkg{ BART} package
 as the \code{pbart} and \code{gbart} functions.  In this case, the
 outcome, \code{y.train}, is an integer with values of 0 or 1.  The
 model is as follows with $i$ indexing subjects: $i=1, \dots, N$.
@@ -1379,7 +1376,7 @@ which are the means of the posterior sample columns, not shown).
 Often it is impractical to provide \code{x.test} in the call to
 \code{pbart} due to the number of predictions considered or all the
 settings to evaluate are simply not known at that time.  To allow for
-this common problem, the {\bf BART} package returns the trees encoded
+this common problem, the \pkg{ BART} package returns the trees encoded
 in an ASCII string, \code{treedraws\$trees}, and provides a
 \code{predict} function to generate any predictions needed.  Note that
 if you need to perform the prediction in some later \proglang{R}
@@ -1438,7 +1435,7 @@ $\hat{p}(\bm{x}_S) = {M^{-1}} {N^{-1}} \sum_{m=1}^M \sum_{i=1}^N
 \Phi(\mu_0+f_m(\bm{x}_S,\bm{x}_{iC}))$
 where $m$ indexes posterior samples.  Friedman's partial dependence
 function is a concept that is very flexible.  So flexible that we are
-unable to provide abstract functional support in the {\bf BART}
+unable to provide abstract functional support in the \pkg{ BART}
 package; rather, we provide examples of the many practical uses in the
 \code{demo} directory.
 
@@ -1465,7 +1462,7 @@ i.e.,
 $p_S(\bm{x}_S) = {\sum_{i=1}^N w_i
   \Phi(\mu_0+f(\bm{x}_S,\bm{x}_{iC}))}/ {\sum_{i'=1}^N w_{i'}}$.
 
-The {\bf BART} package provides two examples:\\
+The \pkg{ BART} package provides two examples:\\
 \code{system.file("demo/nhanes.pbart1.R", package="BART")} for chronic lower back pain and\\
 \code{system.file("demo/nhanes.pbart2.R", package="BART")} for chronic
 neck pain.  In Figure~\ref{clbp}, the unweighted relationship between
@@ -1622,7 +1619,7 @@ This formulation yields the Multinomial likelihood:
 $\wrap{\bm{y}|f_1,\dots,f_{K-1}} = \prod_{i=1}^N \prod_{j=1}^K
 \pi_{ij}^{y_{ij}}$.
 
-This approach is provided by the {\bf BART} package as the
+This approach is provided by the \pkg{ BART} package as the
 \code{mbart} function.  The input for \code{mbart} is essentially
 identical to \code{gbart}, but the output is slightly different.  For
 example, due to the way the model is estimated, the prediction for
@@ -1730,7 +1727,7 @@ large alligators are more likely to rely on a diet of fish while small
 alligators are more likely to rely on invertebrates.  Although the
 true probabilities are obviously unknown, we compared \code{mbart} to
 an analysis by a single hidden-layer/feed-forward Neural Network via
-the {\bf nnet} \proglang{R} package \citep{Ripl07,VenaRipl13} and the
+the \pkg{ nnet} \proglang{R} package \citep{Ripl07,VenaRipl13} and the
 results were essentially identical (see the demo for details).
 \begin{figure}%[t!]
 \begin{center}
@@ -1793,8 +1790,8 @@ Z_{AB} & = \frac{\sqrt{M}(\hat\theta_A-\hat\theta_B)}
                                                   &  & 
 \end{align*}
 
-In our {\bf BART} package, we supply \proglang{R} functions adapted
-from the {\bf coda} \proglang{R} package \citep{PlumBest06} to perform
+In our \pkg{ BART} package, we supply \proglang{R} functions adapted
+from the \pkg{ coda} \proglang{R} package \citep{PlumBest06} to perform
 Geweke diagnostics: {\tt spectrum0ar} and {\tt gewekediag}.  But, how
 do we apply Geweke's diagnostic to BART?  We can check convergence for
 any estimator of the form ${\theta}=h(f(\bm{x}))$, but often setting
@@ -1921,7 +1918,7 @@ $N=10000$.
 Bayesian variable selection techniques applicable to BART have been
 studied by
 \cite{ChipGeor10,ChipGeor13,BleiKape14,HahnCarv15,McCuCarv15,Line16}.
-The {\bf BART} package supports the sparse prior of \citet{Line16} by
+The \pkg{ BART} package supports the sparse prior of \citet{Line16} by
 specifying \code{sparse=TRUE} (the default is \code{sparse=FALSE}).
 Let's represent the variable selection probabilities by
 $s_j \where j=1, \., P$.  Now, replace the uniform variable selection
@@ -1942,7 +1939,7 @@ binary/ordinal covariates and is (is not) the default corresponding to
 \code{augment=FALSE} (\code{augment=TRUE}).
 
 Let's return to the simulated probit BART example explored above which
-is in the {\bf BART} package: \code{system.file("demo/sparse.pbart.R",
+is in the \pkg{ BART} package: \code{system.file("demo/sparse.pbart.R",
   package="BART")}.  For sample sizes of $N=200, 1000, 5000$, there
 are $P=100$ covariates, but only the first 5 are active.  In
 Figure~\ref{varsel}, the 5 (95) active (inactive) covariates are red
@@ -1988,7 +1985,7 @@ calculating these probabilities in
 
 \section{Time-to-event Outcomes with BART}
 
-The {\bf BART} package supports time-to-event outcomes including
+The \pkg{ BART} package supports time-to-event outcomes including
 survival analysis, competing risks and recurrent events.
 
 \subsection{Survival Analysis with the Cox Proportional Hazard Model}
@@ -2272,14 +2269,14 @@ $\hat{S}(t, \bm{x}_S) = {M^{-1}} {N^{-1}} \sum_{m=1}^M \sum_{i=1}^N
 S_m(t, \bm{x}_S,\bm{x}_{iC})$
 where $m$ indexes posterior samples.  Friedman's partial dependence
 function is a concept which is very flexible.  So flexible that as of
-yet, we are unable to provide abstract functional support in the {\bf
+yet, we are unable to provide abstract functional support in the \pkg{
   BART} package; rather, we provide examples of the many practical
 uses in the \code{demo} directory.
 
 \subsubsection{Survival Analysis with BART Example:  
 Advanced Lung Cancer}
 
-Here we present an example that is available in the {\bf BART} package:\\
+Here we present an example that is available in the \pkg{ BART} package:\\
 \code{system.file("demo/lung.surv.bart.R", package="BART")}.  The
 North Central Cancer Treatment Group surveyed 228 advanced lung cancer
 patients \citep{LoprLaur94}.  This data can be found in the
@@ -2496,7 +2493,7 @@ policies have evolved and now depend on each individual patient's
 risk/need which are assessed and updated regularly while a patient is
 on the waiting list.  Nevertheless, there still remains an acute shortage
 of donor livers today.  The \code{transplant} data set is provided by
-the {\bf BART} \proglang{R} package as is this example:
+the \pkg{ BART} \proglang{R} package as is this example:
 \code{system.file("demo/liver.crisk.bart.R", package="BART")}.  We
 compare the nonparametric Aalen-Johansen competing risks estimator
 with BART for the transplant event of type O patients which are in
@@ -2511,7 +2508,7 @@ general agreement; see Figure~\ref{liver-transplant}.
 
 \subsection{Recurrent Events Analysis with BART}%\label{recur}
 
-The {\bf BART} package supports recurrent events \citep{SparRein18}
+The \pkg{ BART} package supports recurrent events \citep{SparRein18}
 with \code{recur.bart} for serial computation and \code{mc.recur.bart}
 for parallel computation.  Survival analysis is generally concerned
 with absorbing events that a subject can only experience once like
@@ -2622,7 +2619,7 @@ which creates the grid of times $(3, 4, 7, 8, 9, 12)$.  For subject 1
 no event occurred at times 4 or 7 (7).  However, there were no events 
 since their first event had not ended yet, i.e., these subjects are not
 chronologically at risk for an event and, therefore, no corresponding random 
-behavior contributed to the likelihood.  The {\bf BART} package provides the
+behavior contributed to the likelihood.  The \pkg{ BART} package provides the
 \code{recur.pre.bart} function which you can use to construct these
 data sets.  Here is a short demonstration of its capabilities adapted
 from \code{demo/data.recur.pre.bart.R} (re-formatted for display purposes).
@@ -2793,16 +2790,16 @@ credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
 \begin{sidewaystable}
 \begin{center}%\label{BARTcompare}
 \begin{tabular}{l|llll}
-Category                 & {\bf BayesTree}      & {\bf bartMachine}  & {\bf dbarts}     & {\bf BART}           \\ \hline
+Category                 & \pkg{ BayesTree}      & \pkg{ bartMachine}  & \pkg{ dbarts}     & \pkg{ BART}           \\ \hline
 First release            & 2006                 & 2013               & 2014             & 2017                 \\
 Authors                  & Chipman              & Kapelner           & Dorie,           & McCulloch, Sparapani \\
                          & \& McCulloch         & \& Bleich          & Chipman          & Gramacy, Spanbauer   \\
                          &                      &                    & \& McCulloch     & \& Pratola           \\
 Source code              & C++                  & java               & C++              & C++                  \\
-R package dependencies   & None                 & {\bf car}, {\bf missForest},   
-                                                                     & None             & {\bf Rcpp}           \\
-excluding Recommended    &                      & {\bf rJava},       &                  &                      \\
-                         &                      & {\bf randomForest} &                  &                      \\
+R package dependencies   & None                 & \pkg{ car}, \pkg{ missForest},   
+                                                                     & None             & \pkg{ Rcpp}           \\
+excluding Recommended    &                      & \pkg{ rJava},       &                  &                      \\
+                         &                      & \pkg{ randomForest} &                  &                      \\
 Tree transition proposals& 4                    & 3                  & 4                & 2                    \\
 Multi-threaded           & No                   & Yes                & No               & Yes                  \\
 \code{predict} function  & No                   & Yes                & No               & Yes                  \\
@@ -2852,14 +2849,14 @@ BART implementation.
 In our implementation of BART, we pair the objected-oriented languages
 of \proglang{R} and \proglang{C++} to satisfy these requirements.  In
 this Section, we give a brief introduction to the concepts and
-technologies harnessed for efficient computing by our {\bf BART}
+technologies harnessed for efficient computing by our \pkg{ BART}
 package.
 
 \subsection{A Brief History of Multi-threading}
 
 Writing multi-threaded programs is a fairly routine practice today
 with a high-level language like \proglang{R} and corresponding
-user-friendly interfaces such as the {\bf parallel} \proglang{R} package
+user-friendly interfaces such as the \pkg{ parallel} \proglang{R} package
 \citep{UrbaRipl17}.  Modern off-the-shelf laptops typically have 4 or
 8 CPU cores placing reasonably priced multi-threaded hardware at your
 fingertips.  Although, BART is often computationally undemanding, we
@@ -2907,7 +2904,7 @@ available features 1 to 4 CPUs each of which is capable of
 multi-threading.  Therefore, in the span of only a few
 years, multi-threading rapidly trickled down from higher-end servers
 to mass-market products such as desktops and laptops.  For example, the
-consumer laptop that {\bf BART} is developed on, purchased in 2016,
+consumer laptop that \pkg{ BART} is developed on, purchased in 2016,
 is capable of 8 threads (and hence many of the examples default to 8
 threads).
 
@@ -2918,31 +2915,31 @@ In the late 1990s, the Message Passing Interface (MPI)
 computing framework in use today \citep{GabrFagg04}, i.e., distributed
 meaning tasks which span multiple computers.  MPI support in
 \proglang{R} is built upon a fairly consistent interface provided by
-the {\bf parallel} package \citep{UrbaRipl17} which is extended by
-other CRAN packages such as {\bf snow} \citep{TierRoss16} and {\bf
+the \pkg{ parallel} package \citep{UrbaRipl17} which is extended by
+other CRAN packages such as \pkg{ snow} \citep{TierRoss16} and \pkg{
   Rmpi} \citep{Yu17}.
-% and {\bf pbdMPI} \citep{ChenOstr18}.  To
+% and \pkg{ pbdMPI} \citep{ChenOstr18}.  To
 To support MPI, BART sofware was re-written with the goal to create a
 \proglang{C++} object schema that is simple to program and maintain
 \citep{PratChip14}.  % Although,
 % not an \proglang{R} package, this project was documented by
 % \cite{PratChip14}.
-The {\bf BART} package source code is a descendent of the MPI BART
+The \pkg{ BART} package source code is a descendent of the MPI BART
 project and its programmer-friendly objects, although, the MPI support
-is now provided by \proglang{R} packages, e.g., {\bf parallel}, {\bf
-  snow} and {\bf Rmpi}.
-% BART project and its programmer-friendly objects.  The current {\bf
-% BART} package no longer supports MPI, but the {\bf BART} package
+is now provided by \proglang{R} packages, e.g., \pkg{ parallel}, \pkg{
+  snow} and \pkg{ Rmpi}.
+% BART project and its programmer-friendly objects.  The current \pkg{
+% BART} package no longer supports MPI, but the \pkg{ BART} package
 % source code is a descendent of the MPI BART project and its
 % programmer-friendly objects. % which is deprecated.
 
-The {\bf BART} package supports multi-threading in two ways: 1)~via
-{\bf parallel} and related packages (as MPI is provided); and 2)~via
+The \pkg{ BART} package supports multi-threading in two ways: 1)~via
+\pkg{ parallel} and related packages (as MPI is provided); and 2)~via
 the OpenMP standard
-\citep{DaguMeno98}. % and the {\bf parallel} package.
+\citep{DaguMeno98}. % and the \pkg{ parallel} package.
 OpenMP takes advantage of modern hardware by performing
 multi-threading on single machines which often have multiple CPUs each
-with multiple cores.  Currently, the {\bf BART} package only uses
+with multiple cores.  Currently, the \pkg{ BART} package only uses
 OpenMP for parallelizing \code{predict} function calculations.  The
 challenge with OpenMP (besides the \proglang{C/C++} programming
 required to support it) is that it is not widely available on all
@@ -2960,18 +2957,18 @@ provide the function \code{mc.cores.openmp} which returns 1 if the
 \code{predict} function is capable of utilizing OpenMP; otherwise,
 returns 0.
 
-The {\bf parallel} package provides multi-threading via forking.
+The \pkg{ parallel} package provides multi-threading via forking.
 Forking is available on Unix platforms, but not Windows (we use the
 term Unix to refer to UNIX, Linux and macOS since they are all in
-the UNIX family tree).  The {\bf BART} package uses forking for
+the UNIX family tree).  The \pkg{ BART} package uses forking for
 posterior sampling of the $f$ function, and also for the
 \code{predict} function when OpenMP is not available.  Except for
 \code{predict}, all functions that use forking start with \code{mc}.
 And, regardless of whether OpenMP or forking is employed, these
 functions accept the argument \code{mc.cores} which controls the
-number of threads to be used.  The {\bf parallel} package provides the
+number of threads to be used.  The \pkg{ parallel} package provides the
 function \code{detectCores} which returns the number of threads that
-your hardware can support and, therefore, the {\bf BART} package can use.
+your hardware can support and, therefore, the \pkg{ BART} package can use.
 
 \subsection{BART Implementations on CRAN}
 
@@ -2979,16 +2976,16 @@ Currently, there are four BART implementations on the Comprehensive R
 Archive Network (CRAN); see the Appendix for a tabulated comparative
 summary of their features.
 
-{\bf BayesTree} was the first released in 2006 \citep{ChipMcCu16}.
+\pkg{ BayesTree} was the first released in 2006 \citep{ChipMcCu16}.
 Reported bugs will be fixed, but no future improvements are planned;
-so, we suggest choosing one of the newer packages such as {\bf BART}.
-The basic interface and workflow of {\bf BayesTree} has strongly
-influenced the other packages which followed.  However, the {\bf
+so, we suggest choosing one of the newer packages such as \pkg{ BART}.
+The basic interface and workflow of \pkg{ BayesTree} has strongly
+influenced the other packages which followed.  However, the \pkg{
   BayesTree} source code is difficult to maintain and, therefore,
 improvements were limited leaving it with relatively fewer
 features than the other entries.
 
-The second entrant is {\bf bartMachine} which is written in
+The second entrant is \pkg{ bartMachine} which is written in
 \proglang{java} and was first released in 2013 \citep{KapeBlei16}.  It
 provides advanced features like multi-threading, variable selection
 \citep{BleiKape14}, a \code{predict} function, convergence diagnostics
@@ -2997,21 +2994,21 @@ and missing data handling.  However, the \proglang{R} to
 \proglang{R} is written in \proglang{C} and \proglang{Fortran},
 consequentally, functions written in \proglang{java} do not have a
 natural interface to \proglang{R}.  This interface is provided by the
-{\bf rJava} \citep{Urba17} package which requires the Java Development
-Kit (JDK).  Therefore, we highly recommend {\bf bartMachine} for  
+\pkg{ rJava} \citep{Urba17} package which requires the Java Development
+Kit (JDK).  Therefore, we highly recommend \pkg{ bartMachine} for  
 \proglang{java} users. 
 
-The third entrant is {\bf dbarts} which is written in \proglang{C++}
+The third entrant is \pkg{ dbarts} which is written in \proglang{C++}
 and was first released in 2014 \citep{DoriChip16}.  It is a clone of
-the {\bf BayesTree} interface, but it does not share the source code;
-{\bf dbarts} source has been re-written from scratch for efficiency
-and maintainability.  {\bf dbarts} is a drop-in replacement for {\bf
-  BayesTree}.  Although, it lacks multi-threading, the {\bf dbarts}
+the \pkg{ BayesTree} interface, but it does not share the source code;
+\pkg{ dbarts} source has been re-written from scratch for efficiency
+and maintainability.  \pkg{ dbarts} is a drop-in replacement for \pkg{
+  BayesTree}.  Although, it lacks multi-threading, the \pkg{ dbarts}
 serial implementation is the fastest, therefore, it is preferable when
 multi-threading is unavailable such as on Windows.
-% However, {\bf dbarts} has relatively fewer features than the other entries.
+% However, \pkg{ dbarts} has relatively fewer features than the other entries.
 
-The {\bf BART} package which is written in \proglang{C++} was first
+The \pkg{ BART} package which is written in \proglang{C++} was first
 released in 2017 \citep{McCuSpar18}.  It provides advanced features
 like multi-threading, variable selection \citep{Line16}, a
 \code{predict} function and convergence diagnostics.  The source code
@@ -3020,7 +3017,7 @@ mainly written in \proglang{C} and \proglang{Fortran} (at the time of
 this writing, 39.2\% and 26.8\% lines of source code respectively),
 \proglang{C++} is a natural choice for creating \proglang{R} functions
 since they are both object-oriented languages.  The \proglang{C++}
-interface to \proglang{R} has been seamlessly provided by the {\bf
+interface to \proglang{R} has been seamlessly provided by the \pkg{
   Rcpp} package \citep{EddeFran11} which efficiently passes object
 references from \proglang{R} to \proglang{C++} (and vice versa) as
 well as providing direct accesss to the \proglang{R} random number
@@ -3036,8 +3033,8 @@ employed that is biased towards the null, i.e., nonmissing values from
 another record are randomly selected regardless of the outcome.  This
 simple missing data imputation method is sufficient for data sets with
 relatively few missing values; for more advanced needs, we recommend
-the {\bf sbart} package which utilizes the Sequential BART algorithm
-\citep{DaniSing17,XuDani16} (N.B.\ {\bf sbart} is also a descendent of
+the \pkg{ sbart} package which utilizes the Sequential BART algorithm
+\citep{DaniSing17,XuDani16} (N.B.\ \pkg{ sbart} is also a descendent of
 MPI BART).
 
 \subsection{MCMC is Embarrassingly Parallel}
@@ -3050,7 +3047,7 @@ are considered to be trivial.  BART MCMC also falls into this class.
 Typical practice for Bayesian MCMC is to start in some initial state,
 perform a limited number of samples to generate a new random starting
 position and throw away the preceding samples which we call burn-in.
-The amount of burn-in in the {\bf BART} package is controlled by the
+The amount of burn-in in the \pkg{ BART} package is controlled by the
 argument \code{nskip}: defaults to 100 with the exception of
 time-to-event outcomes which default to 250.  The total
 length of the chain returned is controlled by the argument
@@ -3146,7 +3143,7 @@ $8 \times m \times n \times B$ where $B$ is the number of children.
 If $A$ is a large matrix, then you may stress the system's limits.
 The simple solution is for the parent to create the transpose before
 passing $A$ and avoiding the multiple copies, i.e., \code{A <- t(A)}.
-And this is the philosophy that the {\bf BART} package follows
+And this is the philosophy that the \pkg{ BART} package follows
 for the multi-threaded BART functions; see
 the documentation for the \code{transposed} argument.
 
@@ -3159,7 +3156,7 @@ display of your keystrokes can not keep up; this should never happen
 and is the sign of something amiss.  With large multi-threaded jobs,
 it is surprisingly easy to naively degrade system performance.  But,
 this can easily be avoided by operating system support provided by
-\proglang{R}.  In the {\bf tools} package \citep{HornLeis17}, there is
+\proglang{R}.  In the \pkg{ tools} package \citep{HornLeis17}, there is
 the \code{psnice} function.  Paraphrased from the \code{?psnice} help
 page.
 \begin{quote}
@@ -3172,7 +3169,7 @@ page.
   Generally, processes with nice 19 are only run when the system would
   otherwise be idle.
 \end{quote}
-Therefore, by default, the {\bf BART} package children have their nice
+Therefore, by default, the \pkg{ BART} package children have their nice
 value set to 19.
 
 \begin{comment}
@@ -3181,7 +3178,7 @@ value set to 19.
 Here we present snippets of \proglang{R} code to run BART in serial
 and parallel for a continuous outcome which we call continuous BART.
 While we only demonstrate continuous outcomes, the other outcomes
-are as similarly handled by the {\bf BART} package as possible to
+are as similarly handled by the \pkg{ BART} package as possible to
 present a consistent interface.
 The serial function is \code{wbart} and the parallel, \code{mc.wbart}.
 The 'w' in the name stands for weighted since you can provide known
@@ -3195,7 +3192,7 @@ we can perform the calculations in serial,\\
 \code{post <- {mc.wbart}(x.train, y.train, ndpost=M, %keepevery=1, 
 mc.cores=8, seed=99)}.\\
   Notice the difference in how the seed is set;
-we will return to this detail later on.  The {\bf BART} package
+we will return to this detail later on.  The \pkg{ BART} package
 allows \code{x.train} (and \code{x.test}) to be provided as matrices
 or data frames, but for simplicity we present them as matrices.
 \begin{align*}
@@ -3230,9 +3227,9 @@ risks) or \code{recurbart} (recurrent events).
 
 Often when we are fitting a BART model, we have not specified an
 \code{x.test} matrix of hypothetical values for the evaluation of $f$.
-For fire-and-forget packages like {\bf BayesTree} and {\bf dbarts}, we
-would have to re-fit the model every time we want to evaluate {\bf
-  x.test} which can be very time-consuming.  Therefore, the {\bf BART}
+For fire-and-forget packages like \pkg{ BayesTree} and \pkg{ dbarts}, we
+would have to re-fit the model every time we want to evaluate \code{
+  x.test} which can be very time-consuming.  Therefore, the \pkg{ BART}
 package takes a unique approach: it returns the ensemble of trees in
 the \code{post} object for later use; specifically, they are encoded
 in an ASCII character string, \code{post\$treedraws\$trees}.  This allows us to
@@ -3269,9 +3266,9 @@ MCMC samples which are the rows of the output matrix.
 Occasionally, you may need to create a BART executable that you can
 run without an \proglang{R} instance.  This is especially useful if
 you need to include BART in another \proglang{C++} program.  Or, when
-you need to debug the {\bf BART} package \proglang{C++} source code
+you need to debug the \pkg{ BART} package \proglang{C++} source code
 which is more difficult to do when you are calling the function from
-\proglang{R}.  Several examples of these are provided with the {\bf
+\proglang{R}.  Several examples of these are provided with the \pkg{
   BART} package.  With \proglang{R}, you can find the \code{Makefile}
 and the weighted BART example with
 \code{system.file("cxx-ex/Makefile", package="BART")} and\\

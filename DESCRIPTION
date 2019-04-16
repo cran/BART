@@ -1,8 +1,8 @@
 Package: BART
 Type: Package
 Title: Bayesian Additive Regression Trees
-Version: 2.3
-Date: 2019-03-27
+Version: 2.4
+Date: 2019-03-28
 Authors@R: c(person('Robert', 'McCulloch', role='aut'),
   person('Rodney', 'Sparapani', role=c('aut', 'cre'), 
   email='rsparapa@mcw.edu'),
@@ -16,12 +16,12 @@ Authors@R: c(person('Robert', 'McCulloch', role='aut'),
 Description: Bayesian Additive Regression Trees (BART) provide flexible nonparametric modeling of covariates for continuous, binary, categorical and time-to-event outcomes.  For more information on BART, see Chipman, George and McCulloch (2010) <doi:10.1214/09-AOAS285> and Sparapani, Logan, McCulloch and Laud (2016) <doi:10.1002/sim.6893>.
 License: GPL (>= 2)
 Depends: R (>= 2.10), nlme, nnet, survival
-Imports: Rcpp (>= 0.12.3), MASS, parallel, tools
+Imports: Rcpp (>= 0.12.3), parallel, tools
 LinkingTo: Rcpp
-Suggests: knitr, rmarkdown, sbart
+Suggests: MASS, knitr, rmarkdown, sbart
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2019-03-28 14:34:50 UTC; rsparapa
+Packaged: 2019-04-16 14:27:25 UTC; rsparapa
 Author: Robert McCulloch [aut],
   Rodney Sparapani [aut, cre],
   Robert Gramacy [aut],
@@ -33,4 +33,4 @@ Author: Robert McCulloch [aut],
   Karen Vines [ctb]
 Maintainer: Rodney Sparapani <rsparapa@mcw.edu>
 Repository: CRAN
-Date/Publication: 2019-03-28 23:30:06 UTC
+Date/Publication: 2019-04-16 16:35:57 UTC

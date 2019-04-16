@@ -1,7 +1,7 @@
 a2fe356a25c27a23f77ca0045c860f9f *COPYING
-1c0269971a391df9658cef201c715b64 *DESCRIPTION
+faa788008946e187b1fa4c38597da8fa *DESCRIPTION
 0ee909720b9f95cb899b708c4abc2244 *NAMESPACE
-9221997fbcd71021eabdf41011a13039 *NEWS
+9e023866dd8fa49bf4e15e6c5e1a2912 *NEWS
 8caa19977720153041d6ca5624cb62f9 *R/abart.R
 04770a00a8f0817ed60d64558701cffb *R/bartModelMatrix.R
 0f7403a71d64ce30cbc6b665b483e582 *R/crisk.bart.R
@@ -166,8 +166,8 @@ acd0b9dc6b5044b7ebf8a6836aa26553 *inst/cxx-ex/tree.h
 94e6128ebe5494c006c05cc979384cef *inst/cxx-ex/treefuns.cpp
 dafd82a9abd232897f2c400a705de5e1 *inst/cxx-ex/treefuns.h
 14acb4e4ba43c8bb6f6d38010b35c629 *inst/cxx-ex/wmain.cpp
-ae4fdda3bdc1eaebf979efb48c0c3e7a *inst/doc/the-BART-R-package.Rnw
-ceaa22b433b67bb58d7ed62552ff47da *inst/doc/the-BART-R-package.pdf
+f70131435c409aaf216f6cfc40291b3b *inst/doc/the-BART-R-package.Rnw
+ef1f10895737c53a4a10ef0f1e416702 *inst/doc/the-BART-R-package.pdf
 591d890fb7ffda80dcf30b453a037ceb *man/ACTG175.Rd
 27644fcb862ec0b32ec04df9fa115ee6 *man/BART-package.Rd
 55a427541f83337e8a268a95f75b70fe *man/abart.Rd
@@ -220,7 +220,7 @@ c90f6e60b934171fef3ee04eeed6e132 *man/wbart.Rd
 3f8da4b13060f282527ffa58d4970c7e *man/xdm20.test.Rd
 6f1c43baa525328ce5bd7707fbff748f *man/xdm20.train.Rd
 bbf937e1c9ef15030a26104f8c3b7d1c *man/ydm20.train.Rd
-c7a5e99997824ae4d1ce891b768569ec *src/Makevars.in
+ec5b4df83843e6e910e911e05865f818 *src/Makevars.in
 e3d3cb360fbfdb3c6974e14eb5f09870 *src/Makevars.win
 121dd097d75d36f6d0337963d51fd17e *src/bart.cpp
 8495b69a0287ebcf449501a85ae7f197 *src/bart.h
@@ -288,5 +288,5 @@ a3e7772b003c13c260c46082f00f7cd4 *vignettes/figures/parallel.pdf
 01f4c6339f058d33f165beb97efea99e *vignettes/figures/sparse-pbart.pdf
 3187cf4e6255484ff6982e255b84c405 *vignettes/references.bib
 bd88c8e818c1184eb513d6fdfa05aaa1 *vignettes/statsref.docx
-ae4fdda3bdc1eaebf979efb48c0c3e7a *vignettes/the-BART-R-package.Rnw
+f70131435c409aaf216f6cfc40291b3b *vignettes/the-BART-R-package.Rnw
 7ea08da7284b1427837910afbd4af0bc *vignettes/wb_stat.bst

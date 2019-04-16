@@ -1,3 +1,7 @@
+Changes and New Features in 2.4 (2019-04-10):
+	* change:  per CRAN policy, dynamic libraries are no 
+	longer "stripped" on Linux
+
 Changes and New Features in 2.3 (2019-03-27):
 	* new feature: adding arguments to surv.pre.bart, surv.bart
 	and mc.surv.bart to fine-tune grid of time points and 
