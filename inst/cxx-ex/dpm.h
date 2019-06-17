@@ -17,49 +17,30 @@
  *  https://www.R-project.org/Licenses/GPL-2
  */
 
-#ifndef GUARD_common_h
-#define GUARD_common_h
+#ifndef GUARD_DPM
+#define GUARD_DPM
 
-#ifdef MATHLIB_STANDALONE
-#define NoRcpp
-#else
-#define RNG_Rcpp
-#endif
+#include "dp.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
+//y_i ~ N(y; theta_i = mu, sigma_i^2), that is, DP on the mu. sigma = eta.
+class dpm: public DP {
+public:
+   //--------------------------------------------------
+   //const/dest
+   dpm(): DP() {}
+   dpm(size_t _n, double _theta): DP(_n,_theta) {}
+   ~dpm() {}
 
-using std::endl;
+   //--------------------------------------------------
+   //public
+   void toscreen() {cout << "###dpm object:\n"; DP::toscreen();}
+   //the virtuals
+   double f(double y, double theta, double eta);
+   double draw_one_theta(std::list<size_t>& ind, rn& gen);
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+   //--------------------------------------------------
+   //private
+};
 
-#ifdef NoRcpp
-
-#include <stdio.h> // for printf
-
-using std::cout;
-
-#define PI 3.141592653589793238462643383280
-
-#else // YesRcpp
-
-#include <Rcpp.h>
-
-#define printf Rprintf
-#define cout Rcpp::Rcout
-
-#endif
-
-// log(2*pi)
-#define LTPI 1.837877066409345483560659472811
-// sqrt(2*pi)
-#define RTPI 2.506628274631000502415765284811
-
-#include "rn.h"
 
 #endif

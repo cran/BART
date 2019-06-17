@@ -16,14 +16,32 @@
 ## along with this program; if not, a copy is available at
 ## https://www.R-project.org/Licenses/GPL-2
 
-stratrs <- function(y, C=5)
+stratrs <- function(y, C=5, P=0)
 {
-    strat <- unique(sort(y))
-    rs <- integer(length(y))
-    
-    for(i in strat) {
-        N <- sum(y==i)
-        rs[y==i] <- sample(1:N, N)%%C
+    N <- length(y)
+    rs <- integer(N)
+
+    if(P>0) {
+        ## for continuous variables
+        Q=quantile(y, probs=(1:(P-1))/P)
+
+        for(i in 1:P) {
+            if(i<P) {
+                M <- sum(y<=Q[i])
+                rs[y<=Q[i]] <- sample(1:M, M)%%C
+            } else {
+                M <- sum(y>Q[P-1])
+                rs[y>Q[P-1] ] <- sample(1:M, M)%%C
+            }
+        }
+    } else {
+        ## for categorical variables
+        strat <- unique(sort(y))
+        
+        for(i in strat) {
+            M <- sum(y==i)
+            rs[y==i] <- sample(1:M, M)%%C
+        }
     }
     
     return(rs+1)

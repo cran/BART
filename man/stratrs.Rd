@@ -5,12 +5,16 @@
   sampling to balance outcomes among the shards.
 }
 \usage{
-stratrs(y, C=5)
+stratrs(y, C=5, P=0)
 }
 
 \arguments{
-  \item{y}{The binary/categorical outcome.}
-  \item{C}{The number of shards to break the data set into.}}
+  \item{y}{The binary/categorical/continuous outcome.}
+  \item{C}{The number of shards to break the data set into.}
+  \item{P}{For continuous data, we break the range into
+    P segments via the quantiles.  Specifying, P=20 seems to
+    work reasonably well.}
+}
 
 \details{
 To perform BART with large data sets, random sampling is employed

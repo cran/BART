@@ -44,7 +44,7 @@ using std::endl;
 
 using std::cout;
 
-#define PI 3.1415926535897931
+#define PI 3.141592653589793238462643383280
 
 #else // YesRcpp
 
@@ -56,7 +56,9 @@ using std::cout;
 #endif
 
 // log(2*pi)
-#define LTPI 1.83787706640934536
+#define LTPI 1.837877066409345483560659472811
+// sqrt(2*pi)
+#define RTPI 2.506628274631000502415765284811
 
 #include "rn.h"
 

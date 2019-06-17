@@ -62,7 +62,7 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
     nc <- numcut
     rm.vars <- c()
 
-    if(N>0 & p>0 & (rm.const | numcut[1]>0))
+    if(N>0 & p>0 & (rm.const | numcut[1]>0)) {
         for(j in 1:p) {
             X.class <- class(X[1, j])
 
@@ -71,16 +71,23 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
                 k <- length(xs)
                 nc[j] <- numcut
 
-                if(cont) {
-                    if(k==1) xs <-
-                         seq(xs[1], xs[1]+1, length.out=numcut+2)[-c(1, numcut+2)]
-                    else xs <-
-                         seq(xs[1], xs[k], length.out=numcut+2)[-c(1, numcut+2)]
+                if(k %in% 0:1) {
+                     rm.vars <- c(rm.vars, -j)
+                     nc[j] <- 1
+                     if(k==0) xs <- NA
                 }
-                else if(k==1) {
-                    rm.vars <- c(rm.vars, -j)
-                    nc[j] <- 1
-                }
+                else if(cont) 
+                    xs <- seq(xs[1], xs[k], length.out=numcut+2)[-c(1, numcut+2)]
+                ## if(cont) {
+                ##     if(k==1) xs <-
+                ##          seq(xs[1], xs[1]+1, length.out=numcut+2)[-c(1, numcut+2)]
+                ##     else xs <-
+                ##          seq(xs[1], xs[k], length.out=numcut+2)[-c(1, numcut+2)]
+                ## }
+                ## else if(k==1) {
+                ##     rm.vars <- c(rm.vars, -j)
+                ##     nc[j] <- 1
+                ## }
                 else if(k<numcut) {
                     xs <- 0.5*(xs[1:(k-1)]+xs[2:k])
                     nc[j] <- k-1
@@ -100,6 +107,7 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
             ##nc[j] <- length(xs)
             xinfo.[j, 1:nc[j] ] <- xs
         }
+    }
 
     X <- data.matrix(X)
 

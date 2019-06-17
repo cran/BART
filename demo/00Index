@@ -32,6 +32,7 @@ liver.crisk.bart   Liver transplant example for competing risks with BART
 liver.crisk2.bart   Liver transplant example for competing risks alternative with BART
 liver50.crisk.bart   Liver transplant example setting K=50 for competing risks with BART
 lung.surv.bart	   Lung cancer example for survival analysis with probit BART
+lung.surv.ice	   Lung cancer example for survival analysis: ICE-like S(t) plot
 lung.surv.lbart	   Lung cancer example for survival analysis with logit BART
 missing.gbart	   Example of missing imputation with gbart
 nhanes.pbart1 	   Friedman's partial dependence function for binary outcomes with BART part 1

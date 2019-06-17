@@ -151,6 +151,12 @@ mc.pbart <- function(
         ## if(length(post$yhat.test.mean)>0)
         ##     post$yhat.test.mean <- apply(post$yhat.test, 2, mean)
 
+        if(length(post$prob.train.mean)>0)
+            post$prob.train.mean <- apply(post$prob.train, 2, mean)
+
+        if(length(post$prob.test.mean)>0)
+            post$prob.test.mean <- apply(post$prob.test, 2, mean)
+
         post$varcount.mean <- apply(post$varcount, 2, mean)
         post$varprob.mean <- apply(post$varprob, 2, mean)
 

@@ -210,7 +210,7 @@ gbart=function(
         SD=matrix(res$sigma[-(1:nskip)], nrow=ndpost, ncol=n)
         ##CPO=1/apply(1/dnorm(Y, res$yhat.train, SD), 2, mean)
         log.pdf=dnorm(Y, res$yhat.train, SD, TRUE)
-        post$sigma.mean=mean(SD[ , 1])
+        res$sigma.mean=mean(SD[ , 1])
     }
     else {
         if(type=='pbart') res$prob.train = pnorm(res$yhat.train)
