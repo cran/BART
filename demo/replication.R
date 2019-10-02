@@ -43,14 +43,14 @@ source(system.file('demo/geweke.pbart2.R', package='BART'))
 ## Figure 13
 source(system.file('demo/sparse.pbart.R', package='BART'))
 
-## Section 5.2, Survival Analysis with BART Example: Advanced Lung Cancer
+## Section 5.1, Survival Analysis with BART Example: Advanced Lung Cancer
 ## Figure 14
 source(system.file('demo/lung.surv.bart.R', package='BART'))
 
-## Section 5.4, Competing Risks with BART Example: Liver Transplants
+## Section 5.3, Competing Risks with BART Example: Liver Transplants
 ## Figure 15
 source(system.file('demo/liver.crisk.bart.R', package='BART'))
 
-## Section 5.5, Recurrent Events with BART Example: Bladder Tumors}
+## Section 5.4, Recurrent Events with BART Example: Bladder Tumors}
 ## Figures 16-18
 source(system.file('demo/bladder.recur.bart.R', package='BART'))

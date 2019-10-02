@@ -4,11 +4,11 @@
 \alias{bladder1}
 \alias{bladder2}
 \title{Bladder Cancer Recurrences}
-\usage{
-bladder
-bladder1
-bladder2
-}
+%\usage{
+%bladder
+%bladder1
+%bladder2
+%}
 \description{
   
 This interesting example is from a clinical trial conducted by the
@@ -23,18 +23,18 @@ tumors during the study and new tumors were removed at each visit.  For
 each patient, their recurrence time, if any, was measured from the
 beginning of treatment.
 
-Bladder is the data set that appears most commonly in the literature.
+bladder is the data set that appears most commonly in the literature.
 It uses only the 85 subjects with nonzero follow-up who were assigned to
 either thiotepa or placebo and only the first four recurrences for any
 patient.  The status variable is 1 for recurrence and 0 for everything
 else (including death for any reason).  The data set is laid out in the
 competing risks format of the paper by Wei, Lin, and Weissfeld (WLW).
 
-Bladder1 is the full data set from the study. It contains all three
+bladder1 is the full data set from the study. It contains all three
 treatment arms and all recurrences for 118 subjects; the maximum
 observed number of recurrences is 9.
 
-Bladder2 uses the same subset of subjects as bladder, but formated in
+bladder2 uses the same subset of subjects as bladder, but formated in
 the (start, stop] or Anderson-Gill (AG) style.  Note that in
 transforming from the WLW to the AG style data set there is a quite
 common programming mistake that leads to extra follow-up time for 12

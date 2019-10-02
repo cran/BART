@@ -83,10 +83,10 @@ events analysis with BART and an application to the hospital admissions
 of patients with diabetes.  MCW Biostatistics Technical Report 64
 \url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
 
-Xu, Daniels and Winterstein.  Sequential BART for imputation of missing
-covariates.  Biostatistics 2016 doi: 10.1093/biostatistics/kxw009
-with supplement
-\url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
+Xu, Daniels and Winterstein (2016).  Sequential BART for imputation of
+missing covariates.  \emph{Biostatistics} doi:10.1093/biostatistics/kxw009
+%% with supplement
+%% \url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
 
 }
 \author{

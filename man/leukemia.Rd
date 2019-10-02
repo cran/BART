@@ -38,7 +38,7 @@
   French-American-British (FAB) Classification (0=Not AML/Elevated, 1=FAB M4 Or M5 with AML)}
 \item{\code{X9}}{Hospital (1=The Ohio State University in Columbus,
   2=Alfred in Melbourne, 3=St. Vincent in Sydney, 4=Hahnemann University
-in Philadelpha)}
+in Philadelphia)}
 \item{\code{X10}}{Methotrexate Used as a Graft-Versus-Host Disease Prophylactic
   (0=No, 1=Yes)}
 }

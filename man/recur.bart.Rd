@@ -346,7 +346,7 @@ Linero, A.R. (2018)
 Sparapani RA, LE Rein, SS Tarima, TA Jackson, JR Meurer (2018).
   Non-parametric recurrent events analysis with BART and an application to
   the hospital admissions of patients with diabetes.
-  \emph{Biostatistics}, \url{https://doi.org/10.1093/biostatistics/kxy032}
+  \emph{Biostatistics}, doi:10.1093/biostatistics/kxy032
 }
 
 \author{
