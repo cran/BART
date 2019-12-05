@@ -62,7 +62,7 @@ mc.surv.pwbart <- function(
 
     pred$yhat.test <- yhat.test.list[[1]]
 
-    if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
+    if(class(pred$yhat.test)[1]!='matrix') return(pred$yhat.test)
 
     if(mc.cores>1) for(i in 2:mc.cores)
                        pred$yhat.test <- cbind(pred$yhat.test, yhat.test.list[[i]])

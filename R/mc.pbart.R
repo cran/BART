@@ -97,7 +97,7 @@ mc.pbart <- function(
 
     if(mc.cores==1 | attr(post, 'class')!='pbart') return(post)
     else {
-        if(class(rm.const)!='logical') post$rm.const <- rm.const
+        if(class(rm.const)[1]!='logical') post$rm.const <- rm.const
 
         post$ndpost <- mc.cores*mc.ndpost
         

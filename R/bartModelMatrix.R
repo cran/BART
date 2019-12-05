@@ -19,7 +19,7 @@
 bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
                          rm.const=FALSE, cont=FALSE, xinfo=NULL) {
     
-    X.class = class(X)
+    X.class = class(X)[1]
 
     if(X.class=='factor') {
         X.class='data.frame'
@@ -64,7 +64,7 @@ bartModelMatrix=function(X, numcut=0L, usequants=FALSE, type=7,
 
     if(N>0 & p>0 & (rm.const | numcut[1]>0)) {
         for(j in 1:p) {
-            X.class <- class(X[1, j])
+            X.class <- class(X[1, j])[1]
 
             if(X.class=='numeric' | X.class=='integer') {
                 xs <- unique(sort(X[ , j]))

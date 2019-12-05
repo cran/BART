@@ -1,3 +1,12 @@
+Changes and New Features in 2.7 (2019-12-04):
+	* addressing new behavior of class function
+
+	* from here on: bug-fixes only
+	package frozen in order to be in synch
+	with our pending publication in JSS
+	for new developments, see BART3 on our github site at
+	https://github.com/rsparapa/bnptools
+
 Changes and New Features in 2.6 (2019-07-24):
 	* updated vignette with typo corrections and additional info
 	

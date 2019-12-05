@@ -118,8 +118,6 @@ Rodney Sparapani: \email{rsparapa@mcw.edu}.
 }
 \examples{
 
-library(BART)
-
 data(transplant)
 
 delta <- (as.numeric(transplant$event)-1)

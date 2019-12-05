@@ -37,7 +37,7 @@ surv.pwbart <- function(
 
     pred$yhat.test <- pwbart(x.test, treedraws, binaryOffset, mc.cores, TRUE)
 
-    if(class(pred$yhat.test)!='matrix') return(pred$yhat.test)
+    if(class(pred$yhat.test)[1]!='matrix') return(pred$yhat.test)
 
     x.test <- t(x.test)
     pred$tx.test <- x.test
