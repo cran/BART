@@ -6,6 +6,8 @@ figures = getOption('figures', default='NONE')
 x = Boston[,c(6,13)] #rm=number of rooms and lstat= percent lower status
 y = Boston$medv # median value
 
+head(cbind(x, y))
+
 par(mfrow=c(2,2))
 par(mai=c(.8,.8,.2,.2))
 plot(x[,1],y,xlab="x1=rm",ylab="y=mdev",cex.axis=1.3,cex.lab=1.2)
@@ -39,11 +41,16 @@ if(figures!='NONE')
 
 n=length(y)   ## total sample size
 set.seed(14)  ## Dave Keon, greatest Leaf of all time!
-ii = sample(1:n,floor(.75*n)) ## indices for train data, 75% of data
-xtrain=x[ii,]; ytrain=y[ii]   ## training data
-xtest=x[-ii,]; ytest=y[-ii]   ## test data
-cat("train sample size is ",length(ytrain),"\n")
-cat("test sample size is ",length(ytest),"\n")
+## ii = sample(1:n,floor(.75*n)) ## indices for train data, 75% of data
+## xtrain=x[ii,]; ytrain=y[ii]   ## training data
+## xtest=x[-ii,]; ytest=y[-ii]   ## test data
+## cat("train sample size is ",length(ytrain),"\n")
+## cat("test sample size is ",length(ytest),"\n")
+i <- sample(1:n, floor(0.75 * n))
+xtrain <- x[i, ]; ytrain = y[i]
+xtest <- x[-i, ]; ytest = y[-i]
+cat("training sample size = ", length(ytrain), "\n")
+cat("testing sample size = ", length(ytest), "\n")
 set.seed(99)
 bfp1 = wbart(xtrain,ytrain,xtest)
 set.seed(99)
@@ -115,3 +122,4 @@ plot(lstat[-H], diff.mean, type='l',
 lines(lstat[-H], diff.025, type='l', lty=2)
 lines(lstat[-H], diff.975, type='l', lty=2)
 abline(h=0, col='gray')
+

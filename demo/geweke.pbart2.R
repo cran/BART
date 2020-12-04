@@ -20,7 +20,7 @@ nskip = 100
 
 par(mfrow=c(2, 2))
 
-for(n in c(200, 1000, 10000)) {
+for(n in c(200, 1000, 5000)) {
     set.seed(12)
     x.train=matrix(runif(n*k), n, k)
     Ey.train = f(x.train)

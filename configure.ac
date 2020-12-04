@@ -6,23 +6,25 @@ dnl with is licensed under GPL-3 with the
 dnl Autoconf Configure Script Exception, version 3.0.
 
 AC_PREREQ(2.62)
+AC_INIT([BART],[2.8],[],[],[])
 
-dnl AC_INIT([ARTP2],[0.9.30],[],[ARTP2],[])
-dnl derived from the ARTP2 R package v 0.9.30
-AC_INIT([BART],[2.3],[],[],[])
-
-dnl CXX1X=`"${R_HOME}/bin/R" CMD config CXX1X`
-dnl CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
-dnl CXX="${CXX1X} ${CXX1XSTD}"
-dnl CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
-
+dnl snippet from 1.24 Using C++11 Code
+dnl https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Using-C_002b_002b11-code
 CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+if test -z "$CXX11"; then
+  AC_MSG_ERROR([No C++11 compiler is available])
+fi
 CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
 CXX="${CXX11} ${CXX11STD}"
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
-
 AC_LANG(C++)
+
+dnl additional changes as needed 
+LDFLAGS=`${R_HOME}/bin/R CMD config LDFLAGS`
+dnl CPPFLAGS="${CPPFLAGS} -D_OPENMP"
+
 dnl the meat of R's m4/openmp.m4
+AC_LANG(C++)
   OPENMP_[]_AC_LANG_PREFIX[]FLAGS=
   AC_ARG_ENABLE([openmp],
     [AS_HELP_STRING([--disable-openmp], [do not use OpenMP])])

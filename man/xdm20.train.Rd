@@ -10,7 +10,8 @@ A matrix containing a 20\% random sample of the training set for a real
 data example of recurrent events survival analysis.  There are 100
 patients in the cohort: 50 in the training set and 50 in the testing
 set.  The full data set, \code{xdm.train}, can be obtained online at
-\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.tar}.
+%\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.tar}.
+\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/Tech-Report-64-April-2017-data-file.tar?la=en}.
 There are 488 patients in the full cohort: 235 in the training set and
 253 in the testing set.  See the Reference below (and the References
 therein) for more detailed information; a brief synopsis follows.
@@ -106,11 +107,14 @@ composite of diagnosis codes and prescription orders.
 \usage{data(xdm20.train)}
 \seealso{xdm20.test}
 \references{
-Sparapani R., Rein L., Tarima S., Jackson T., Meurer J. (2017)
-Nonparametric recurrent events analysis with BART
-and an application to the hospital admissions of patients with diabetes.
-\emph{MCW Biostatistics Technical Report 64}
-\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}.
+Sparapani, Rein, Tarima, Jackson, Meurer (2020).  Non-parametric recurrent
+events analysis with BART and an application to the hospital admissions
+of patients with diabetes. \emph{Biostatistics} doi:10.1093/biostatistics/kxy032
+%% Sparapani R., Rein L., Tarima S., Jackson T., Meurer J. (2017)
+%% Nonparametric recurrent events analysis with BART
+%% and an application to the hospital admissions of patients with diabetes.
+%% \emph{MCW Biostatistics Technical Report 64}
+%% \url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}.
 
 }
 \examples{

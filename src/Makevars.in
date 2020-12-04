@@ -2,6 +2,8 @@
 CXX_STD = CXX11
 PKG_CXXFLAGS = @OPENMP_CXXFLAGS@
 PKG_LIBS = @OPENMP_CXXFLAGS@
+##PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) @OPENMP_CXXFLAGS@
+##PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) @OPENMP_CXXFLAGS@
 
 ## C++ especially with header libs like Rcpp generate large libs on Linux
 ## this will slim down the size of the libs considerably and make CRAN happy

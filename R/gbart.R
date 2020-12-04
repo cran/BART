@@ -160,11 +160,11 @@ gbart=function(
 
     ## if(hotdeck) ## warnings are suppressed with mc.gbart anyways
     ##     warning('missing elements of x imputed with hot decking')
-    
+
     if(.Platform$OS.type!='unix') hostname <- FALSE
     else if(hostname)
         hostname <- system('hostname', intern=TRUE)
-    
+
     ptm <- proc.time()
 
     res = .Call("cgbart",
@@ -225,8 +225,8 @@ gbart=function(
     min.log.pdf=t(matrix(apply(log.pdf, 2, min), nrow=n, ncol=ndpost))
     log.CPO=log(ndpost)+min.log.pdf[1, ]-
         log(apply(exp(min.log.pdf-log.pdf), 2, sum))
-    res$LPML=sum(log.CPO) 
-    ##res$CPO=exp(log.CPO) 
+    res$LPML=sum(log.CPO)
+    ##res$CPO=exp(log.CPO)
     ##res$LPML=sum(log(CPO))
 
     if(np>0) {
@@ -240,6 +240,7 @@ gbart=function(
         }
     }
 
+    res$ndpost = ndpost
     res$offset = offset
     names(res$treedraws$cutpoints) = dimnames(x.train)[[1]]
     dimnames(res$varcount)[[2]] = as.list(dimnames(x.train)[[1]])

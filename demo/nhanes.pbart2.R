@@ -59,9 +59,10 @@ pd2.975 <- apply(pd2, 2, quantile, probs=0.975)
 
 par(mfrow=c(1, 2))
 
-plot(bmxbmi, pd1.mean, type='l', col='blue', 
-     ylim=c(min(pd1.025, pd2.025, -pd1.975, -pd2.975),
-            max(-pd1.025, -pd2.025, pd1.975, pd2.975)),
+plot(bmxbmi, pd1.mean, type='l', col='blue',
+     ylim=c(-0.2, 0.2),
+     ## ylim=c(min(pd1.025, pd2.025, -pd1.975, -pd2.975),
+     ##        max(-pd1.025, -pd2.025, pd1.975, pd2.975)),
      xlab='BMI', ylab=expression(p(x)-p(25)),
      sub='Chronic pain: low-back(blue)')
      ##sub='Chronic pain: low-back/buttock(blue)')
@@ -69,9 +70,10 @@ lines(bmxbmi, pd1.025, type='l', col='blue', lty=2)
 lines(bmxbmi, pd1.975, type='l', col='blue', lty=2)
 lines(bmxbmi, rep(0, H))
 
-plot(bmxbmi, pd2.mean, type='l', col='red', 
-     ylim=c(min(pd1.025, pd2.025, -pd1.975, -pd2.975),
-            max(-pd1.025, -pd2.025, pd1.975, pd2.975)),
+plot(bmxbmi, pd2.mean, type='l', col='red',
+     ylim=c(-0.2, 0.2),
+     ## ylim=c(min(pd1.025, pd2.025, -pd1.975, -pd2.975),
+     ##        max(-pd1.025, -pd2.025, pd1.975, pd2.975)),
      xlab='BMI', ylab=expression(p(x)-p(25)),
      sub='Chronic pain: neck(red)')
 lines(bmxbmi, pd2.025, type='l', col='red', lty=2)

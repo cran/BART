@@ -1,7 +1,8 @@
 \documentclass[nojss]{jss}
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{The BART R package}
-%\usepackage{thumbpdf,lmodern}
+\usepackage{thumbpdf,lmodern}
+\graphicspath{{figures/}}  % folder with figures
 \usepackage[]{graphicx}
 \usepackage[]{color}
 \usepackage{tikz}
@@ -74,7 +75,7 @@
 %   \And Second Author\\Plus Affiliation}
 %\Plainauthor{Achim Zeileis, Second Author}
 \author{Rodney Sparapani\\Medical College of Wisconsin
-\And Charles Spanbauer\\Medical College of Wisconsin
+\And Charles Spanbauer\\University of Minnesota
 \And Robert McCulloch\\Arizona State University}
 \Plainauthor{Rodney Sparapani, Robert McCulloch, Charles Spanbauer}
 
@@ -150,7 +151,7 @@
 
 N.B.\ This vignette is largely based on our previous
 work \citep{SparSpan19}.  However, erratum and new
-developments will by necessity appear here only.
+developments, if any, will by necessity appear here only.
 
 \clearpage
 
@@ -164,7 +165,7 @@ predictive performance of ensemble models became apparent
 Instead of making a single prediction from a complex model, ensemble
 models make a single prediction which is the summary of the
 predictions from many simple models.  Generally, ensemble models have
-desirable properties, e.g., they do not suffer from over-fitting
+desirable properties, e.g.,~they do not suffer from over-fitting
 \citep{KuhnJohn13}.  Like bagging \citep{Brei96}, boosting
 \citep{FreuScha97,Frie01} and random forests \citep{Brei01}, BART
 relies on an ensemble of trees to predict the outcome; and, although,
@@ -183,12 +184,12 @@ fitted function, $f$, at chosen values of the covariates.  As shown by
 generally equivalent to, or exceeds that, of alternatives like lasso
 with L1 regularization \citep{EfroHast04} or black-box models such as
 gradient boosting \citep{FreuScha97,Frie01}, neural nets with one
-hidden layer \citep{Ripl07,VenaRipl13} and random forests
+hidden layer \citep{VenaRipl13} and random forests
 \citep{Brei01}.  Over-fitting is the tendency to overly fit a model to
 an in-sample training data set at the expense of poor predictive
 performance for unseen out-of-sample data.  Typically, BART does not
 over-fit to the training data due to the regularization tree-branching
-penalty of the BART prior, i.e., generally, each tree has few branches
+penalty of the BART prior, i.e.,~generally, each tree has few branches
 and plays a small part in the overall fit.  So, the resulting fit from
 the ensemble of trees as a whole is generally a good fit that does not
 over-fit.  Essentially, BART is a Bayesian nonlinear model with all
@@ -200,7 +201,7 @@ does it require the covariate functional relationship, nor the
 interactions considered, to be pre-specified.
 
 In this article, we give an overview of data analysis with BART and
-the \pkg{BART} \proglang{R} package.  In Section~\ref{cont}, we
+the \pkg{BART} \proglang{R}~package.  In Section~\ref{cont}, we
 describe the \proglang{R} functions provided by the \pkg{BART} package
 for analyzing continuous outcomes with BART.  In Section~\ref{boston},
 we demonstrate the typical usage of BART via the classic example of
@@ -218,15 +219,15 @@ describe how to perform the BART computations efficiently by resorting
 to parallel processing with multi-threading 
 % added to address Windows multi-threading concerns...
 (N.B.\ by default, the Microsoft Windows operating system does not
-provide the multi-threading interfaces employed by the \proglang{R}
-environment; in lieu of the provision, the \pkg{BART} package is
-single-threaded on Windows, yet, otherwise, completely functional; see
+provide the multi-threading interfaces employed by the
+\proglang{R}~environment; in lieu of the provision, the \pkg{BART} package
+is single-threaded on Windows, yet, otherwise, completely functional; see
 Appendix~\ref{efficient} for more details).
 
 \section{Continuous outcomes with BART}\label{cont}
 
 In this section, we document the analysis of continuous outcomes with
-the \pkg{BART} \proglang{R} package.  We provide two functions for
+the \pkg{BART} \proglang{R}~package.  We provide two functions for
 continuous outcomes: 1)~\code{wbart} named for weighted BART; and
 2)~\code{gbart} named for generic, or generalized, BART.  Both functions
 have roughly the same functionality.  \code{wbart} has a verbose
@@ -245,37 +246,96 @@ outcome \code{y.train} is a vector of numeric values.  The covariates
 for training (validation, if any) are \code{x.train} (\code{x.test})
 which can be matrices or data frames containing factors; in the
 display below, we assume matrices for simplicity.  N.B.\ throughout we
-denote integer constants by upper case letters, e.g., in the following
+denote integer constants by upper case letters, e.g.,~in the following
 display: $M$~for the number of posterior samples, $B$~for the number
 of threads (generally, $B=1$ for Windows), $N$~for the number of
 observations in the training set, and $Q$~for the number of
 observations in the test set.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post <- wbart(x.train, y.train, x.test, ndpost=M)
-R> post <- mc.wbart(x.train, y.train, x.test, ndpost=M, mc.cores=B, seed=99)
-R> post <- gbart(x.train, y.train, x.test, ndpost=M)
-R> post <- mc.gbart(x.train, y.train, x.test, ndpost=M, mc.cores=B, seed=99)
+R> post <- wbart(x.train, y.train, x.test, ndpost = M)
+R> post <- mc.wbart(x.train, y.train, x.test, ndpost = M, mc.cores = B,
++    seed = 99)
+R> post <- gbart(x.train, y.train, x.test, ndpost = M)
+R> post <- mc.gbart(x.train, y.train, x.test, ndpost = M, mc.cores = B,
++    seed = 99)
 \end{Sinput}
-\begin{align*}
-\mbox{Input matrices, \code{x.train} and, optionally, \code{x.test}:\ } & 
-\wrap{\begin{array}{c}
+\end{CodeChunk}
+%
+% \begin{align*}
+% \mbox{Input matrices, \code{x.train}:\ } & 
+% %\mbox{Input matrices, \code{x.train} and, optionally, \code{x.test}:\ } & 
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{N} \\
+% \end{array}} \mbox{made up of $\bm{x}_{i}$ as row vectors}\\
+% \mbox{And \code{x.test} (optional) } & 
+% \mbox{\code{post}, of type \code{wbart}, which is essentially a list} & \\
+% \mbox{\code{post\$yhat.train} and \code{post\$yhat.test}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{y}_{11}& \dots & \hat{y}_{N1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{y}_{1M}& \dots & \hat{y}_{NM} \\
+% \end{array}} \begin{array}{l} \hat{y}_{im}=\mu_0+f_m(\bm{x}_i) \\
+% \mbox{\ $m$th posterior draw} \end{array} 
+% \end{align*}
+
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description}
+\item[\code{x.train}] is a matrix or data frame of covariates for training\\
+ represented notationally as
+%\mbox{Input matrices, \code{x.train} and, optionally, \code{x.test}:\ } & 
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{N} \\
-\end{array}} \mbox{made up of $\bm{x}_{i}$ as row vectors}\\
-\mbox{\code{post}, of type \code{wbart}, which is essentially a list} & \\
-\mbox{\code{post\$yhat.train} and \code{post\$yhat.test}:\ } &
-\wrap{\begin{array}{ccc}
+\end{array}}$ made up of $\bm{x}_{i}$ as row vectors
+\item[\code{y.train}] is a vector of the outcome for training
+\item[\code{x.test} (optional)] is a matrix or data frame for testing
+\end{description}
+\end{quote}
+The value returned, \code{post} as shown above, is of type
+`\code{wbart}'
+that is essentially a list containing named components.
+Of particular interest are \code{post\$yhat.train}
+and \code{post\$yhat.test} 
+described as follows.
+\begin{quote}
+\begin{description}
+\item[\code{post\$yhat.train}] is a matrix of predictions
+$\wrap{\begin{array}{ccc}
 \hat{y}_{11}& \dots & \hat{y}_{N1} \\
 \vdots & \ddots & \vdots \\
 \hat{y}_{1M}& \dots & \hat{y}_{NM} \\
-\end{array}} \begin{array}{l} \hat{y}_{im}=\mu_0+f_m(\bm{x}_i) \\
-\mbox{\ $m$th posterior draw} \end{array} 
-\end{align*}
+\end{array}}$\\
+ where $\hat{y}_{im}=\mu_0+f_m(\bm{x}_i)$
+is the $m$th posterior draw
+\item[\code{post\$yhat.test}] is a similar matrix 
+corresponding to \code{x.test} if provided
+\end{description}
+\end{quote}
+%
+% \textcolor{blue}{
+% \textbf{Proposition for possible formatting\\ }
+% Input values are:
+% \begin{description}
+%   \item[\code{x.train}]  $\wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{N} \\
+% \end{array}}$ made up of $\bm{x}_{i}$ as row vectors.
+%   \item[\code{x.test}] (optional) ...
+% \end{description}}
+%
 The columns of \code{post\$yhat.train} and \code{post\$yhat.test}
-represent different covariate settings and the rows, the \code{M}
+represent different covariate settings and the rows, the $M$
 draws from the posterior.
 
 Often it is impractical to provide \code{x.test} in the call to
@@ -287,60 +347,95 @@ and provides a \code{predict} function to generate any predictions
 needed (more details on trees and, the string representation of trees,
 can be found in Appendix Section~\ref{trees}).  Note that if you need
 to perform the prediction in some later \proglang{R} instance, then
-you can save the \code{wbart} object returned and reload it when
-needed, e.g., save with \code{saveRDS(post, "post.rds")} and reload,
-\code{post <- readRDS("post.rds")}\ .  The \code{x.test} input can be
+you can save the `\code{wbart}' object returned and reload it when
+needed, e.g.,~save with \code{saveRDS(post, "post.rds")} and reload,
+\code{post <- readRDS("post.rds")}.  The \code{x.test} input can be
 a matrix or a data frame; for
 simplicity, we assume a matrix below.\\
 For serial computation
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> pred <- predict(post, x.test)
 \end{Sinput}
+\end{CodeChunk}
+%
 For parallel computation
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> pred <- predict(post, x.test, mc.cores=B)
+R> pred <- predict(post, x.test, mc.cores = B)
 \end{Sinput}
-\begin{align*}
-\mbox{Input: \code{x.test}:\ }  &
-\wrap{\begin{array}{c}
+\end{CodeChunk}
+%
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description} 
+\item[\code{post}] is an object of type `\code{wbart}'
+\item[\code{x.test}] is a matrix or a data frame represented
+notationally as  
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{Q} \\
-\end{array}} \mbox{made up of $\bm{x}_{h}$ as row vectors} \\
-\mbox{\code{pred} is a matrix:} & 
-%\mbox{\code{pred}:\ } &
-\wrap{\begin{array}{ccc}
+\end{array}}$\\ made up of $\bm{x}_{h}$ as row vectors
+\end{description}
+\end{quote}
+The value returned, \code{pred} as shown above, is as follows.
+\begin{description}
+\item[\code{pred}] is a matrix of predictions
+$\wrap{\begin{array}{ccc}
 \hat{y}_{11}& \dots & \hat{y}_{Q1} \\
 \vdots & \ddots & \vdots \\
 \hat{y}_{1M}& \dots & \hat{y}_{QM} \\
-\end{array}} \where \hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)  
-\end{align*}
-
+\end{array}}$ where $\hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)$
+\end{description}
+%
+% \begin{align*}
+% \mbox{Input: \code{x.test}:\ }  &
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{Q} \\
+% \end{array}} \mbox{made up of $\bm{x}_{h}$ as row vectors} \\
+% \mbox{\code{pred} is a matrix:} & 
+% %\mbox{\code{pred}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{y}_{11}& \dots & \hat{y}_{Q1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{y}_{1M}& \dots & \hat{y}_{QM} \\
+% \end{array}} \where \hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)  
+% \end{align*}
+%
 \subsection{Posterior samples returned}
 
 The number of MCMC samples discarded for burn-in is specified by the
 \code{nskip} argument and the default is 100.  The number of MCMC
 samples returned is specified by the \code{ndpost} argument and the
 default is 1000.  Returning every $l^{th}$ value, or thinning, can be
-specified by the \code{keepevery} argument which defaults to 1, i.e.,
-no thinning.  Some, but not all, returned values can be thinned.  The
-following arguments are available with \code{wbart} and default to
+specified by the \code{keepevery} argument which defaults to 1,
+i.e.,~no thinning.  Some, but not all, returned values can be thinned.
+The following arguments are available with \code{wbart} and default to
 \code{ndpost}, but can be over-ridden as needed (with \code{gbart},
 \code{ndpost} draws are always returned and can't be over-ridden).
-
+%
 \begin{itemize}
-\item \code{nkeeptrain} : number of $f$ draws to return corresponding to \code{x.train}
-\item \code{nkeeptest} :  number of $f$ draws to return corresponding to \code{x.test}
-\item \code{nkeeptestmeam} : number of $f$ draws to use in computing \code{yhat.test.mean}
-\item \code{nkeeptreedraws} : number of tree ensemble draws to return for use
-with \code{predict}
+\item \code{nkeeptrain}: number of $f$ draws to return corresponding
+                          to \code{x.train}
+\item \code{nkeeptest}:  number of $f$ draws to return corresponding
+                          to \code{x.test}
+\item \code{nkeeptestmeam}: number of $f$ draws to use in computing
+                             \code{yhat.test.mean}
+\item \code{nkeeptreedraws}: number of tree ensemble draws to return for use
+                              with \code{predict}
 \end{itemize}
-
+%
 Members of the object returned (which is essentially a list) include
 \code{varprob} and \code{varcount} which correspond to the variable
 selection probability and the observed counts in the ensemble of
-trees.  When \code{sparse=TRUE}, \code{varprob} is the random variable
+trees.  When \code{sparse = TRUE}, \code{varprob} is the random variable
 selection probability, $s_j$; otherwise, it is the fixed constant
 $s_j=P^{-1}$.  Besides the posterior samples, also the mean over the
 posterior is provided as \code{varprob.mean} and \code{varcount.mean}.
@@ -360,7 +455,7 @@ air pollution estimate, the concentration of nitrogen oxides, based on
 a meteorological model that was calibrated to monitoring data.
 Restricted to tracts with owner-occupied homes, there are 506
 observations.  We'll predict the median value of owner-occupied homes
-(in thousands of dollars truncated at 50), \code{y=mdev}, from two
+(in thousands of dollars truncated at 50), \code{y = mdev}, from two
 covariates: \code{rm} and \code{lstat}.  \code{rm} is the number of
 rooms defined as the average number of rooms for owner-occupied homes.
 \code{lstat} is the percent of population that is lower status defined
@@ -368,10 +463,12 @@ as the average of the proportion of adults without any high school
 education and the proportion of male workers classified as laborers.
 Below, we present several observations of the data and scatter plots
 in Figure~\ref{boston1}.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> library("MASS")
-R> x = Boston[, c(6, 13)] 
-R> y = Boston$medv     
+R> x <- Boston[, c(6, 13)] 
+R> y <- Boston$medv     
 R> head(cbind(x, y))
 \end{Sinput} 
 %$
@@ -385,42 +482,49 @@ R> head(cbind(x, y))
 6 6.430  5.21 28.7
 \end{Soutput}
 \begin{Sinput}
-R> par(mfrow=c(2, 2))
-R> plot(x[, 1], y, xlab="x1=rm", ylab="y=mdev")
-R> plot(x[, 2], y, xlab="x2=lstat", ylab="y=mdev")
-R> plot(x[, 1], x[, 2], xlab="x1=rm", ylab="x2=lstat")
-R> par(mfrow=c(1, 1))
+R> par(mfrow = c(2, 2))
+R> plot(x[, 1], y, xlab = "x1=rm", ylab = "y=mdev")
+R> plot(x[, 2], y, xlab = "x2=lstat", ylab = "y=mdev")
+R> plot(x[, 1], x[, 2], xlab = "x1=rm", ylab = "x2=lstat")
+R> par(mfrow = c(1, 1))
 \end{Sinput}
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston1.pdf}
-\end{center}
-\caption{\label{boston1}The Boston housing data was compiled from the
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston1.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
-  50), \code{y=mdev}, the average number of rooms, \code{x1=rm}, and
-  the percent of the population that is lower status, \code{x2=lstat}.
-  Here, we show scatter plots of the data.  }
+  50), \code{y = mdev}, the average number of rooms, \code{x1 = rm}, and
+  the percent of the population that is lower status, \code{x2 = lstat}.
+  Here, we show scatter plots of the data.}
+  \label{boston1}
 \end{figure}
+%
 
-\subsection{wbart for continuous outcomes}
+\subsection[wbart for continuous outcomes]{\code{wbart} for
+continuous outcomes}
 
 In this example, we fit the following BART model for continuous outcomes:
+%
 \begin{align*}
-y_i &= \mu_0 + f(x_i) + \epsilon_i \where \epsilon_i \sim N(0,\sigma^2) \\
-(f, \sd^2) & \prior \mathrm{BART}
+& y_i  = \mu_0 + f(x_i) + \epsilon_i \where \epsilon_i \sim N(0,\sigma^2) \\
+& (f, \sd^2) \prior \mathrm{BART}
 \end{align*}
+%
 with $i$ indexing subjects; $i=1, \dots, N$.  We use Markov chain
 Monte Carlo (MCMC) to get draws from the posterior distribution of the
 parameter $(f,\sigma^2)$. 
-
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> library("BART") 
 R> set.seed(99)  
-R> nd = 200       
-R> burn = 50     
-R> post = wbart(x, y, nskip=burn, ndpost=nd)
+R> nd <- 200       
+R> burn <- 50     
+R> post <- wbart(x, y, nskip = burn, ndpost = nd)
 \end{Sinput}
 \begin{Soutput}
 *****Into main of wbart
@@ -447,12 +551,15 @@ time: 1s
 check counts
 trcnt,tecnt,temecnt,treedrawscnt: 200,0,0,200
 \end{Soutput}
+\end{CodeChunk}
+%
 
-\subsection{Results returned from wbart}
+\subsection[Results returned from wbart]{Results returned from \code{wbart}}
  
 We returned the results of running \code{wbart} in the object
-\code{post} of type \code{wbart} which is essentially a list.
-
+\code{post} of type `\code{wbart}' which is essentially a list.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> names(post)
 \end{Sinput}
@@ -482,20 +589,21 @@ R> dim(post$yhat.train)
 \begin{Soutput}
 [1] 200 506
 \end{Soutput}
-%$
-%\textcolor{red}
+\end{CodeChunk}
+%
 {Remember}, the training data has $n=$
-506 observations, we had \code{burn}=50 
-burn-in discarded draws and \code{nd}=$M$=200 draws kept.
+506 observations, we had $\text{\code{burn}}=50$ 
+burn-in discarded draws and $\text{\code{nd}}=M=200$ draws kept.
 Let's look at a couple of the key list components.\\
 \code{\$sigma}: both the 50 burn-in and 250 draws are kept for $\sigma$;
 burn-in are kept only for this parameter.\\
-\code{\$yhat.train}: the $m$th row and $i$th column is $f_m(x_i)$ (the $m^{th}$ kept MCMC draw
-evaluated at the $i^{th}$ training observation).\\
-\code{\$yhat.train.mean}: the posterior estimate of $f(x_i)$, i.e.,
-$M^{-1} \sum_m f_m(x_i)$.
+\code{\$yhat.train}: the $m$th row and $i$th column is $f_m(x_i)$
+(the $m^{th}$ kept MCMC draw evaluated at the $i^{th}$ training observation).\\
+\code{\$yhat.train.mean}: the posterior estimate of $f(x_i)$,
+i.e.,~$M^{-1} \sum_m f_m(x_i)$.
 
-\subsection{Assessing convergence with wbart} 
+\subsection[Assessing convergence with wbart]{Assessing convergence
+with \code{wbart}} 
 %{ with $\sigma$ Draws}
 
 As with any high-dimensional MCMC, assessing convergence may be
@@ -511,43 +619,47 @@ applicable for continuous outcomes.
 Assessing convergence in this example, the parameter $\sigma$ is the
 only identified parameter in the model and, of course, it is
 indicative of the size of the errors.
-
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> plot(post$sigma, type="l")
-R> abline(v=burn, lwd=2, col="red")
+R> plot(post$sigma, type = "l")
+R> abline(v = burn, lwd = 2, col = "red")
 \end{Sinput}
+\end{CodeChunk}
 %$
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston2.pdf}
-\end{center}
-\caption{\label{boston2}The Boston housing data was compiled from the
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston2.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
-  50), \code{y=mdev}, the average number of rooms, \code{x1=rm}, and
-  the percent of the population that is lower status, \code{x2=lstat}.
-  With BART, we predict \code{y=mdev} from \code{rm} and \code{lstat}.
+  50), \code{y = mdev}, the average number of rooms, \code{x1 = rm}, and
+  the percent of the population that is lower status, \code{x2 = lstat}.
+  With BART, we predict \code{y = mdev} from \code{rm} and \code{lstat}.
   Here, we show a trace plot of the error variance, $\sd$, that
-  demonstrates convergence for BART rather quickly, i.e., by 50
-  iterations or earlier.  }
+  demonstrates convergence for BART rather quickly, i.e.,~by 50
+  iterations or earlier.}
+  \label{boston2}
 \end{figure}
-
+%
 In Figure~\ref{boston2}, you can see that BART burned in very quickly.  
 Just one initial draw looking a bit bigger than the rest.
 Apparently, subsequent variation is legitimate posterior variation.  
 In a more difficult problem you may see the $\sigma$ draws initially 
 declining as the MCMC searches for a good fit.
 
-\subsection{wbart and linear regression compared}
+\subsection[wbart and linear regression compared]{\code{wbart} and
+linear regression compared}
 
 Let's look at the in-sample BART fit (\code{yhat.train.mean})  
-and compare it to \code{y=medv} fits from a multiple linear regression.  
-
+and compare it to \code{y = medv} fits from a multiple linear regression.  
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> lmf = lm(y~., data.frame(x, y))
-R> fitmat = cbind(y, post$yhat.train.mean, lmf$fitted.values)
-R> colnames(fitmat) = c("y", "BART", "Linear")
+R> lmf <- lm(y~., data.frame(x, y))
+R> fitmat <- cbind(y, post$yhat.train.mean, lmf$fitted.values)
+R> colnames(fitmat) <- c("y", "BART", "Linear")
 R> cor(fitmat)
 \end{Sinput}
 \begin{Soutput}
@@ -559,81 +671,93 @@ Linear 0.7991005 0.8978003 1.0000000
 \begin{Sinput}
 R> pairs(fitmat)
 \end{Sinput}
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston3.pdf}
-\end{center}
-\caption{\label{boston3}The Boston housing data was compiled from the
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston3.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
-  50), \code{y=mdev}, the average number of rooms, \code{x1=rm}, and
-  the percent of the population that is lower status, \code{x2=lstat}.
-  With BART, we predict \code{y=mdev} from \code{rm} and \code{lstat}.
-  Here, we show scatter plots comparing \code{y=mdev}, the BART fit
-  (``BART'') and multiple linear regression (``Linear'').  }
+  50), \code{y = mdev}, the average number of rooms, \code{x1 = rm}, and
+  the percent of the population that is lower status, \code{x2 = lstat}.
+  With BART, we predict \code{y = mdev} from \code{rm} and \code{lstat}.
+  Here, we show scatter plots comparing \code{y = mdev}, the BART fit
+  (``BART'') and multiple linear regression (``Linear'').}
+  \label{boston3}
 \end{figure}
+%
 In Figure~\ref{boston3}, we present scatter plots between
 \code{mdev}, the BART fit and the multiple linear regression.
 The BART fit is noticeably different from the linear fit.
 
-\subsection{Prediction and uncertainty with wbart}
+\subsection[Prediction and uncertainty with wbart]{Prediction and
+uncertainty with \code{wbart}}
 
 In Figure~\ref{boston4}, we order the observations by the fitted house
 value (\code{yhat.train.mean}) and then use boxplots to display the
 draws of $f(x)$ in each column of \code{yhat.train}.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> i = order(post$yhat.train.mean) 
+R> i <- order(post$yhat.train.mean) 
 R> boxplot(post$yhat.train[, i])   
 \end{Sinput}
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston4.pdf}
-\end{center}
-\caption{\label{boston4}The Boston housing data was compiled from the
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston4.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
   50), \code{mdev}, the average number of rooms, \code{rm}, and the
   percent of the population that is lower status, \code{lstat}.  With
-  BART, we predict \code{y=mdev} from \code{rm} and \code{lstat}.
+  BART, we predict \code{y = mdev} from \code{rm} and \code{lstat}.
   Here, we show boxplots of the posterior samples of predictions (on
   the y-axis) ordered by the average predicted home value per tract
-  (on the x-axis).  }
+  (on the x-axis).}
+  \label{boston4}
 \end{figure}
-
+%
 Substantial predictive uncertainty, but you can still be fairly certain that
 some houses should cost more than other.
 
-\subsection{Using the predict function with wbart}
+\subsection[Using the predict function with wbart]{Using the \code{predict}
+function with \code{wbart}}
 
 We can get out of sample predictions in two ways. 
 First, we can can just ask for them when we call \code{wbart} by supplying 
 a matrix or data frame of test $x$ values. 
 Second, we can call a \code{predict} method.
 Now, let's split our data into train and test subsets.  
-
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> n = length(y)   
+R> n <- length(y)   
 R> set.seed(14) 
-R> i = sample(1:n, floor(0.75*n)) 
-R> x.train = x[i, ]; y.train=y[i]  
-R> x.test = x[-i, ]; y.test=y[-i] 
-R> cat("training sample size = ", length(y.train), "\n")
-R> cat("testing sample size = ", length(y.test), "\n")
+R> i <- sample(1:n, floor(0.75 * n)) 
+R> xtrain <- x[i, ]; ytrain = y[i]  
+R> xtest <- x[-i, ]; ytest = y[-i] 
+R> cat("training sample size = ", length(ytrain), "\n")
+R> cat("testing sample size = ", length(ytest), "\n")
 \end{Sinput}
 \begin{Soutput}
 training sample size = 379  
 testing sample size = 127 
 \end{Soutput}
-
+\end{CodeChunk}
+%
 And now we can run \code{wbart} using the training data to 
 learn and predict at \code{x.test}.
 First, we'll just pass \code{x.test} to the \code{wbart} call.
-
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post1 = wbart(x.train, y.train, x.test) 
+R> post1 <- wbart(x.train, y.train, x.test) 
 R> dim(post1$yhat.test)
 \end{Sinput}
 %$
@@ -647,12 +771,14 @@ R> length(post1$yhat.test.mean)
 \begin{Soutput}
 [1] 127
 \end{Soutput}
-
+\end{CodeChunk}
+%
 The testing data is handled similarly to the training data.\\
-\code{\$yhat.test}: the $m$th row and $h$th column is $f_m(x_h)$ (the $m^{th}$ kept MCMC draw
+\code{\$yhat.test}: the $m$th row and $h$th column is $f_m(x_h)$ (the $m^{th}$
+kept MCMC draw
 evaluated at the $h^{th}$ testing observation).\\
-\code{\$yhat.test.mean}: the posterior estimate of $f(x_h)$, i.e.,
-$Q^{-1} \sum_m f_m(x_h)$.
+\code{\$yhat.test.mean}: the posterior estimate of $f(x_h)$,
+i.e.,~$Q^{-1} \sum_m f_m(x_h)$.
 % Now, \code{yhat.test}: the $i,j$ value is the $i^{th}$ kept MCMC draw of 
 % $f(x_j)$ where $x_j$ is the $j^{th}$ row of \code{xtest}.\\
 % \code{yhat.test.mean}: the $j^{th}$ value is the posterior mean of 
@@ -661,10 +787,12 @@ $Q^{-1} \sum_m f_m(x_h)$.
 Alternatively, we could run \code{wbart} saving all the MCMC results
 and then call \code{predict}.
 %\code{predict.wbart}.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post2 = wbart(x.train, y.train)
-R> yhat = predict(post2, x.test)
+R> post2 <- wbart(x.train, y.train)
+R> yhat <- predict(post2, x.test)
 \end{Sinput}
 \begin{Soutput}
 *****In main of C++ for bart prediction
@@ -678,7 +806,9 @@ from x,np,p: 2, 127
 \begin{Sinput}
 R> dim(yhat)
 \end{Sinput}
+\begin{Soutput}
 [1] 1000  127
+\end{Soutput}
 \begin{Sinput}
 R> summary(as.double(yhat - post1$yhat.test))
 \end{Sinput}
@@ -687,20 +817,24 @@ R> summary(as.double(yhat - post1$yhat.test))
       Min.    1st Qu.     Median       Mean    3rd Qu.       Max. 
 -9.091e-09 -1.186e-09  2.484e-11  2.288e-12  1.188e-09  6.790e-09 
 \end{Soutput}
+\end{CodeChunk}
+%
 So \code{yhat} and \code{post1$yhat.test} are practically identical.%$
 
-\subsection{wbart and thinning}
+\subsection[wbart and thinning]{\code{wbart} and thinning}
 
 In our simple example of the Boston housing data, \code{wbart} runs
 pretty fast.  But with more data and/or longer runs, you may want to
 speed things up by saving fewer samples and then using \code{predict}.
 Let's just keep a thinned subset of 200 tree ensemble draws.
-
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(4) 
-R> post3 = wbart(x.train, y.train, nskip=1000, ndpost=10000,
-+    nkeeptrain=0, nkeeptest=0, nkeeptestmean=0, nkeeptreedraws=200)
-R> yhatthin = predict(post3, x.test)
+R> post3 <- wbart(x.train, y.train, nskip = 1000, ndpost = 10000,
++    nkeeptrain = 0, nkeeptest = 0, nkeeptestmean = 0,
++    nkeeptreedraws = 200)
+R> yhatthin <- predict(post3, x.test)
 \end{Sinput}
 \begin{Soutput}
 *****In main of C++ for bart prediction
@@ -724,6 +858,8 @@ R> dim(yhatthin)
 \begin{Soutput}
 [1] 200 127
 \end{Soutput}
+\end{CodeChunk}
+%
 Now, there are no kept draws of $f(x)$ for training $x$, and we have
 200 tree ensemble draws to use with \code{predict}.  Of course, if we keep
 200 out of 10000, then every 50th draw is kept.
@@ -732,7 +868,8 @@ Now, there are no kept draws of $f(x)$ for training $x$, and we have
 % The thinning arguments for \code{wbart} are the following.\\
 % \code{nkeeptrain} : number of $f(x)$ draws to save for training $x$\\
 % \code{nkeeptest} : number of $f(x)$ draws to save for test $x$\\
-% \code{nkeeptestmeam} : number of draws to use in computing \code{yhat.test.mean}\\
+% \code{nkeeptestmeam} : number of draws to use in computing 
+%                        \code{yhat.test.mean}\\
 % \code{nkeeptreedraws} : number of tree ensemble draws to keep for
 % \code{predict}
 
@@ -746,41 +883,46 @@ Now, there are no kept draws of $f(x)$ for training $x$, and we have
 % for \code{predict}
 % \end{itemize}
 
-The default values are to keep all the draws (e.g.,
-\code{nkeeptrain=ndpost}).
+The default values are to keep all the draws
+(e.g.,~\code{nkeeptrain = ndpost}).
 Now, let's have a look at the predictions.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> fmat = cbind(y.test, post1$yhat.test.mean, apply(yhatthin, 2, mean)) 
-R> colnames(fmat) = c("y", "yhat", "yhatThin")
+R> fmat <- cbind(y.test, post1$yhat.test.mean, apply(yhatthin, 2, mean)) 
+R> colnames(fmat) <- c("y", "yhat", "yhatThin")
 R> pairs(fmat)
 \end{Sinput}
 %$
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston5.pdf}
-\end{center}
-\caption{\label{boston5}The Boston housing data was compiled from the
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston5.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
   50), \code{mdev}, the average number of rooms, \code{rm}, and the
   percent of the population that is lower status, \code{lstat}.  With
-  BART, we predict \code{y=mdev} by \code{rm} and \code{lstat}.  The
-  predictions labeled ``yhat'' are from a BART run with \code{seed=99}
+  BART, we predict \code{y = mdev} by \code{rm} and \code{lstat}.  The
+  predictions labeled ``yhat'' are from a BART run with \code{seed = 99}
   and all default values.  The predictions labeled ``yhatThin'' are
   thinned by 50 (after 1000 burnin discarded, 200 kept out of 10000
-  draws) with \code{seed=4}.  It is very interesting how similar they
-  are!  }
+  draws) with \code{seed = 4}.  It is very interesting how similar they
+  are!}
+  \label{boston5}
 \end{figure}
-
+%
 In Figure~\ref{boston5}, we present scatter plots between \code{mdev},
 ``yhat'' and ``yhatThin''.  Recall, the predictions labeled ``yhat'' are
-from a BART run with \code{seed=99} and all default values.  The
+from a BART run with \code{seed = 99} and all default values.  The
 predictions labeled ``yhatThin'' are thinned by 50 (after 1000 burnin
-discarded, 200 kept out of 10000 draws) with \code{seed=4}.  It is
+discarded, 200 kept out of 10000 draws) with \code{seed = 4}.  It is
 very interesting how similar they are!
 
-\subsection{wbart and Friedman's partial dependence function}
+\subsection[wbart and Friedman's partial dependence function]{\code{wbart} and
+Friedman's partial dependence function}
 \label{Friedman-partial}
 
 BART does not directly provide a summary of the effect of a single
@@ -796,7 +938,7 @@ functional support in the \pkg{BART} package; rather, we provide
 examples of the many practical uses in the \code{demo} directory.
 
 We use $S$ to denote the indices of the covariates in the subset and
-the collection itself, i.e., define the row vector for test setting
+the collection itself, i.e.,~define the row vector for test setting
 $h$ as $\bm{x}_{hS}=\wrap{{x}_{hj}} \where j \in S$.  Similarly, we
 denote the complement of the subset as $C$ with $S \cup C$ spanning
 all covariates.  The complement row vector for training
@@ -807,8 +949,8 @@ complement covariates:
 $f(\bm{x}_{hS})={N^{-1}}\sum_{i=1}^N f(\bm{x}_{hS},\bm{x}_{iC})$.  
 Other marginal functions can be
 obtained in a similar fashion.  Estimates can be derived via functions
-of the posterior samples such as means, quantiles, etc., e.g.,
-$\hat{f}(\bm{x}_{hS}) = {M^{-1}} {N^{-1}} \sum_{m=1}^M \sum_{i=1}^N
+of the posterior samples such as means, quantiles, etc.,
+e.g.,~$\hat{f}(\bm{x}_{hS}) = {M^{-1}} {N^{-1}} \sum_{m=1}^M \sum_{i=1}^N
 f_m(\bm{x}_{hS}, \bm{x}_{iC})$ where $m$ indexes posterior samples.  
 However, care must be taken in the interpretation of the marginal 
 effect as estimated by Friedman's partial dependence function.  
@@ -822,33 +964,34 @@ percent of the population with lower status, \code{lstat} (variable
 13), while aggregating over the other twelve covariates in the Boston
 housing data.  In Figure~\ref{boston6}, we demonstrate the marginal
 estimate and its 95\% credible interval.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> x.train = as.matrix(Boston[i, -14])
+R> x.train <- as.matrix(Boston[i, -14])
 R> set.seed(12) 
-R> post4 = wbart(x.train, y.train)
-R> H = floor(0.75*length(y.train))
-R> L = 41
-R> x = seq(min(x.train[, 13]), max(x.train[, 13]), length.out=L)
-R> x.test = cbind(x.train[, -13], x[1])
+R> post4 <- wbart(x.train, y.train)
+R> H <- floor(0.75 * length(y.train))
+R> L <- 41
+R> x <- seq(min(x.train[, 13]), max(x.train[, 13]), length.out = L)
+R> x.test <- cbind(x.train[, -13], x[1])
 R> for(j in 2:L)
-+    x.test = rbind(x.test, cbind(x.train[, -13], x[j]))
-R> pred = predict(post4, x.test)
-R> partial = matrix(nrow=1000, ncol=L)
++    x.test <- rbind(x.test, cbind(x.train[, -13], x[j]))
+R> pred <- predict(post4, x.test)
+R> partial <- matrix(nrow = 1000, ncol = L)
 R> for(j in 1:L) {
-R>   h = (j - 1) * H + 1:H
-R>   partial[, j] = apply(pred[, h], 1, mean)
-R> }
-R> plot(x, apply(partial, 2, mean), type='l',
-+    xlab='percent lower status', ylab='median home value',
-+    ylim=c(10, 50))
-R> lines(x, apply(partial, 2, quantile, probs=0.025), lty=2)
-R> lines(x, apply(partial, 2, quantile, probs=0.975), lty=2)
+R>   h <- (j - 1) * H + 1:H
+R>   partial[, j] <- apply(pred[, h], 1, mean)}
+R> plot(x, apply(partial, 2, mean), type = "l", ylim = c(10, 50),
++    xlab = "percent lower status", ylab = "median home value")
+R> lines(x, apply(partial, 2, quantile, probs = 0.025), lty = 2)
+R> lines(x, apply(partial, 2, quantile, probs = 0.975), lty = 2)
 \end{Sinput}
-\begin{figure}
-\begin{center}
-\includegraphics{figures/boston6.pdf}
-\end{center}
-\caption{\label{boston6}The Boston housing data was compiled from the
+\end{CodeChunk}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics{boston6.pdf}
+  \caption{The Boston housing data was compiled from the
   1970 US Census where each observation represents a Census tract in
   Boston with owner-occupied homes. For each tract, we have the median
   value of owner-occupied homes (in thousands of dollars truncated at
@@ -857,10 +1000,12 @@ R> lines(x, apply(partial, 2, quantile, probs=0.975), lty=2)
   summarize the marginal effect of \code{lstat} on \code{mdev} while
   aggregating over the other covariates with Friedman's partial
   dependence function.  The marginal estimate and its 95\% credible
-  interval are shown. }
+  interval are shown.}
+  \label{boston6}
 \end{figure}
+%
 Besides the marginal effect, we can 
-define the conditional effect of $x_1|x_2$ as
+define the conditional effect of $x_1 \mid x_2$ as
   $\frac{f(x_1+\delta, {x}_2)-f(x_1, {x}_2)}{\delta}$.  However,
   BART is not fitting simple linear functions.  For example, suppose
   the data follows a sufficiently complex function like so:
@@ -872,13 +1017,13 @@ $x_1$, $x_2$ and $\delta$.  Nevertheless, these functions can be
 estimated by BART if these inputs are provided.  But, these 
 functions have the same limitations as Friedman's partial dependence
 function and, perhaps, even moreso.  See the conditional effect
-example at the end of \code{demo("boston.R", package="BART")}.
+example at the end of \code{demo("boston.R", package = "BART")}.
 
 \section{Binary and categorical outcomes with BART}\label{bincat}
 
 The \pkg{BART} package supports binary outcomes via probit BART with
-Normal latents and logit BART with Logistic latents.  Categorical
-outcomes are supported with Multinomial BART which defaults to probit
+normal latents and logit BART with logistic latents.  Categorical
+outcomes are supported with multinomial BART which defaults to probit
 for computational efficiency, but logit is available as an option.
 Convergence diagnostics are provided and variable selection as well.
 
@@ -889,14 +1034,16 @@ as the \code{pbart} and \code{gbart} functions.  In this case, the
 outcome, \code{y.train}, is an integer with values of 0 or 1.  The
 model is as follows with $i$ indexing subjects: $i=1, \dots, N$.
 % where $\Phi$ is the standard Normal cumulative distribution function.
+%
 \begin{align*}
-y_{i}|p_{i} & \ind \B{p_{i}} 
+y_{i} \mid p_{i} & \ind \B{p_{i}} 
 \where \B{.} \mbox{is the Bernoulli distribution} \\
 p_{i} & =  \Phi({\mu}_0+f(\bm{x}_i)) \where f \prior \mathrm{BART} 
-\mbox{\ and\ } \Phi(.) \mbox{\ is the standard Normal cdf}
+\mbox{\ and\ } \Phi(.) \mbox{\ is the standard normal cdf}
 \end{align*}
+%
 This setup leads to the following likelihood:
-$\wrap{\bm{y}|f} = \prod_{i=1}^N p_{i}^{y_i}(1-p_{i})^{1-y_i}$. 
+$\wrap{\bm{y} \mid f} = \prod_{i=1}^N p_{i}^{y_i}(1-p_{i})^{1-y_i}$. 
 
 % \begin{comment}
 % The BART function, $f$, is centered around a known constant, $\mu_0$,
@@ -909,19 +1056,20 @@ $\wrap{\bm{y}|f} = \prod_{i=1}^N p_{i}^{y_i}(1-p_{i})^{1-y_i}$.
 To extend BART to binary outcomes, we employ the technique of
 \cite{AlbeChib93} that assumes there is an unobserved latent, $z_i$,
 where $y_i=\I{z_i>0}$ and $i=1, \dots, n$ indexes subjects. Given
-$y_i$, we generate the truncated Normal latents, $z_i$; these
+$y_i$, we generate the truncated normal latents, $z_i$; these
 auxiliary latents are efficiently sampled \citep{Robe95} and recast as
 the outcome for a continuous BART with unit variance as follows.
+%
 \begin{align*}
-z_{i}|y_{i},f & ~ \N{{\mu}_0+ f(\bm{x}_i)}{1} \begin{cases}
+z_{i} \mid y_{i},f & \sim \N{{\mu}_0+ f(\bm{x}_i)}{1} \begin{cases}
 \I{-\infty, 0} & \If y_{i}=0 \\
 \I{0, \infty} & \If y_{i}=1 \\
 \end{cases}  
 \end{align*}
-
+%
 Centering the latent $z_i$ around the constant $\mu_0$ is
   analogous to quasi-centering the probabilities, $p_i$, at
-  $p_0=\Phi(\mu_0)$, i.e., $\E{p_i}$ is approximately equal
+  $p_0=\Phi(\mu_0)$, i.e.,~$\E{p_i}$ is approximately equal
   to $p_0$ which is all that is necessary for inference to be
   performed.  The default value of $\mu_0$ is
 $\Phi^{-1}(\bar{y})$ (which you can over-ride with the
@@ -932,8 +1080,8 @@ $\Phi^{-1}(\bar{y})$ (which you can over-ride with the
 % the argument \code{binaryOffset=-1.645} in the \code{pbart} call.  
 % The key
 % insight into the probit BART technique is that the Gibbs conditional
-% $ {f|z_i,y_i} {\;\stackrel{d}{=} f|z_i} $, i.e., given $z_i$, $y_i$ is
-% unnecessary.  
+% $ {f \mid z_i,y_i} {\;\stackrel{d}{=} f \mid z_i} $, i.e.,
+% given $z_i$, $y_i$ is unnecessary.  
 
 %In the following, we assume that \code{binaryOffset=0} for convenience.
 %(which is the default).  
@@ -947,52 +1095,101 @@ Notation: $M$~for the number of posterior samples, $B$~for the number
 of threads (generally, $B=1$ for Windows), $N$~for the number of
 observations in the training set, and $Q$~for the number of
 observations in the test set.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post <- pbart(x.train, y.train, x.test, ndpost=M)
-R> post <- mc.pbart(x.train, y.train, x.test, ndpost=M, mc.cores=B, seed=99)
-R> post <- gbart(x.train, y.train, x.test, type='pbart', ndpost=M)
-R> post <- mc.gbart(x.train, y.train, x.test, type='pbart', ndpost=M, ...
+R> post <- pbart(x.train, y.train, x.test, ndpost = M)
+R> post <- mc.pbart(x.train, y.train, x.test, ndpost = M, mc.cores = B,
++    seed = 99)
+R> post <- gbart(x.train, y.train, x.test, type = "pbart", ndpost = M)
+R> post <- mc.gbart(x.train, y.train, x.test, type = "pbart", ndpost = M, 
++    seed = 99)
 \end{Sinput}
+\end{CodeChunk}
+%
 N.B.\ for \code{pbart}, the thinning argument, \code{keepevery}
-defaults to 1 while for \code{gbart} with\\ \code{type='pbart'},
-\code{keepevery} defaults to 10.  
+defaults to 1 while for \code{gbart} with\\ \code{type = "pbart"},
+\code{keepevery} defaults to 10. 
 
-\begin{align*}
-\mbox{Input matrices: \code{x.train} and, optionally, \code{x.test}:\ } & 
-\wrap{\begin{array}{c}
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description}
+\item[\code{x.train}] is a matrix or a data frame of covariates for training\\
+represented notationally as 
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{N} \\
-\end{array}} \mbox{\ or\ } \bm{x}_{i} \mbox{\ as row vectors} \\
-\mbox{\code{post}, of type \code{pbart}, which is essentially a list} & \\
-\mbox{\code{post\$yhat.train} and \code{post\$yhat.test}:\ } &
-\wrap{\begin{array}{ccc}
-\hat{y}_{11}& \dots & \hat{y}_{N1} \\
-\vdots & \ddots & \vdots \\
-\hat{y}_{1M}& \dots & \hat{y}_{NM} \\
-\end{array}} \hat{y}_{im}=\mu_0+f_m(\bm{x}_i) 
-\end{align*}
-
-The columns of \code{post\$yhat.train} and \code{post\$yhat.test}
-represent different covariate settings and the rows, the \code{M}
-draws from the posterior.  \code{post\$yhat.train} and
-\code{post\$yhat.test}, when requested, are returned, although,
-\code{post\$prob.train} and \code{post\$prob.test} are generally of
-more interest (and \code{post\$prob.train.mean} and
-\code{post\$prob.test.mean} which are the means of the posterior
-sample columns, not shown).
-
-\begin{align*}
-\mbox{\code{post\$prob.train} and \code{post\$prob.test}:\ } &
-\wrap{\begin{array}{ccc}
+\end{array}}$ where $\bm{x}_{i}$ are row vectors
+\item[\code{y.train}] is a vector of the outcome for training
+\item[\code{x.test} (optional)] 
+is a matrix or a data frame of covariates for testing
+\end{description}
+\end{quote}
+The return value, \code{post} as shown above is of type `\code{pbart}'
+that is essentially a list of named items; of particular interest
+are the following:
+%\code{post\$yhat.train}, \code{post\$yhat.test},
+\code{post\$prob.train} and \code{post\$prob.test}.
+% \begin{description}
+% \item[\code{post\$yhat.train}] a matrix of predictions
+% $\wrap{\begin{array}{ccc}
+% \hat{y}_{11}& \dots & \hat{y}_{N1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{y}_{1M}& \dots & \hat{y}_{NM} \\
+% \end{array}}$ where $\hat{y}_{im}=\mu_0+f_m(\bm{x}_i)$
+% \end{description}
+%
+% \begin{align*}
+% \mbox{Input matrices: \code{x.train} and, optionally, \code{x.test}:\ } & 
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{N} \\
+% \end{array}} \mbox{\ or\ } \bm{x}_{i} \mbox{\ as row vectors} \\
+% \mbox{\code{post}, of type \code{pbart}, which is essentially a list} & \\
+% \mbox{\code{post\$yhat.train} and \code{post\$yhat.test}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{y}_{11}& \dots & \hat{y}_{N1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{y}_{1M}& \dots & \hat{y}_{NM} \\
+% \end{array}} \hat{y}_{im}=\mu_0+f_m(\bm{x}_i) 
+% \end{align*}
+%
+As with a continuous outcome, the columns of \code{post\$yhat.train}
+and \code{post\$yhat.test} represent different covariate settings and
+the rows, the $M$ draws from the posterior. 
+% \code{post\$yhat.train} and \code{post\$yhat.test} (when requested)
+% are returned.  
+However, \code{post\$prob.train} and \code{post\$prob.test} (when
+requested) are generally of more interest (and
+\code{post\$prob.train.mean} and \code{post\$prob.test.mean} which are
+the means of the posterior sample columns, not shown).
+%
+\begin{quote}
+\begin{description}
+\item[\code{post\$prob.train}] is a matrix of predictions\\
+$\wrap{\begin{array}{ccc}
 \hat{p}_{11}& \dots & \hat{p}_{N1} \\
 \vdots & \ddots & \vdots \\
 \hat{p}_{1M}& \dots & \hat{p}_{NM} \\
-\end{array}} \where  \hat{p}_{im}=\Phi(\hat{y}_{im})  %\Phi(f_m(\bm{x}_i)) \\
-\end{align*}
-
+\end{array}}$  where  $\hat{p}_{im}=\Phi(\mu_0+f_m(\bm{x}_i))$
+\item[\code{post\$prob.test}] is a matrix of predictions\\
+corresponding to \code{post\$x.test} if provided
+\end{description}
+\end{quote}
+% \begin{align*}
+% \mbox{\code{post\$prob.train} and \code{post\$prob.test}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{p}_{11}& \dots & \hat{p}_{N1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{p}_{1M}& \dots & \hat{p}_{NM} \\
+% \end{array}} \where  \hat{p}_{im}=\Phi(\hat{y}_{im})  %\Phi(f_m(\bm{x}_i)) \\
+% \end{align*}
+%
 Often it is impractical to provide \code{x.test} in the call to
 \code{pbart} due to the number of predictions considered or all the
 settings to evaluate are simply not known at that time.  To allow for
@@ -1000,39 +1197,78 @@ this common problem, the \pkg{BART} package returns the trees encoded
 in an ASCII string, \code{treedraws\$trees}, and provides a
 \code{predict} function to generate any predictions needed.  Note that
 if you need to perform the prediction in some later \proglang{R}
-instance, then you can save the \code{pbart} object returned and
-reload it when needed, e.g., save with \code{saveRDS(post,
+instance, then you can save the `\code{pbart}' object returned and
+reload it when needed, e.g.,~save with \code{saveRDS(post,
   "post.rds")} and reload, \code{post <- readRDS("post.rds")}\ .
-The \code{x.test} input can be a matrix or a data frame; for
-simplicity, we assume a matrix below.\\
+%The \code{x.test} input can be a matrix or a data frame.
+%; for simplicity, we assume a matrix below.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> pred <- predict(post, x.test, mc.cores=B)
+R> pred <- predict(post, x.test, mc.cores = B)
 \end{Sinput}
-\begin{align*}
-\mbox{Input: \code{x.test}:\ }  &
-\wrap{\begin{array}{c}
+\end{CodeChunk}
+%
+The data input, \code{x.test} as shown above, is as follows.
+\begin{description}
+\item[\code{x.test}] is a matrix or data frame of covariates\\
+  represented notationally as
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{Q} \\
-\end{array}} \mbox{\ or\ } \bm{x}_h \mbox{\ as row vectors} \\
-\mbox{\code{pred}, of type \code{pbart}, which is essentially a list} & \\
-\mbox{\code{pred\$yhat.test}:\ } &
-\wrap{\begin{array}{ccc}
+\end{array}}$ where $\bm{x}_h$ are row vectors
+\end{description}
+The returned value, \code{pred} as shown above, is of type
+`\code{pbart}' that is essentially a list with the following
+named components.
+\begin{quote}
+\begin{description}
+\item[\code{pred\$yhat.test}] is a matrix of predictions
+$\wrap{\begin{array}{ccc}
 \hat{y}_{11}& \dots & \hat{y}_{Q1} \\
 \vdots & \ddots & \vdots \\
 \hat{y}_{1M}& \dots & \hat{y}_{QM} \\
-\end{array}} \where \hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)  \\
-\mbox{\code{pred\$prob.test}:\ } &
-\wrap{\begin{array}{ccc}
+\end{array}}$\\ where $\hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)$
+\item[\code{pred\$prob.test}] is a matrix of probabilities
+$\wrap{\begin{array}{ccc}
 \hat{p}_{11}& \dots & \hat{p}_{Q1} \\
 \vdots & \ddots & \vdots \\
 \hat{p}_{1M}& \dots & \hat{p}_{QM} \\
-\end{array}} \where \hat{p}_{hm}=\Phi(\hat{y}_{hm}) \\ %\Phi(f_m(\bm{x}_h))  \\
-\mbox{\code{pred\$prob.test.mean}:\ } &
-\wrap{\hat{p}_{1}, \dots, \hat{p}_{Q}} \where \hat{p}_{h}=M^{-1} \sum_{m=1}^M  \hat{p}_{hm}   
-\end{align*}
-
+\end{array}}$\\ where 
+$\hat{p}_{hm}=\Phi(\hat{y}_{hm})$
+\item[\code{pred\$prob.test.mean}] is a vector of probabilities
+$\wrap{\hat{p}_{1}, \dots, \hat{p}_{Q}}$\\ where $\hat{p}_{h}=M^{-1}
+\sum_{m=1}^M  \hat{p}_{hm}$   
+\end{description}
+\end{quote}
+% \begin{align*}
+% \mbox{Input: \code{x.test}:\ }  &
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{Q} \\
+% \end{array}} \mbox{\ or\ } \bm{x}_h \mbox{\ as row vectors} \\
+% \mbox{\code{pred}, of type \code{pbart}, which is essentially a list} & \\
+% \mbox{\code{pred\$yhat.test}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{y}_{11}& \dots & \hat{y}_{Q1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{y}_{1M}& \dots & \hat{y}_{QM} \\
+% \end{array}} \where \hat{y}_{hm}=\mu_0+f_m(\bm{x}_h)  \\
+% \mbox{\code{pred\$prob.test}:\ } &
+% \wrap{\begin{array}{ccc}
+% \hat{p}_{11}& \dots & \hat{p}_{Q1} \\
+% \vdots & \ddots & \vdots \\
+% \hat{p}_{1M}& \dots & \hat{p}_{QM} \\
+% \end{array}} \where \hat{p}_{hm}=\Phi(\hat{y}_{hm}) \\ %\Phi(f_m(\bm{x}_h))  \\
+% \mbox{\code{pred\$prob.test.mean}:\ } &
+% \wrap{\hat{p}_{1}, \dots, \hat{p}_{Q}} \where \hat{p}_{h}=M^{-1}
+% \sum_{m=1}^M  \hat{p}_{hm}   
+% \end{align*}
+%
 \subsection{Probit BART and Friedman's partial dependence function}
 
 For an overview of Friedman's partial dependence function (including
@@ -1087,15 +1323,16 @@ available to extrapolate the rates from the survey to the US
 population as a whole.  We will concentrate on body mass index (BMI)
 and gender, $\bm{x}_{hS}$, while utilizing Friedman's partial
 dependence function as defined above and incorporating the survey
-weights, i.e.,
-$p_{hS}(\bm{x}_{hS}) = {\sum_{i=1}^N w_i
+weights, i.e.,~$p_{hS}(\bm{x}_{hS}) = {\sum_{i=1}^N w_i
   \Phi(\mu_0+f(\bm{x}_{hS},\bm{x}_{iC}))}/ {\sum_{i'=1}^N w_{i'}}$.
 
 The \pkg{BART} package provides two examples for the relationship
-between chronic pain and BMI: \code{demo("nhanes.pbart1",
-  package="BART")} for the probabilities and
-\code{demo("nhanes.pbart2", package="BART")} for differences in these
-probabilities.  In Figure~\ref{chronic-pain1}, the left panel for
+between chronic pain and BMI:
+\code{demo("nhanes.pbart1", package = "BART")}, probabilities; and
+\code{demo("nhanes.pbart2", package = "BART")}, differences in
+%\code{demo("nhanes.pbart1", package = "BART")} for the probabilities and
+%\code{demo("nhanes.pbart2", package = "BART")} for differences in these
+probabilities. In Figure~\ref{chronic-pain1}, the left panel for
 lower-back pain and the right panel for neck pain, the
 unweighted relationship between chronic pain, BMI and gender are
 displayed: males (females) are represented by blue (red) solid lines
@@ -1105,22 +1342,13 @@ probability of chronic lower-back pain increases with BMI for either
 gender.  Conversely, chronic neck pain does appear to be rising, yet
 again, the intervals are wide.  In both cases, these findings are not
 anticipated given the original hypotheses.  Based on survey weights
-(not shown), the results are basically the same.  In
-Figure~\ref{chronic-pain2}, the unweighted relationship for females
-between BMI and the difference in probability of chronic pain from a
-baseline BMI of 25 (which is the upper limit of normal) with
-corresponding 95\% credible intervals in dashed lines: the left panel
-for lower-back pain (blue solid lines) and the right panel for
-neck pain (red solid lines). Again, we have roughly the same
-impression, i.e., there is no increase of lower-back chronic
-pain with BMI and it is possibly dropping while neck pain might be
-increasing, but the intervals are wide for both.  The results are
-basically the same for males (not shown).
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/chronic-pain1.pdf}
-\end{center}
-\caption{\label{chronic-pain1}NHANES, BMI and the probability of
+(not shown), the results are basically the same. 
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{chronic-pain1.pdf}
+  %\includegraphics[scale=0.425]{Figures/chronic-pain1.pdf}
+  \caption{NHANES, BMI and the probability of
   chronic pain: the left panel for lower-back pain and the
   right panel for neck pain.  The unweighted Friedman's partial
   dependence relationship between chronic pain, BMI and gender are
@@ -1135,13 +1363,25 @@ basically the same for males (not shown).
   with BMI for either gender.  Conversely, chronic neck pain does
   appear to be rising, yet again, the intervals are wide.  In both
   cases, these findings are not anticipated.  }
+  \label{chronic-pain1}
 \end{figure}
-
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/chronic-pain2.pdf}
-\end{center}
-\caption{\label{chronic-pain2}NHANES, BMI and the probability of
+%
+In Figure~\ref{chronic-pain2}, the unweighted relationship for females
+between BMI and the difference in probability of chronic pain from a
+baseline BMI of 25 (which is the upper limit of normal) with
+corresponding 95\% credible intervals in dashed lines: the left panel
+for lower-back pain (blue solid lines) and the right panel for
+neck pain (red solid lines). Again, we have roughly the same
+impression, i.e.,~there is no increase of lower-back chronic
+pain with BMI and it is possibly dropping while neck pain might be
+increasing, but the intervals are wide for both.  The results are
+basically the same for males (not shown).
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{chronic-pain2.pdf}
+  %\includegraphics[scale=0.425]{Figures/chronic-pain2.pdf}
+  \caption{NHANES, BMI and the probability of
   chronic pain for females only: the left panel for lower-back
   pain and the right panel for neck pain. The unweighted Friedman's
   partial dependence relationship between chronic pain and BMI are
@@ -1149,8 +1389,8 @@ basically the same for males (not shown).
   lower-back (blue) and neck pain (red) are presented with the
   corresponding 95\% credible intervals (dashed lines).  The
   difference in probability of chronic pain from a baseline BMI of 25
-  (which is the upper limit of normal) is presented, i.e.,
-  $p(x)-p(25)$.  We want to explore the hypothesis that obesity is a
+  (which is the upper limit of normal) is presented,
+  i.e.,~$p(x)-p(25)$.  We want to explore the hypothesis that obesity is a
   risk factor for chronic lower-back pain (which includes buttock pain
   in this definition).  A corollary to this hypothesis is that obesity
   is not considered to be a risk factor for chronic neck pain.
@@ -1159,19 +1399,20 @@ basically the same for males (not shown).
   with BMI.  Conversely, chronic neck pain does appear to be rising,
   yet again, the intervals are wide.  In both cases, these findings
   are not anticipated. }
+  \label{chronic-pain2}
 \end{figure}
-
+%
 
 \subsection{Logit BART for binary outcomes}
 
-Assuming a Normal distribution of the unobserved latent, $z_i$ where
+Assuming a normal distribution of the unobserved latent, $z_i$ where
 $y_i=\I{z_i>0}$, provides some challenges when estimating very small
-or very large probabilities, $p_i$, since the Normal distribution has
+or very large probabilities, $p_i$, since the normal distribution has
 relatively thin tails.  This restriction can be relaxed by assuming
-the latents follow the Logistic distribution which has heavier tails. 
+the latents follow the logistic distribution which has heavier tails. 
 % and, therefore, is a better
 %choice if the $p_i$ can be very close to zero or one.  
-For Logistic latents, we employ a variant of the \citet{HolmHeld06}
+For logistic latents, we employ a variant of the \citet{HolmHeld06}
 technique by \citet{GramPols12} to create what we call logit BART.
 However, it is important to recognize that logit BART is more
 computationally intensive than probit BART.
@@ -1179,21 +1420,21 @@ computationally intensive than probit BART.
 The outcome, \code{y.train}, is provided as an integer with values 0
 or 1.  Logit BART is provided by the \code{lbart} and \code{gbart}
 functions.  Unlike probit BART where the auxiliary latents, $z_i$,
-have a unit variance $\sd^2=1$; with Logisitic BART, we sample
-truncated Normal latents, $z_i$, with a variance $\sd_i^2$ by the
+have a unit variance $\sd^2=1$; with logit BART, we sample
+truncated normal latents, $z_i$, with a variance $\sd_i^2$ by the
 \citet{Robe95} technique.  If ${\sd^2_i} = 4\psi_i^2 \where \psi_i$ is
 sampled from the Kolmogorov-Smirnov distribution, then $z_i$ follow
-the Logistic distribution.  Sampling from the Kolmogorov-Smirnov
+the logistic distribution.  Sampling from the Kolmogorov-Smirnov
 distribution is described by \cite{Devr86}.  So, the conditionally
-Normal latents, $z_i|\sd_i^2$, are the outcomes for a continuous BART
-with a given heteroskedastic variance, $\sd_i^2$.  % Since Logistic
+normal latents, $z_i \mid \sd_i^2$, are the outcomes for a continuous BART
+with a given heteroskedastic variance, $\sd_i^2$.  % Since logistic
 % latents are more flexible, there is no centering parameter, i.e.,
 % $\mu_0=0$.  Therefore, the probabilities are $p_i=F(f(\bm{x}_i))$
-% where $F$ is the standard Logistic distribution function.
+% where $F$ is the standard logistic distribution function.
 
 The $z_i$ are centered around a known constant, $\mu_0$, which is
-analagous to quasi-centering the probabilities, $p_i$, around
-$p_0=F(\mu_0)$ where $F$ is the standard Logistic distribution
+analogous to quasi-centering the probabilities, $p_i$, around
+$p_0=F(\mu_0)$ where $F$ is the standard logistic distribution
 function.  The default value of $\mu_0$ is $F^{-1}(\bar{y})$ (which
 you can over-ride with the \code{binaryOffset} argument to
 \code{lbart} or the \code{offset} argument to \code{gbart}).
@@ -1201,12 +1442,12 @@ Therefore, the probabilities are $p_i=F(\mu_0+f(\bm{x}_i))$.
 
 The input and output for \code{lbart} is essentially identical to
 \code{pbart}.  Also, the \code{predict} function for objects of type
-\code{lbart} is analogous.  The \code{gbart} function performs logit
-BART when passed the \code{type='lbart'} argument.  
+`\code{lbart}' is analogous.  The \code{gbart} function performs logit
+BART when passed the \code{type = "lbart"} argument.  
 
 N.B.\ for
 \code{lbart}, the thinning argument, \code{keepevery} defaults to 1
-while for \code{gbart} with \code{type='lbart'}, \code{keepevery}
+while for \code{gbart} with \code{type = "lbart"}, \code{keepevery}
 defaults to 10.
 
 \subsection{Multinomial BART for categorical outcomes}
@@ -1214,7 +1455,7 @@ defaults to 10.
 Several strategies for analyzing categorical outcomes have been
 proposed from the Bayesian perspective
 \citep{AlbeChib93,McCuRoss94,McCuPols00,ImaiVanD05,FruhFruh10,Scot11}
-including two BART implementations \citep{KindWang16,Murr17}: our BART
+including two BART implementations \citep{KindWang16,Murr20}: our BART
 implementations differ from these; although, since we are working on
 the same problem, there are some similarities.
 Generally, the literature has taken a logit approach.  Due to
@@ -1224,7 +1465,7 @@ categorical outcomes, we have created two approaches to what we call
 Multinomial BART.  The first approach works well when they are
 relatively few categories while the second is preferable otherwise.
 
-\subsubsection{Multinomial BART and conditional probability: mbart}
+\subsubsection[Multinomial BART and conditional probability: mbart]{Multinomial BART and conditional probability: \code{mbart}}
 
 In the first approach, we fit a novel sequence of binary BART models
 that bears some resemblance to continuation-ratio logits
@@ -1233,22 +1474,25 @@ are represented by mutually exclusive binary indicators:
 $y_{i1}, \dots, y_{iK}$ for subjects indexed by $i=1, \dots, N$.  We
 denote the probability of these outcome indicators via conditional
 probabilities, $p_{ij}$, where $j=1, \dots, K$ as follows.
+%
 \begin{align*}
 p_{i1}&=\P{y_{i1}=1}\\
-p_{i2}&=\P{y_{i2}=1|y_{i1}=0} \\
-p_{i3}&=\P{y_{i3}=1|y_{i1}=y_{i2}=0} \\
+p_{i2}&=\P{y_{i2}=1 \mid y_{i1}=0} \\
+p_{i3}&=\P{y_{i3}=1 \mid y_{i1}=y_{i2}=0} \\
 \vdots & \\
-p_{i,K-1}&=\P{y_{i,K-1}=1|y_{i1}=\cdots=y_{i,K-2}=0} \\
-p_{iK}&=\P{y_{i,K-1}=0|y_{i1}=\cdots=y_{i,K-2}=0} 
+p_{i,K-1}&=\P{y_{i,K-1}=1 \mid y_{i1}=\cdots=y_{i,K-2}=0} \\
+p_{iK}&=\P{y_{i,K-1}=0 \mid y_{i1}=\cdots=y_{i,K-2}=0} 
 \end{align*}
+%
 Notice that $p_{iK}=1-p_{i,K-1}$ so we can specify the $K$
 conditional probabilities via $K-1$ parameters.  Furthermore, these
 conditional probabilities are, by construction, defined for subsets of
 subjects: let $S_1=\{1, \dots, N\}$ and
 $S_j = \{ i : y_{i1}=\cdots=y_{i,j-1}=0 \} \where j=2, \dots, K-1$.
 Now, the unconditional probability of these outcome indicators,
-$\pi_{ij}$, can be defined in terms of the conditional probablities
+$\pi_{ij}$, can be defined in terms of the conditional probabilities
 and their complements, $q_{ij}=1-p_{ij}$, for all subjects.
+%
 \begin{align*}
 \pi_{i1}&=\P{y_{i1}=1}=p_{i1} \\
 \pi_{i2}&=\P{y_{i2}=1}=p_{i2}q_{i1} \\
@@ -1257,21 +1501,25 @@ and their complements, $q_{ij}=1-p_{ij}$, for all subjects.
 \pi_{i,K-1}&=\P{y_{i,K-1}=1}=p_{i,K-1}q_{i,K-2}\cdots q_{i1} \\
 \pi_{iK}&=\P{y_{iK}=1}=q_{i,K-1}q_{i,K-2}\cdots q_{i1} 
 \end{align*}
+%
 N.B.\ the conditional probability construction of $\pi_{ij}$
 ensures that $\sum_{j=1}^K\pi_{ij}=1$.
 
-Our modelling of these conditional probabilities based on a vector of
+Our modeling of these conditional probabilities based on a vector of
 covariates $\bm{x}_i$ is what we call Multinomial BART:
+%
 \begin{align*}
-y_{ij}|p_{ij} &\; ~ \; \B{p_{ij}} \where i \in S_j \mbox{ and } j=1, \dots, K-1 \\
+y_{ij} \mid p_{ij} &\; ~ \; \B{p_{ij}} \where i \in S_j \mbox{ and } j=1,
+\dots, K-1 \\
 p_{ij} & = \Phi(\mu_j+f_j(\bm{x}_i)) \\
  f_j & \prior \mathrm{BART}
 \end{align*}
+%
 with $i$ indexing subjects, $i=1, \dots, N$; and the default value of
 $\mu_j=\Phi^{-1}\wrap{\frac{\sum_i y_{ij}}{\sum_i
     \mathrm{I}\,\wrap[()]{i \in S_j}}}$.
 This formulation yields the Multinomial likelihood:
-$\wrap{\bm{y}|f_1,\dots,f_{K-1}} = \prod_{i=1}^N \prod_{j=1}^K
+$\wrap{\bm{y} \mid f_1,\dots,f_{K-1}} = \prod_{i=1}^N \prod_{j=1}^K
 \pi_{ij}^{y_{ij}}$.
 
 This approach is provided by the \pkg{BART} package as the
@@ -1279,79 +1527,121 @@ This approach is provided by the \pkg{BART} package as the
 identical to \code{gbart}, but the output is slightly different.  For
 example, due to the way the model is estimated, the prediction for
 \code{x.train} is not available; therefore, to request it set the
-argument \code{x.test=x.train}.  By default, probit BART is employed
+argument \code{x.test = x.train}.  By default, probit BART is employed
 for computational efficiency, but logit BART can be specified with the
-argument \code{type='lbart'}.
-%Also, the \code{predict} function for objects of type \code{lbart} is analogous.
+argument \code{type = "lbart"}.
+%Also, the \code{predict} function for objects of type \code{lbart} is
+%analogous.
 Notation: $M$~for the number of posterior samples, $B$~for the number
 of threads (generally, $B=1$ for Windows), $N$~for the number of
 observations in the training set, and $Q$~for the number of
 observations in the test set.
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post <- mbart(x.train, y.train, x.test, ndpost=M) 
-R> post <- mc.mbart(x.train, y.train, x.test, ndpost=M, mc.cores=B, seed=99) 
+R> post <- mbart(x.train, y.train, x.test, ndpost = M) 
+R> post <- mc.mbart(x.train, y.train, x.test, ndpost = M, mc.cores = B,
++    seed = 99) 
 \end{Sinput}
-\begin{align*}
-\mbox{Input: \code{x.train} and \code{x.test}:\ } & 
-\wrap{\begin{array}{c}
+\end{CodeChunk}
+%
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description}
+\item[\code{x.train}] is a matrix or data frame of covariates for training
+\item[\code{y.train}] is a vector of the outcome for training
+\item[\code{x.test} (optional)] is a matrix or data frame of covariates for 
+testing\\
+represented notationally as
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{Q} \\
-\end{array}} \mbox{\ or\ } \bm{x}_{i} \\
-\mbox{\code{post}, of type \code{mbart}} & \\
-\mbox{\code{post\$prob.test}:\ } &
-\wrap{\begin{array}{ccccccc}
-\hat{\pi}_{111} & \dots & \hat{\pi}_{1K1} & \dots & \hat{\pi}_{Q11} & \dots & \hat{\pi}_{QK1}\\
+\end{array}}$ where $\bm{x}_{i}$ are row vectors
+\end{description}
+\end{quote}
+The returned value, \code{post} as shown above, is of type
+`\code{mbart}' that is essentially a list with named components,
+particularly, \code{post\$prob.test}.
+\begin{description}
+\item[\code{post\$prob.test}] is matrix of probabilities 
+$\wrap{\begin{array}{ccccccc}
+\hat{\pi}_{111} & \dots & \hat{\pi}_{1K1} & \dots & \hat{\pi}_{Q11} & \dots
+& \hat{\pi}_{QK1}\\
 \vdots       & \ddots & \vdots    & \ddots & \vdots   & \ddots & \vdots \\
-\hat{\pi}_{11M} & \dots & \hat{\pi}_{1KM} & \dots & \hat{\pi}_{Q1M} & \dots & \hat{\pi}_{QKM} \\
-\end{array}} 
-%& \where  \hat{p}_{ijm}=\Phi(f_{jm}(\bm{x}_i)) \mbox{ for \code{type='pbart'}}\\
-%&\mbox{ or } \hat{p}_{ijm}=F(f_{jm}(\bm{x}_i)) \mbox{ for \code{type='lbart'}}\\
-%&\mbox{ and $F(.)$ is the CDF of the Logistic distribution.}\\
-\end{align*}
+\hat{\pi}_{11M} & \dots & \hat{\pi}_{1KM} & \dots & \hat{\pi}_{Q1M} & \dots
+& \hat{\pi}_{QKM} \\
+\end{array}}$ 
+\end{description}
+% \begin{align*}
+% \mbox{Input: \code{x.train} and \code{x.test}:\ } & 
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{Q} \\
+% \end{array}} \mbox{\ or\ } \bm{x}_{i} \\
+% \mbox{\code{post}, of type \code{mbart}} & \\
+% \mbox{\code{post\$prob.test}:\ } &
+% \wrap{\begin{array}{ccccccc}
+% \hat{\pi}_{111} & \dots & \hat{\pi}_{1K1} & \dots & \hat{\pi}_{Q11} & \dots
+% & \hat{\pi}_{QK1}\\
+% \vdots       & \ddots & \vdots    & \ddots & \vdots   & \ddots & \vdots \\
+% \hat{\pi}_{11M} & \dots & \hat{\pi}_{1KM} & \dots & \hat{\pi}_{Q1M} & \dots
+% & \hat{\pi}_{QKM} \\
+% \end{array}} 
+% %& \where  \hat{p}_{ijm}=\Phi(f_{jm}(\bm{x}_i)) \mbox{ 
+% %for \code{type='pbart'}}\\
+% %&\mbox{ or } \hat{p}_{ijm}=F(f_{jm}(\bm{x}_i)) \mbox{ for 
+% %\code{type='lbart'}}\\
+% %&\mbox{ and $F(.)$ is the CDF of the Logistic distribution.}\\
+% \end{align*}
+%
 The columns of %\code{post\$prob.train} and
 \code{post\$prob.test} represent different covariate settings crossed
 with the $K$ categories.  The \code{predict} function for objects of
-type \code{mbart} is analogous.
+type `\code{mbart}' is analogous.
 
-\subsubsection{Multinomial BART and the logit transformation: mbart2}
+\subsubsection[Multinomial BART and the logit transformation: mbart2]{Multinomial BART and the logit transformation: \code{mbart2}}
 
 The second approach is inspired by the logit transformation and is
 provided by the \code{mbart2} function which has a similar calling
 convention to \code{mbart} described above.  Furthermore, as we shall
 see, the computationally friendly probit is even applicable in this
-instance.  Here, $y_i$ is categorical, i.e., $y_i \in \{1, \dots, K\}$
+instance.  Here, $y_i$ is categorical, i.e.,~$y_i \in \{1, \dots, K\}$
 (technically, the \code{mbart2} function does not require the
 categories to be $1, \dots, K$; it only requires that there are $K$
 distinct categories).  Now, we have the following framework motivated
 by the logit transformation.
+%
 \begin{align*}
-%y_i|\bm{\pi}_i & ~ \M{1}{\bm{\pi}_i} \\
+%y_i \mid \bm{\pi}_i & ~ \M{1}{\bm{\pi}_i} \\
 \P{y_i=j} & = \frac{\exp(\mu_j + f_j(\bm{x}_i))}
 {\sum_{j'=1}^K \exp(\mu_{j'}+ f_{j'}(\bm{x}_i))} 
 = \pi_{ij} \\
 & \where f_j \prior \mathrm{BART},\ j=1, \dots, K
 \end{align*}
+%
 Suppose for the moment, the centering parameters, $\mu_j$, are defined
 as in logit BART.
 
-It would appear that this definition has an identifiability issue
-since
+It would appear that this definition lacks identifiability since
 $\pi_{ij}= \frac{\exp(\mu_j + f_j(\bm{x}_i))} {\sum_{j'=1}^K
   \exp(\mu_{j'}+ f_{j'}(\bm{x}_i))} = \frac{\exp(\mu_j + f_j(\bm{x}_i)
   + c)} {\sum_{j'=1}^K \exp(\mu_{j'}+ f_{j'}(\bm{x}_i) + c)}$.
-Identifiability could be restored by setting a single BART function to
-zero, i.e., $f_{j'}(\bm{x}_i)=0$.  However, this is really unnecessary
+Identifiability of $f_j$ could be restored by setting a single BART function to
+zero, i.e.,~$f_{j'}(\bm{x}_i)=0$.  However, this is really unnecessary
 since $\pi_{ij}$ is identified regardless.  % Although, the likelihood is 
 % unidentified, due to our proper prior, we generate a proper posterior.
 
 Computationally, this inference can be performed via a series of 
 binary BARTs.  This can be shown by following the work of
-\citep{HolmHeld06}: define $\P{y_i=c} \propto \exp f_c(\bm{x}_i)$.
+\cite{HolmHeld06}: define $\P{y_i=c} \propto \exp f_c(\bm{x}_i)$.
 Consider two cases: $\P{y_i=c}$ and $\P{y_i=j} \where j\not=c$.
 The first case gives us the following in terms of $f_c$.
+%
 \begin{align*}
 \P{y_i=c} & = \frac{\exp f_c(\bm{x}_i)}{\exp f_c(\bm{x}_i) 
 + \sum_{k\not=c} \exp f_k(\bm{x}_i)} \\
@@ -1361,7 +1651,9 @@ The first case gives us the following in terms of $f_c$.
 {\exp f_c(\bm{x}_i) + \exp S} \\
 & = \frac{\exp (f_c(\bm{x}_i)-S)} {\exp (f_c(\bm{x}_i) -S)  +1}
 \end{align*} \\
+%
 And the second case, where $j\not=c$, is as follows in terms of $f_c$.\\
+%
 \begin{align*}
 \P{y_i=j} & = \frac{\exp f_j(\bm{x}_i)}{\exp f_c(\bm{x}_i) 
 + \sum_{k\not=c} \exp f_k(\bm{x}_i)} \\
@@ -1369,15 +1661,16 @@ And the second case, where $j\not=c$, is as follows in terms of $f_c$.\\
 & \propto \frac{1}{ \exp -S}\frac{1} {\exp f_c(\bm{x}_i) + \exp S} \\
 & = \frac{1} {\exp (f_c(\bm{x}_i) -S)  +1}
 \end{align*} 
+%
 Thus, the conditional inference for $f_c$ is equivalent to a binary indicator
 $\I{y=c}$.  Therefore, \code{mbart2}
 computes a full series of all $K$ BART functions for binary indicators.
 
-The \code{mbart2} function defaults to \code{type='lbart'}, i.e.,
-Logistic latents are used to compute the $f_j$'s which fits nicely
-with the logit development of this approach.  However, the Logistic
+The \code{mbart2} function defaults to \code{type = "lbart"},
+i.e.,~logistic latents are used to compute the $f_j$'s which fits nicely
+with the logit development of this approach.  However, the logistic
 latent fitting method can be computationally demanding.  Therefore,
-Normal latents can be specified by \code{type='pbart'}.  This latter
+normal latents can be specified by \code{type = "pbart"}.  This latter
 setting would appear to contradict the development of this approach;
 but notice that $\pi_{ij}$ is still a probability in this case and,
 in our experience, the results produced are often reasonable.
@@ -1399,45 +1692,49 @@ preference: bird, fish (the most common primary food choice),
 invertebrate (snails, insects, crayfish, etc.), reptile (turtles,
 alligators), bird, and other (amphibians, plants, household pets,
 stones, and other debris).  The length of alligators was dichotomized
-into small, $\le$2.3m, vs.\ large, $>$2.3m.  We estimate the
+into small, $\le$ 2.3m, vs.\ large, $>$ 2.3m.  We estimate the
 probability of each food preference category for the marginal effect
 of size by resorting to Friedman's partial dependence function
 \citep{Frie01}.  We have supplied Figure~\ref{alligator} which
 summarizes the BART results generated by the example
 \code{alligator.R}: you can find this demo with the command
-\code{demo("alligator", package="BART")}.  The
+\code{demo("alligator", package = "BART")}.  The
 \code{mbart} function was used since the number of categories is
 small.  The 95\% credible intervals are wide, but it appears that
 large alligators are more likely to rely on a diet of fish while small
 alligators are more likely to rely on invertebrates.  Although the
 true probabilities are obviously unknown, we compared \code{mbart} to
 an analysis by a single hidden-layer/feed-forward Neural Network via
-the \pkg{nnet} \proglang{R} package \citep{Ripl07,VenaRipl13} and the
+the \pkg{nnet} \proglang{R}~package \citep{Ripl07,VenaRipl13} and the
 results were essentially identical (see the \code{demo} for details).
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/alligator.pdf}
-\end{center}
-\caption{\label{alligator}In 1985, American alligators were harvested
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{alligator.pdf}
+  %\includegraphics[scale=0.425]{Figures/alligator.pdf}
+  \caption{In 1985, American alligators were harvested
   by hunters in peninsular Florida from four lakes. Lake, length and
   sex were recorded for each alligator.  The stomach contents of 219
   alligators were classified into five categories based on the primary
   food preference: bird, fish, invertebrate, reptile and other.  The
-  length of alligators was dichotomized into small, $\le$2.3m, vs.\
+  length of alligators was dichotomized into small, $\le$2.3m, vs.
   large, $>$2.3m.  We estimate the probability of each food preference
   category for the marginal effect of size by resorting to Friedman's
-  partial dependence function \citep{Frie01}.  The 95\% credible
+  partial dependence function \protect{\citep{Frie01}}.  The 95\% credible
   intervals are wide, but it appears that large alligators are more
   likely to rely on a diet of fish while small alligators are more
   likely to rely on invertebrates.  }
+  \label{alligator}
 \end{figure}
+%
 
-\subsection{Converegence diagnostics for binary and categorical outcomes}\label{geweke}
+\subsection{Converegence diagnostics for binary and categorical outcomes}
+\label{geweke}
 
 How do you perform convergence diagnostics for BART?  For continuous
 outcomes, convegence can easily be determined from the trace plots of
 the the error standard deviation, $\sigma$.  However, for probit and
-Multinomial BART with Normal latents, the error variance is fixed at 1
+Multinomial BART with normal latents, the error variance is fixed at 1
 so this is not an option.  Similarly, for logit BART, $\sigma_i$, are
 auxiliary latent variables not suitable for convergence diagnostics.
 Therefore, we adapt traditional MCMC diagnostic approaches to BART.
@@ -1462,7 +1759,8 @@ We divide our chain into two segments, $A$ and $B$, as follows:
 $m \in A=\{1, \dots, M_A\} \where M_A= a M$; and
 $m \in B=\{M-M_B+1, \dots, M\} \where M_B= b M$.  Note that 
 $a+b<1$. Geweke suggests $a=0.1,\ b=0.5$ and recommends the
-following Normal test for convergence.
+following normal test for convergence.
+%
 \begin{align*}
 \hat\theta_A & = M_A^{-1}\sum_{m \in A} \theta_m  &
 \hat\theta_B & = M_B^{-1}\sum_{m \in B} \theta_m  \\
@@ -1471,103 +1769,37 @@ following Normal test for convergence.
 \hat\sd^2_{\hat\theta_B} & = \hat{\gamma}_{m \in B}^2(0) \\
 & \\
 Z_{AB} & = \frac{\sqrt{M}(\hat\theta_A-\hat\theta_B)}
-{\sqrt{a^{-1}\hat\sd^2_{\hat\theta_A}+b^{-1}\hat\sd^2_{\hat\theta_B}}}~{\N{0}{1}}
+{\sqrt{a^{-1}\hat\sd^2_{\hat\theta_A}+b^{-1}\hat\sd^2_{\hat\theta_B}}}
+\sim {\N{0}{1}}
 %                                                  &  & 
 \end{align*}
-
+%
 In our \pkg{BART} package, we supply \proglang{R} functions adapted
-from the \pkg{coda} \proglang{R} package \citep{PlumBest06} to perform
+from the \pkg{coda} \proglang{R}~package \citep{PlumBest06} to perform
 Geweke diagnostics: {\tt spectrum0ar} and {\tt gewekediag}.  But, how
 do we apply Geweke's diagnostic to BART?  We can check convergence for
 any estimator of the form ${\theta}=h(f(\bm{x}))$, but often setting
-$h$ to the identify function will suffice, i.e., ${\theta}=f(\bm{x})$.
+$h$ to the identify function will suffice, i.e.,~${\theta}=f(\bm{x})$.
 However, BART being a Bayesian nonparametric technique means that we
-have many potential estimators to check, i.e., essentially one
+have many potential estimators to check, i.e.,~essentially one
 estimator for every possible choice of $\bm{x}$.
 
 We have supplied Figures~\ref{geweke-pbart2-200},
 \ref{geweke-pbart2-1000} and \ref{geweke-pbart2-5000} generated by
-the example \code{geweke.pbart2.R}:\\ \code{demo("geweke.pbart2",
-  package="BART")}.  The data are simulated by Friedman's
+the example \code{geweke.pbart2.R}:\\ 
+\code{demo("geweke.pbart2", package = "BART")}. 
+The data are simulated by Friedman's
 five-dimensional test function \citep{Frie91} where 50 covariates are
-generated as $x_{ij}~\U{0, 1}$ but only the first 5 covariates have an
+generated as $x_{ij} \sim \U{0, 1}$ but only the first 5 covariates have an
 impact on the outcome at sample sizes $N = 200, 1000, 5000$.
+%
 \begin{align*}
-{f(\bm{x}_i)} & = -1.5+\sin(\pi x_{i1} x_{i2}) + 2 (x_{i3}-0.5)^2 +x_{i4}+0.5x_{i5} \\
-z_i & ~\N{f(\bm{x}_i)}{1} \\
-{y_i} & =\I{z_i>0} 
+{f(\bm{x}_i)} & = -1.5+\sin(\pi x_{i1} x_{i2}) + 2 (x_{i3}-0.5)^2 +
+x_{i4}+0.5x_{i5} \\
+z_i & \sim \N{f(\bm{x}_i)}{1} \\
+{y_i} & =\I{z_i>0}
 \end{align*}
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.3]{figures/geweke-pbart2-200.pdf}
-\end{center}
-\caption{\label{geweke-pbart2-200}Geweke convergence diagnostics for
-  probit BART: $N=200$.  In the upper left quadrant, we have plotted
-  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
-  for 10 values of $x_{i4}$.  This is a check that can't be performed
-  for real data, but it is informative in this case.  Notice that
-  $f(x_{i4})$ vs.\ $x_{i4}$ is mainly directly proportional expected.
-  In the upper right quadrant, we plot the auto-correlations of
-  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
-  subjects.  Notice that there is very little auto-correlation.  In
-  the lower left quadrant, we display the corresponding trace plots
-  for these same settings.  The traces demonstrate that samples of
-  $f(\bm{x}_i)$ appear to adequately traverse the sample space.  In
-  the lower right quadrant, we plot the Geweke $Z_{AB}$ statistics for
-  each subject $i$.  Notice that the $Z_{AB}$ exceed the 95\% limits
-  only a handful of times.  Based on this figure, we conclude that the
-  chains have converged.  }
-\end{figure}
-
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/geweke-pbart2-1000.pdf}
-\end{center}
-\caption{\label{geweke-pbart2-1000}Geweke convergence diagnostics for
-  probit BART: $N=1000$.  In the upper left quadrant, we have plotted
-  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
-  for 10 values of $x_{i4}$.  This is a check that can't be performed
-  for real data, but it is informative in this case.  Notice that
-  $f(x_{i4})$ vs.\ $x_{i4}$ is directly proportional as expected.  In
-  the upper right quadrant, we plot the auto-correlations of
-  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
-  subjects.  Notice that there is very little auto-correlation.  In
-  the lower left quadrant, we display the corresponding trace plots
-  for these same settings.  The traces demonstrate that samples of
-  $f(\bm{x}_i)$ appear to adequately traverse the sample space.  In
-  the lower right quadrant, we plot the Geweke $Z_{AB}$ statistics for
-  each subject $i$.  Notice that there appear to be a considerable
-  number exceeding the 95\% limits.  Based on this figure, we conclude
-  that convergence is questionable.  We would suggest that more
-  thinning be employed via the \code{keepevery} argument to
-  \code{pbart}; perhaps, \code{keepevery=50}.  }
-\end{figure}
-
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/geweke-pbart2-5000.pdf}
-\end{center}
-\caption{\label{geweke-pbart2-5000}Geweke convergence diagnostics for
-  probit BART: $N=5000$.  In the upper left quadrant, we have plotted
-  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
-  for 10 values of $x_{i4}$.  This is a check that can't be performed
-  for real data, but it is informative in this case.  Notice that
-  $f(x_{i4})$ vs.\ $x_{i4}$ is directly proportional as expected.  In
-  the upper right quadrant, we plot the auto-correlations of
-  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
-  subjects.  Notice that there is some auto-correlation.  In the lower
-  left quadrant, we display the corresponding trace plots for these
-  same settings.  The traces demonstrate that samples of $f(\bm{x}_i)$
-  appear to traverse the sample space, but there are some slower
-  oscillations.  In the lower right quadrant, we plot the Geweke
-  $Z_{AB}$ statistics for each subject $i$.  Notice that there appear
-  to be far too many exceeding the 95\% limits.  Based on these
-  figures, we conclude that convergence has not been attained.  We
-  would suggest that more thinning be employed via the
-  \code{keepevery} argument to \code{pbart}; perhaps,
-  \code{keepevery=250}.  }
-\end{figure}
-
+%
 The convergence for each of these data sets is graphically displayed
 in Figures~\ref{geweke-pbart2-200}, \ref{geweke-pbart2-1000} and
 \ref{geweke-pbart2-5000} where each figure is broken into four
@@ -1594,8 +1826,83 @@ converged for $N=200$; for $N=1000$, convergence is questionable; and,
 for $N=5000$, convergence has not been attained.  We would suggest
 that more thinning be employed for $N=1000, 5000$ via the
 \code{keepevery} argument to \code{pbart}; perhaps,
-\code{keepevery=50} for $N=1000$ and \code{keepevery=250} for
+\code{keepevery = 50} for $N=1000$ and \code{keepevery = 250} for
 $N=5000$.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.3]{geweke-pbart2-200.pdf}
+  %\includegraphics[scale=0.3]{Figures/geweke-pbart2-200.pdf}
+  \caption{Geweke convergence diagnostics for
+  probit BART: $N=200$.  In the upper left quadrant, we have plotted
+  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
+  for 10 values of $x_{i4}$.  This is a check that can't be performed
+  for real data, but it is informative in this case.  Notice that
+  $f(x_{i4})$ vs.\ $x_{i4}$ is mainly directly proportional expected.
+  In the upper right quadrant, we plot the auto-correlations of
+  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
+  subjects.  Notice that there is very little auto-correlation.  In
+  the lower left quadrant, we display the corresponding trace plots
+  for these same settings.  The traces demonstrate that samples of
+  $f(\bm{x}_i)$ appear to adequately traverse the sample space.  In
+  the lower right quadrant, we plot the Geweke $Z_{AB}$ statistics for
+  each subject $i$.  Notice that the $Z_{AB}$ exceed the 95\% limits
+  only a handful of times.  Based on this figure, we conclude that the
+  chains have converged.  }
+  \label{geweke-pbart2-200}
+\end{figure}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{geweke-pbart2-1000.pdf}
+  %\includegraphics[scale=0.425]{Figures/geweke-pbart2-1000.pdf}
+  \caption{Geweke convergence diagnostics for
+  probit BART: $N=1000$.  In the upper left quadrant, we have plotted
+  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
+  for 10 values of $x_{i4}$.  This is a check that can't be performed
+  for real data, but it is informative in this case.  Notice that
+  $f(x_{i4})$ vs.\ $x_{i4}$ is directly proportional as expected.  In
+  the upper right quadrant, we plot the auto-correlations of
+  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
+  subjects.  Notice that there is very little auto-correlation.  In
+  the lower left quadrant, we display the corresponding trace plots
+  for these same settings.  The traces demonstrate that samples of
+  $f(\bm{x}_i)$ appear to adequately traverse the sample space.  In
+  the lower right quadrant, we plot the Geweke $Z_{AB}$ statistics for
+  each subject $i$.  Notice that there appear to be a considerable
+  number exceeding the 95\% limits.  Based on this figure, we conclude
+  that convergence is questionable.  We would suggest that more
+  thinning be employed via the \code{keepevery} argument to
+  \code{pbart}; perhaps, \code{keepevery = 50}.  }
+  \label{geweke-pbart2-1000}
+\end{figure}
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{geweke-pbart2-5000.pdf}
+  %\includegraphics[scale=0.425]{Figures/geweke-pbart2-5000.pdf}
+  \caption{Geweke convergence diagnostics for
+  probit BART: $N=5000$.  In the upper left quadrant, we have plotted
+  Friedman's partial dependence function for $f(x_{i4})$ vs.\ $x_{i4}$
+  for 10 values of $x_{i4}$.  This is a check that can't be performed
+  for real data, but it is informative in this case.  Notice that
+  $f(x_{i4})$ vs.\ $x_{i4}$ is directly proportional as expected.  In
+  the upper right quadrant, we plot the auto-correlations of
+  $f(\bm{x}_i)$ for 10 randomly selected $\bm{x}_i$ where $i$ indexes
+  subjects.  Notice that there is some auto-correlation.  In the lower
+  left quadrant, we display the corresponding trace plots for these
+  same settings.  The traces demonstrate that samples of $f(\bm{x}_i)$
+  appear to traverse the sample space, but there are some slower
+  oscillations.  In the lower right quadrant, we plot the Geweke
+  $Z_{AB}$ statistics for each subject $i$.  Notice that there appear
+  to be far too many exceeding the 95\% limits.  Based on these
+  figures, we conclude that convergence has not been attained.  We
+  would suggest that more thinning be employed via the
+  \code{keepevery} argument to \code{pbart}; perhaps,
+  \code{keepevery = 250}.}
+  \label{geweke-pbart2-5000}
+\end{figure}
+%
 
 \subsection{BART and variable selection}
 
@@ -1603,15 +1910,17 @@ Bayesian variable selection techniques applicable to BART have been
 studied by
 \cite{ChipGeor10,ChipGeor13,BleiKape14,HahnCarv15,McCuCarv15,Line16}.
 The \pkg{BART} package supports the sparse prior of \citet{Line16} by
-specifying \code{sparse=TRUE} (the default is \code{sparse=FALSE}).
+specifying \code{sparse = TRUE} (the default is \code{sparse = FALSE}).
 Let's represent the variable selection probabilities by
-$s_j \where j=1, \., P$.  Now, replace the uniform variable selection
-prior in BART with a Dirichlet prior.  Also, place a Beta prior on the
+$s_j$ where $j=1, \., P$.  Now, replace the uniform variable selection
+prior in BART with a Dirichlet prior.  Also, place a beta prior on the
 $\theta$ parameter.
+%
 \begin{align*}
-\wrap{s_1, \., s_P}|\theta & \prior \Dir{\theta/P, \., \theta/P} \\
+\wrap{s_1, \., s_P} \mid \theta & \prior \Dir{\theta/P, \., \theta/P} \\
 \frac{\theta}{\theta+\rho} & \prior \Beta{a}{b} 
 \end{align*}
+%S
 Typical settings are $b=1$ and $\rho=P$ (the defaults) which you can
 over-ride with the \code{b} and \code{rho} arguments respectively.
 The value $a=0.5$ (the default) is a sparse setting whereas an
@@ -1623,11 +1932,11 @@ Furthermore, Linero discusses two assumptions: Assumption 2.1 and
 Assumption 2.2 (see \citet{Line16} for more details).  Basically,
 Assumption 2.2 (2.1) is more (less) friendly to binary/ordinal
 covariates and is (is not) the default corresponding to
-\code{augment=FALSE} (\code{augment=TRUE}).
+\code{augment = FALSE} (\code{augment = TRUE}).
 
 Let's return to the simulated probit BART example explored above which
-is in the \pkg{BART} package: \code{demo("sparse.pbart",
-  package="BART")}.  For sample sizes of $N=200, 1000, 5000$, there
+is in the \pkg{BART} package: \code{demo("sparse.pbart", package = "BART")}.
+For sample sizes of $N = 200, 1000, 5000$, there
 are $P=100$ covariates, but only the first 5 are active.  In
 Figure~\ref{varsel}, the 5 (95) active (inactive) covariates are red
 (black) and circles (dots) are $>$ ($\le$) $P^{-1}$ which is chance
@@ -1637,11 +1946,12 @@ positives.  For $N=1000$, all five active covariates are identified,
 but notice that there are still 14 false positives.  For $N=5000$, all
 five active covariates are identified and notice that there is only
 one false positive.
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.425]{figures/sparse-pbart.pdf}
-\end{center}
-\caption{\label{varsel}Probit BART and variable selection example.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.425]{sparse-pbart.pdf}
+  %\includegraphics[scale=0.425]{Figures/sparse-pbart.pdf}
+\caption{Probit BART and variable selection example.
   For sample sizes of $N=200, 1000, 5000$, there are $P=100$
   covariates, but only the first 5 are active.  The 5 (95) active
   (inactive) covariates are red (black) and circles (dots) are $>$
@@ -1651,23 +1961,24 @@ one false positive.
   active covariates are identified, but notice that there are still 14
   false positives.  For $N=5000$, all five active covariates are
   identified and notice that there is only one false positive.  }
+  \label{varsel}
 \end{figure}
-
+%
 We are often interested in the inter-relationship between covariates
 within our model.  We can assess these relationships by inspecting the
 binary trees.  For example, we can ascertain how often $x_1$ is chosen
 as a branch decision rule leading to a branch decision rule with $x_2$
 further up the tree or vice versa.  In this case, we call $x_1$ and
 $x_2$ a concordant pair and we denote by $x_1 \leftrightarrow x_2$
-which is a symmetric relationship, i.e., $x_1 \leftrightarrow x_2$
+which is a symmetric relationship, i.e.,~$x_1 \leftrightarrow x_2$
 implies $x_2 \leftrightarrow x_1$.  If $\mathcal{B}_h$ is the number
 of branches in tree $\mathcal{T}_h$, then the concordant pair
 probability is:
 $\kappa_{ij} = \P{x_i \leftrightarrow x_j \in
-  \mathcal{T}_h|\mathcal{B}_h>1}$
+  \mathcal{T}_h \mid \mathcal{B}_h>1}$
 for $i=1, \dots, P-1$ and $j=i+1, \dots, P$.  See an example of
 calculating these probabilities in
-\code{demo("trees.pbart", package="BART")}.
+\code{demo("trees.pbart", package = "BART")}.
 
 \section{Time-to-event outcomes with BART}\label{surv}
 
@@ -1700,7 +2011,7 @@ survival analysis, competing risks and recurrent events.
 % is a parametric multiplier which we call linear proportionality.  To
 % perform estimation and inference of $\bm{\beta}$,
 % we utilize what is known as the partial likelihood: $
-% \wrap{\bm{\beta}|\lambda_0(t)} = \prod_i
+% \wrap{\bm{\beta} \mid \lambda_0(t)} = \prod_i
 % \frac{\e{\bm{\beta}'\bm{x}_{i}}}{\sum_{{j \in R(t_i)}}
 %   \e{\bm{\beta}'\bm{x}_{j}}} $ where
 % $R(t_i)$
@@ -1763,29 +2074,31 @@ $y_{ij}$ on the time $t_{(j)}$ and the covariates $\bm{x}_i$. %  We
 % the outcome.
 
 So the model is
+%
 \begin{align*}%\label{eq:survbartdata}
 y_{ij} & = \delta_i \I{s_i=t_{(j)}},\ j=1, \dots, n_i \\
-y_{ij}|p_{ij} & ~  \B{p_{ij}} \\
+y_{ij} \mid p_{ij} & \sim \B{p_{ij}} \\
 p_{ij} & =  \Phi(\mu_{ij}),\ \mu_{ij} =\mu_0+f(t_{(j)}, \bm{x}_i)  \\
 f & \prior  \mathrm{BART} 
-% z_{ij}|y_{ij},f & ~  \begin{cases} 
+% z_{ij} \mid y_{ij},f & ~  \begin{cases} 
 % \N{ \mu_{ij}}{1}\I{-\infty, 0} & \If y_{ij}=0 \\
 % \N{ \mu_{ij}}{1}\I{0, \infty} & \If y_{ij}=1 \\
 % \end{cases} 
 \end{align*}
+%
 where $i$ indexing subjects, $i=1, \dots, N$; and
-$\Phi(.)$ is the standard Normal cumulative distribution function.
+$\Phi(.)$ is the standard normal cumulative distribution function.
 % With the data vector $\bm{y}$ made up of $n$ independent
 % sequences of $0$'s and $1$'s given $\bm{p}$ (the entire collection of
 % $p_{ij}$'s), 
 This formulation creates the likelihood of
-$\wrap{\bm{y}|f}\ = \prod_{i=1}^N\prod_{j=1}^{n_i} p_{ij}^{y_{ij}}
+$\wrap{\bm{y} \mid f}\ = \prod_{i=1}^N\prod_{j=1}^{n_i} p_{ij}^{y_{ij}}
 (1-p_{ij})^{1-y_{ij}}$.
 % (in contrast to the Cox model, this is the
 % actual likelihood rather than the partial likelihood).
 %The product over $j$ is a result of the
-% definition of $p_{ij}$'s as conditional probabilities, and not a consequence of
-% an assumption of independence.
+% definition of $p_{ij}$'s as conditional probabilities, and not a
+% consequence of an assumption of independence.
 
 If the event indicators, $y_{ij}$, have already been computed, then
 you can specify them with the \code{y.train} argument.
@@ -1808,15 +2121,15 @@ is $\Phi^{-1}(\bar{y})$
 % zero for \code{type="lbart"}).
 For computational efficiency, probit \citep{AlbeChib93} is the
 default, but logit \citep{HolmHeld06,GramPols12} can be specified as
-an option via \code{type="lbart"}.
+an option via \code{type = "lbart"}.
 
 Based on the posterior samples, we construct quantities of interest
 with BART for survival analysis.  In discrete-time survival analysis,
 the instantaneous hazard from continuous-time survival is essentially
-replaced with the probability of an event in an interval, i.e., 
-$p(t_{(j)},\bm{x})=\Phi(\mu_0+f(t_{(j)},\bm{x}))$.  Now, the survival
-function is constructed as follows:
-$ S(t_{(j)}|\bm{x})=Pr(T>t_{(j)}|\bm{x})=\prod_{l=1}^j
+replaced with the probability of an event in an interval,
+i.e.,~$p(t_{(j)},\bm{x})=\Phi(\mu_0+f(t_{(j)},\bm{x}))$. 
+Now, the survival function is constructed as follows:
+$ S(t_{(j)} \mid \bm{x})=Pr(T>t_{(j)} \mid \bm{x})=\prod_{l=1}^j
 (1-p(t_{(l)},\bm{x}))$.
 
 Survival data pairs $(s, \delta)$ are converted to indicators by the
@@ -1836,10 +2149,12 @@ Here is a very simple example of a data set with
 three observations and no covariates re-formatted for display 
 (no covariates is an interesting special case but we
 will discuss the more common case with covariates further below).
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> times <- c(2.5, 1.5, 3.0)
-R> delta <- c(  1,   1,   0)
-R> surv.pre.bart(times=times, delta=delta)
+R> delta <- c(1, 1, 0)
+R> surv.pre.bart(times = times, delta = delta)
 \end{Sinput}
 \begin{Soutput}
 $y.train  $tx.train  $tx.test  $times    $K     
@@ -1852,14 +2167,19 @@ $y.train  $tx.train  $tx.test  $times    $K
     0     [6,] 3.0
 \end{Soutput}  
 %$
-
+\end{CodeChunk}
+%
 Here is a diagram of the input and output for the
 \code{surv.pre.bart} function.  \code{pre} is a list that is generated
 to contain the matrix \code{pre\$tx.train} and
-the vector \code{pre\$y.train}. \\
+the vector \code{pre\$y.train}.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> pre <- surv.pre.bart(times, delta, x.train, x.test=x.train)  
+R> pre <- surv.pre.bart(times, delta, x.train, x.test = x.train)  
 \end{Sinput}
+\end{CodeChunk}
+%
 \begin{align*}
 \mbox{\code{tx.train}\quad} & \mbox{\quad\code{y.train}} \\
 \wrap{\begin{array}{cc}
@@ -1880,29 +2200,30 @@ y_{N1}=0 \\
 y_{Nn_N}= \delta_N \\
 \end{array}}
 \end{align*}
+%
 For \code{pre\$tx.test}, ${n_i}$ is replaced by $K$ which is very
 helpful so that each subject contributes an equal number of settings
-for programmatic convenience and noninformative estimation, i.e., if
+for programmatic convenience and non-informative estimation, i.e.,~if
 high-risk subjects with earlier events did not appear beyond their
 event, then estimates of survival for latter times would be biased
 upward.  For other outcomes besides time-to-event, we provide two
 matrices of covariates, \code{x.train} and \code{x.test}, where
 \code{x.train} is for training and \code{x.test} is for validation.
 However, due to the variable $n_i$ for time-to-event outcomes, we
-generally provide two arguments as follows: \code{x.train,
-  x.test=x.train} where the former matrix will be expanded by
-\code{surv.pre.bart} to $\sum_{i=1}^N n_i$ rows for training
+generally provide two arguments as follows:
+\code{x.train, x.test = x.train} where the former matrix will be expanded
+by \code{surv.pre.bart} to $\sum_{i=1}^N n_i$ rows for training
 $f(t, \bm{x})$ while the latter matrix will be expanded to
 $N \times K$ rows for $f(t, \bm{x})$ estimation only.  If you still
 need to perform validation, then you can make a separate call to the
 \code{predict} function.
 
-N.B.\ the argument \code{ndpost=M} is the length of the chain to be
-returned and the argument \code{keepevery} is used for thinning, i.e.,
-return \code{M} observations where \code{keepevery} are culled in
+N.B.\ the argument \code{ndpost = M} is the length of the chain to be
+returned and the argument \code{keepevery} is used for thinning,
+i.e.,~return \code{M} observations where \code{keepevery} are culled in
 between each returned value.  For BART with time-to-event outcomes
 which is based on \code{gbart},
-the default is \code{keepevery=10} since the grid of time points
+the default is \code{keepevery = 10} since the grid of time points
 creates data set observations of order $N \times K$ which have a
 tendency towards higher auto-correlation, therefore, making thinning
 more necessary.  
@@ -1917,7 +2238,7 @@ registries often collect survival times in days while time in months
 or quarters would suffice for many typical applications.  
 You can coarsen
 automatically by supplying the optional \code{K} argument to coarsen
-the times to a grid of time quantiles: \code{1/K}, \code{2/K}, ...,
+the times to a grid of time quantiles: \code{1/K}, \code{2/K}, \dots,
 \code{K/K} (not to be confused with the \code{k} argument which is a
 prior parameter for the distribution of the leaf terminal values).
 
@@ -1926,20 +2247,28 @@ function for serial computation and \code{mc.surv.bart} for parallel
 computation. 
 
 Serial call  
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> set.seed(99)
-R> post=surv.bart(x.train, times=times, delta=delta, x.test=x.train, 
-+    ndpost=M)
+R> post <- surv.bart(x.train, times = times, delta = delta,
++    x.test = x.train, ndpost = M)
 \end{Sinput} 
+\end{CodeChunk}
+%
 Parallel call
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> post=mc.surv.bart(x.train, times=times, delta=delta, x.test=x.train, 
-+    ndpost=M, mc.cores=B, seed=99) 
+R> post <- mc.surv.bart(x.train, times = times, delta = delta,
++    x.test = x.train, ndpost = M, mc.cores = B, seed = 99)  
 \end{Sinput}
-
+\end{CodeChunk}
+%
 % \begin{comment}
 % \begin{align*}
-% \mbox{Input vector \code{times} with \code{K} distinct values and \code{x.train}:\ } &
+% \mbox{Input vector \code{times} with \code{K} distinct values 
+% and \code{x.train}:\ } &
 % \wrap{\begin{array}{c}
 % \bm{x}_{1} \\
 % \bm{x}_{2} \\
@@ -1948,58 +2277,115 @@ R> post=mc.surv.bart(x.train, times=times, delta=delta, x.test=x.train,
 % \end{array}} \mbox{\ with rows of\ } \bm{x}_i \\
 % \end{align*}
 % \end{comment}
-Input vector \code{times} with \code{K} distinct values and
-\begin{align*}
-%\mbox{Input vector \code{times}} &\\
-%\mbox{with \code{K} distinct values} &\\
-\mbox{\code{x.train}:\ } &
-\wrap{\begin{array}{c}
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description}
+\item[\code{x.train}] is a matrix or data frame of covariates for training\\
+represented notationally as
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{N} \\
-\end{array}} \mbox{\ with rows of\ } \bm{x}_i \\
-%\begin{align*}
-%\mbox{Output \code{post}, type \code{survbart},} & \\
-%\mbox{which is essentially a list } & \\
-\mbox{Output \code{post},} & \\
-\mbox{of type \code{survbart},} & \\
-\mbox{is essentially a list } & \\
-\mbox{including the matrix} & \\
-\mbox{\code{post\$surv.test}:\ } & \hat{S}_m(t_{(j)}, \bm{x}_i) \\
- &\wrap{\begin{array}{ccccccc}
-\scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_1)& \scriptstyle \dots & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
-& \scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_N)& \scriptstyle \dots & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_N) \\
+\end{array}}$ where $\bm{x}_i$ are row vectors
+\item[\code{times}] is a vector of times with \code{K} distinct values
+\item[\code{delta}] is a vector of binary event indicators
+\item[\code{x.test} (optional)] is a matrix or data frame of covariates for testing
+\end{description}
+\end{quote}
+The returned value, \code{post} as shown above, is 
+of type `\code{survbart}' that is essentially a list with named components,
+particularly, \code{post\$surv.test}.
+\begin{description}
+\item[\code{post\$surv.test}] is a matrix of survival function estimates
+$\hat{S}_m(t_{(j)}, \bm{x}_i)\\
+\wrap{\begin{array}{ccccccc}
+\scriptstyle \hat{S}_1(t_{(1)},\, \bm{x}_1)& \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(K)},\, \bm{x}_1) & \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(1)},\, \bm{x}_N)& \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(K)},\, \bm{x}_N) \\
 \vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
-\scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_1)& \scriptstyle \dots & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
-& \scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_N)& \scriptstyle \dots & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_N) \\
-\end{array}} & 
-\end{align*}
-
-Here is a diagram of the input and output for the \code{predict.survbart} function.\\
+\scriptstyle \hat{S}_M(t_{(1)},\, \bm{x}_1)& \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(K)},\, \bm{x}_1) & \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(1)},\, \bm{x}_N)& \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(K)},\, \bm{x}_N) \\
+\end{array}}$  
+\end{description}
+% Input vector \code{times} with \code{K} distinct values and
+% %
+% \begin{align*}
+% %\mbox{Input vector \code{times}} &\\
+% %\mbox{with \code{K} distinct values} &\\
+% \mbox{\code{x.train}:\ } &
+% \wrap{\begin{array}{c}
+% \bm{x}_{1} \\
+% \bm{x}_{2} \\
+% \vdots \\
+% \bm{x}_{N} \\
+% \end{array}} \mbox{\ with rows of\ } \bm{x}_i \\
+% %\begin{align*}
+% %\mbox{Output \code{post}, type \code{survbart},} & \\
+% %\mbox{which is essentially a list } & \\
+% \mbox{Output \code{post},} & \\
+% \mbox{of type `\code{survbart}',} & \\
+% \mbox{is essentially a list } & \\
+% \mbox{including the matrix} & \\
+% \mbox{\code{post\$surv.test}:\ } & \hat{S}_m(t_{(j)}, \bm{x}_i) \\
+%  &\wrap{\begin{array}{ccccccc}
+% \scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_1)& \scriptstyle \dots
+% & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
+% & \scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_N)& \scriptstyle \dots
+% & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_N) \\
+% \vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+% \scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_1)& \scriptstyle \dots
+% & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
+% & \scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_N)& \scriptstyle \dots
+% & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_N) \\
+% \end{array}} & 
+% \end{align*}
+%
+Here is a diagram of the input and output for the
+\code{predict.survbart} function.\\
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> pred <- predict(post, pre$tx.test, mc.cores=B)
+R> pred <- predict(post, pre$tx.test, mc.cores = B)
 \end{Sinput}
+\end{CodeChunk}
 %$
-\begin{align*}
-\mbox{Input: \code{x.test}\ } &
-\wrap{\begin{array}{c}
+The data inputs, as shown above, are as follows.
+\begin{quote}
+\begin{description}
+\item[\code{post}] is an object of type `\code{survbart}'
+\item[\code{x.test}] is a matrix of data frame of covariates for testing\\
+represented notationally as
+$\wrap{\begin{array}{c}
 \bm{x}_{1} \\
 \bm{x}_{2} \\
 \vdots \\
 \bm{x}_{Q} \\
-\end{array}} \mbox{\ with rows of \ } \bm{x}_i \\
-\mbox{Output:\ } & \mbox{ \code{pred} of type \code{survbart} with \code{pred\$surv.test}:\ } 
-{\hat{S}_m(t_{(j)}, \bm{x}_i)} \\
-& \wrap{\begin{array}{ccccccc}
-\scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_1)& \scriptstyle \dots & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
-& \scriptstyle \hat{S}_1(t_{(1)}, \bm{x}_Q)& \scriptstyle \dots & \scriptstyle \hat{S}_1(t_{(K)}, \bm{x}_Q) \\
+\end{array}}$ where $\bm{x}_i$ are row vectors
+\end{description}
+\end{quote}
+The returned value, \code{pred} as shown above, is an object of type
+`\code{survbart}' that is essentially a list of named components,
+particularly, \code{pred\$surv.test}.
+\begin{description}
+\item[\code{pred\$surv.test}] is a matrix of survival function estimates
+${\hat{S}_m(t_{(j)}, \bm{x}_i)} \\
+\wrap{\begin{array}{ccccccc}
+\scriptstyle \hat{S}_1(t_{(1)},\, \bm{x}_1)& \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(K)},\, \bm{x}_1) & \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(1)},\, \bm{x}_Q)& \scriptstyle \dots
+& \scriptstyle \hat{S}_1(t_{(K)},\, \bm{x}_Q) \\
 \vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
-\scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_1)& \scriptstyle \dots & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_1) & \scriptstyle \dots
-& \scriptstyle \hat{S}_M(t_{(1)}, \bm{x}_Q)& \scriptstyle \dots & \scriptstyle \hat{S}_M(t_{(K)}, \bm{x}_Q) \\
-\end{array}} 
-\end{align*}
-
+\scriptstyle \hat{S}_M(t_{(1)},\, \bm{x}_1)& \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(K)},\, \bm{x}_1) & \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(1)},\, \bm{x}_Q)& \scriptstyle \dots
+& \scriptstyle \hat{S}_M(t_{(K)},\, \bm{x}_Q) \\
+\end{array}}$ 
+\end{description}
+%
 For an overview of Friedman's partial dependence function (including
 the notation adopted in this article and its meaning), please see 
 Section~\ref{Friedman-partial} which discusses continuous outcomes.
@@ -2034,8 +2420,8 @@ $S(t_{(j)}, \bm{x}_{hS}) = {N^{-1}} \sum_{i=1}^N S(t_{(j)},
 \subsubsection{Survival analysis with BART example:  
 advanced lung cancer}
 
-Here we present an example that is available in the \pkg{BART} package:\\
-\code{demo("lung.surv.bart", package="BART")}.  The
+Here we present an example that is available in the \pkg{BART} package:
+\code{demo("lung.surv.bart", package = "BART")}.  The
 North Central Cancer Treatment Group surveyed 228 advanced lung cancer
 patients \citep{LoprLaur94}.  This data can be found in the
 \code{lung} data set.  The study focused on prognostic variables.
@@ -2045,20 +2431,23 @@ their physician.  We compare the survival for males and females with
 Friedman's partial dependence function; see Figure~\ref{lung}.  We
 also analyze this data set with logit BART and the results are
 quite similar (not shown): 
-\code{demo("lung.surv.lbart", package="BART")}.
-Furthermore, we perform convergence diagnostics on the chain:\\
-\code{demo("geweke.lung.surv.bart", package="BART")}.
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.45]{figures/lung.pdf}
-\end{center}
-\caption{\label{lung}Advanced lung cancer example: Friedman's partial
+\code{demo("lung.surv.lbart", package = "BART")}.
+Furthermore, we perform convergence diagnostics on the chain:
+\code{demo("geweke.lung.surv.bart", package = "BART")}.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.45]{lung.pdf}
+  %\includegraphics[scale=0.45]{Figures/lung.pdf}
+  \caption{Advanced lung cancer example: Friedman's partial
   dependence function with 95\% credible intervals: males (blue) vs.\
   females (red). A cohort of advanced lung cancer patients was
   recruited from the North Central Cancer Treatment Group. For
   survival time, these patients were followed for nearly 3 years or
   until lost to follow-up.}
+  \label{lung}
 \end{figure}
+%
 
 \subsection{Survival analysis and the concordance probability}
 
@@ -2070,55 +2459,71 @@ based on a different subject profile), then the concordance probability is
 defined as $\kappa_{t_1, t_2}=\P{t_1<t_2}$.  A simple analytic example
 with the Exponential distribution is as
 follows. % where $t_1$ and $t_2$ are
-%conditionally independent, i.e., $t_1|\lambda_1 \perp t_2|\lambda_2$,
+%conditionally independent, i.e., $t_1 \mid \lambda_1 \perp t_2 \mid \lambda_2$,
+%
 \begin{align*}
-t_i|\lambda_i & \ind \Exp{\lambda_i} \where i \in \{1, 2\} \\
-\P{t_1<t_2|\lambda_1, \lambda_2} & 
+t_i \mid \lambda_i & \ind \Exp{\lambda_i} \where i \in \{1, 2\} \\
+\P{t_1<t_2 \mid \lambda_1, \lambda_2} & 
 = \int_0^{\infty} \int_0^{t_2} \lambda_2 \e{-\lambda_2 t_2} 
               \lambda_1 \e{-\lambda_1 t_1} \d{t_1}  \d{t_2} 
               = \frac{\lambda_1}{\lambda_1+\lambda_2} \\
-1-\P{t_1>t_2|\lambda_1, \lambda_2} & = 1- \frac{\lambda_2}{\lambda_1+\lambda_2}
+1-\P{t_1>t_2 \mid \lambda_1, \lambda_2} & = 1- \frac{\lambda_2}{\lambda_1+\lambda_2}
   = \frac{\lambda_1}{\lambda_1+\lambda_2}\\
-& = \P{t_1<t_2|\lambda_1, \lambda_2} 
+& = \P{t_1<t_2 \mid \lambda_1, \lambda_2} 
 \end{align*}
+%
 Notice that the concordance is symmetric with respect to $t_1$ and $t_2$.
 
 We can make a similar calculation based on our BART survival analysis
 model.  Suppose that we have two event times, $s_1$ and $s_2$, which
-are conditionally independent, i.e.,
-$s_1|(f, \bm{x}_1) \perp s_2|(f, \bm{x}_2)$.  First, we calculate
-$ \P{s_1 < s_2|f, \bm{x}_1, \bm{x}_2} $ (from here on, we suppress $f$
+are conditionally independent,
+i.e.,~$s_1 \mid (f, \bm{x}_1) \perp s_2 \mid (f, \bm{x}_2)$. 
+First, we calculate
+$ \P{s_1 < s_2 \mid f, \bm{x}_1, \bm{x}_2} $ (from here on, we suppress $f$
 and $\bm{x}_i$ for notational convenience).
+%
 \begin{align*}
 \P{s_1 < s_2}  = &\P{s_1=t_{(1)}, s_2>t_{(1)}}+\\
-&\P{s_1=t_{(2)}, s_2>t_{(2)}|s_1>t_{(1)}, s_2>t_{(1)}}\P{s_1>t_{(1)}, s_2>t_{(1)}}+\.\\
-= & \sum_{j=1}^K \P{s_1=t_{(j)}, s_2>t_{(j)}|s_1>t_{(j-1)}, s_2>t_{(j-1)}}
+&\P{s_1=t_{(2)}, s_2>t_{(2)} \mid s_1>t_{(1)}, s_2>t_{(1)}}\P{s_1>t_{(1)},
+s_2>t_{(1)}}+\.\\
+= & \sum_{j=1}^K \P{s_1=t_{(j)}, s_2>t_{(j)} \mid s_1>t_{(j-1)},
+s_2>t_{(j-1)}}
     \P{s_1>t_{(j-1)}, s_2>t_{(j-1)}} \\
-= & \sum_{j=1}^K p_{1j} q_{2j} S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) 
+= & \sum_{j=1}^K p_{1j} q_{2j} S_{1}(t_{(j-1)})
+S_{2}(t_{(j-1)}) 
 \end{align*}
+%
 Now, we calculate the mirror image relationship.
+%
 \begin{align*}
-1- \P{s_1 > s_2} = &  1-\sum_{j=1}^K q_{1j} p_{2j} S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
- = &1-\sum_{j=1}^K (1-p_{1j}) (1-q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
- = & 1-\sum_{j=1}^K (1-p_{1j}-q_{2j}+p_{1j}q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) \\
+1- \P{s_1 > s_2} = &  1-\sum_{j=1}^K q_{1j} p_{2j} S_{1}(t_{(j-1)})
+S_{2}(t_{(j-1)}) \\
+ = &1-\sum_{j=1}^K (1-p_{1j}) (1-q_{2j})  S_{1}(t_{(j-1)})
+ S_{2}(t_{(j-1)}) \\
+ = & 1-\sum_{j=1}^K (1-p_{1j}-q_{2j}+p_{1j}q_{2j})  S_{1}(t_{(j-1)})
+ S_{2}(t_{(j-1)}) \\
 = & 1-\sum_{j=1}^K p_{1j}q_{2j}  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)})
 -\sum_{j=1}^K (q_{1j}-q_{2j})  S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)}) 
 \end{align*}
+%
 However, note that these probabilities are not symmetric in this form.
 Yet, we can arrive at symmetry as follows.
+%
 \begin{align*}
   \kappa_{s_1, s_2}  & =0.5 \wrap[()]{\P{s_1 < s_2}+1- \P{s_1 > s_2}} \\
-  & =  0.5\wrap{1  -\sum_{j=1}^K (q_{1j}-q_{2j}) S_{1}(t_{(j-1)}) S_{2}(t_{(j-1)})} 
+  & =  0.5\wrap{1  -\sum_{j=1}^K (q_{1j}-q_{2j}) S_{1}(t_{(j-1)})
+  S_{2}(t_{(j-1)})} 
 \end{align*}
+%
 See the concordance probability example at 
-\code{demo("concord.surv.bart", package="BART")}.
+\code{demo("concord.surv.bart", package = "BART")}.
 
 \subsection{Competing risks with BART}
 
 Competing risks survival analysis
 \citep{KalbPren80,FineGray99,KleiMoes06,NicovanH10,IshwGerd14,SparLoga19}
 deal with events which are mutually exclusive, say, death from
-cardiovascular disease vs.\ death from other causes, i.e., a patient
+cardiovascular disease vs.\ death from other causes, i.e.,~a patient
 experiencing one of the events is incapable of experiencing another.
 We take two approaches to support competing risks with BART: both
 approaches are extensions of BART survival analysis.  We flexibly
@@ -2126,7 +2531,8 @@ model the cause-specific hazards and eschew precarious restrictive
 assumptions like linearity of covariate effects, proportionality
 and/or parametric distributions of the outcomes.
 
-\subsubsection{Competing risks with crisk.bart}
+\subsubsection[Competing risks with crisk.bart]{Competing risks with
+\code{crisk.bart}}
 
 The first approach is supported by the function \code{crisk.bart} for
 serial computation and\\ \code{mc.crisk.bart} for parallel
@@ -2148,7 +2554,7 @@ computation.  % These functions along with a related approach are
 % with \citet{FineGray99} since they assume linear proportionality and
 % the Exponential distribution while we impose no such precarious
 % restrictive assumptions.
-To accomodate competing risks, we adapt our notation slightly:
+To accommodate competing risks, we adapt our notation slightly:
 $(s_i, \delta_i)$ where $\delta_i=1$ for kind 1 events, $\delta_i=2$
 for kind 2 events, or $\delta_i=0$ for censoring times.  We create a
 single grid of time points for the ordered distinct times based on
@@ -2161,53 +2567,73 @@ $0=t_{(0)}< t_{(1)}<\cdots < t_{(K)} < \infty$.  % To accommodate
 % points on the grid; and $k=1, \dots, N_i=N_i(s_i)$ indexes hospital
 % admissions.  Now, an analysis of recurrent events proceeds as follows.
 We model the probability for an event of kind 1,
-$p_1(t_{(j)}, \bm{x}_i)$, and an event of kind 2 conditioned on subject $i$ being alive at time
+$p_1(t_{(j)}, \bm{x}_i)$, and an event of kind 2 conditioned on
+subject $i$ being alive at time
 $t_{(j)}$, $p_2(t_{(j)}, \bm{x}_i)$.  % So, we can estimate the
 % survival function and the cumulative incidence functions as follows.
 % \begin{align*}
-% S(t, \bm{x}_{i}) & = 1-F(t, \bm{x}_{i}) = \prod_{j=1}^k (1-p_1(t_{(j)}, \bm{x}_i))(1-p_{2}(t_{(j)}, \bm{x}_i)) \where k=\arg \max_j \wrap{t_{(j)} \le t}  \\
-% F_1(t, \bm{x}_{i}) & = \int_0^t S(u-, \bm{x}_{i}) \lambda_1(u, \bm{x}_{i}) \mathrm{d}u 
+% S(t, \bm{x}_{i}) & = 1-F(t, \bm{x}_{i}) = \prod_{j=1}^k (1-p_1(t_{(j)}, 
+% \bm{x}_i))(1-p_{2}(t_{(j)}, \bm{x}_i)) \where k=\arg \max_j \wrap{t_{(j)} 
+% \le t}  \\
+% F_1(t, \bm{x}_{i}) & = \int_0^t S(u-, \bm{x}_{i}) \lambda_1(u, \bm{x}_{i}) 
+% \mathrm{d}u 
 % = \sum_{j=1}^k S(t_{(j-1)}, \bm{x}_{i}) p_{1}(t_{(j)}, \bm{x}_i) \\
-% F_2(t, \bm{x}_{i}) &  = \int_0^t S(u-, \bm{x}_{i}) \lambda_2(u, \bm{x}_{i}) \mathrm{d}u 
-% = \sum_{j=1}^k S(t_{(j-1)}, \bm{x}_{i}) (1-p_{1}(t_{(j)}, \bm{x}_i)) p_{2}(t_{(j)}, \bm{x}_i) \\
+% F_2(t, \bm{x}_{i}) &  = \int_0^t S(u-, \bm{x}_{i}) \lambda_2(u, \bm{x}_{i}) 
+% \mathrm{d}u 
+% = \sum_{j=1}^k S(t_{(j-1)}, \bm{x}_{i}) (1-p_{1}(t_{(j)}, \bm{x}_i)) 
+% p_{2}(t_{(j)}, \bm{x}_i) \\
 % \end{align*}
 Now, we create event indicators by melding absorbing events survival
 analysis with mutually exclusive Multinomial categories where $i$
 indexes subjects: $i=1, \dots, N$.
 % First, we develop event 1, then event 2 
-% which is necessarily conditioned on patient $i$ being alive at time $t_{(j)}$.
+% which is necessarily conditioned on patient $i$ being alive at 
+% time $t_{(j)}$.
+%
 \begin{align*}
-y_{1ij} & = \I{\delta_i=1} \I{j=n_i} \where j=1, \dots, n_i\\ %  \where y_{1i0}=0 \\
-%y_{1ij}|(y_{1i\,j-1}=0, p_{1ij}) & ~ \B{p_{1ij}} \where p_{1i0}=0 \\
-y_{1ij}|p_{1ij} & ~ \B{p_{1ij}} \\ % \where p_{1i0}=0 \\
- p_{1ij} & = \Phi(\mu_1+f_1(t_{(j)}, {\bm{x}}_{i})) \where f_1 \prior \mathrm{BART} \\
-y_{2ij} & = \I{\delta_i=2} \I{j=n_i}  \where j=1, \dots, n_i-y_{1in_i} \\ % \where y_{2i0}=0 \\
-y_{2ij}|p_{2ij} & ~ \B{p_{2ij}} \\ %\where p_{2i0}=0\\
-%y_{2ij}|(y_{1i\,j-1}=y_{1ij}=0, p_{2ij}) & ~ \B{p_{2ij}} \where p_{2i0}=0\\
- p_{2ij} & = \Phi(\mu_2+f_2(t_{(j)}, {\bm{x}}_{i})) \where f_2 \prior \mathrm{BART} 
+y_{1ij} & = \I{\delta_i=1} \I{j=n_i} \where j=1, \dots, n_i\\ 
+%  \where y_{1i0}=0 \\
+%y_{1ij} \mid (y_{1i\,j-1}=0, p_{1ij}) & ~ \B{p_{1ij}} \where p_{1i0}=0 \\
+y_{1ij} \mid p_{1ij} & \sim \B{p_{1ij}} \\ % \where p_{1i0}=0 \\
+ p_{1ij} & = \Phi(\mu_1+f_1(t_{(j)}, {\bm{x}}_{i}))
+ \where f_1 \prior \mathrm{BART} \\
+y_{2ij} & = \I{\delta_i=2} \I{j=n_i}
+\where j=1, \dots, n_i-y_{1in_i} \\ % \where y_{2i0}=0 \\
+y_{2ij} \mid p_{2ij} & \sim \B{p_{2ij}} \\ %\where p_{2i0}=0\\
+%y_{2ij} \mid (y_{1i\,j-1}=y_{1ij}=0, p_{2ij}) 
+%&~ \B{p_{2ij}} \where p_{2i0}=0\\
+ p_{2ij} & = \Phi(\mu_2+f_2(t_{(j)}, {\bm{x}}_{i}))
+ \where f_2 \prior \mathrm{BART} 
 \end{align*}
-The likelihood is: $\wrap{\bm{y}|f_1, f_2} = \prod_{i=1}^N 
+%
+The likelihood is: $\wrap{\bm{y} \mid f_1, f_2} = \prod_{i=1}^N 
 \prod_{j=1}^{n_i} p_{1ij}^{y_{1ij}} (1-p_{1ij})^{1-y_{1ij}}
 \prod_{j'=1}^{n_i-y_{1in_i}} p_{2ij'}^{y_{2ij'}} (1-p_{2ij'})^{1-y_{2ij'}}$.
 Now, we can estimate the survival function and the cumulative
 incidence functions as follows.
+%
 \begin{align*}
-S(t, \bm{x}_{i}) & = 1-F(t, \bm{x}_{i}) = \prod_{j=1}^k (1-p_{1ij})(1-p_{2ij}) \where k=\arg \max_j \wrap{t_{(j)} \le t}  \\
-F_1(t, \bm{x}_{i}) & = \int_0^t S(u-, \bm{x}_{i}) \lambda_1(u, \bm{x}_{i}) \mathrm{d}u 
+S(t, \bm{x}_{i}) & = 1-F(t, \bm{x}_{i}) = \prod_{j=1}^k (1-p_{1ij})(1-p_{2ij})
+\where k=\arg \max_j \wrap{t_{(j)} \le t}  \\
+F_1(t, \bm{x}_{i}) & = \int_0^t S(u-, \bm{x}_{i})
+\lambda_1(u, \bm{x}_{i}) \mathrm{d}u 
 = \sum_{j=1}^k S(t_{(j-1)}, \bm{x}_{i}) p_{1ij} \\
-F_2(t, \bm{x}_{i}) &  = \int_0^t S(u-, \bm{x}_{i}) \lambda_2(u, \bm{x}_{i}) \mathrm{d}u 
+F_2(t, \bm{x}_{i}) &  = \int_0^t S(u-, \bm{x}_{i})
+\lambda_2(u, \bm{x}_{i}) \mathrm{d}u 
 = \sum_{j=1}^k S(t_{(j-1)}, \bm{x}_{i}) (1-p_{1ij}) p_{2ij} 
 \end{align*}
+%
 % There are pros and cons to this approach.  We are modeling the
 % subdistribution function rather than the distribution function;
 % however, for applications like ours, inference with respect to
 % the subdistribution function is probably adequate.
-The returned object of type \code{criskbart} from \code{crisk.bart}
+The returned object of type `\code{criskbart}' from \code{crisk.bart}
 or \code{mc.crisk.bart} provides the cumulative incidence functions
 and survival corresponding to \code{x.test} as follows: $F_1$ is
 \code{cif.test}, $F_2$ is \code{cif.test2} and $S$ is \code{surv.test}.
 
-\subsubsection{Competing risks with crisk2.bart}
+\subsubsection[Competing risks with crisk2.bart]{Competing risks
+with \code{crisk2.bart}}
 
 The second approach is supported by the function \code{crisk2.bart}
 for serial computation and\\ \code{mc.crisk2.bart} for parallel
@@ -2218,21 +2644,27 @@ and, given an event has occurred, the probability of a kind 1 event,
 $\pi_{i}=\pi(t_{i}, \bm{x}_i)$.  Now, we create the corresponding
 event indicators $y_{ij}$ and $u_i$ where $i$ indexes subjects:
 $i=1, \dots, N$.
+%
 \begin{align*}
-y_{ij} & = \I{\delta_i\not=0} \I{j=n_i} \where j=1, \dots, n_i\\ %  \where y_{1i0}=0 \\
-y_{ij}|p_{ij} & ~ \B{p_{ij}} \\ % \where p_{1i0}=0 \\
- p_{ij} & = \Phi(\mu_y+f_y(t_{(j)}, {\bm{x}}_{i})) \where f_y \prior \mathrm{BART} \\
+y_{ij} & = \I{\delta_i\not=0} \I{j=n_i} \where j=1, \dots, n_i\\ 
+%  \where y_{1i0}=0 \\
+y_{ij} \mid p_{ij} & \sim \B{p_{ij}} \\ % \where p_{1i0}=0 \\
+ p_{ij} & = \Phi(\mu_y+f_y(t_{(j)}, {\bm{x}}_{i})) \where f_y \prior
+ \mathrm{BART} \\
 u_{i} & = \I{\delta_i=1} \where i \in \{i' : \delta_{i'}\not=0 \} \\
-u_{i}|\pi_{i} & ~ \B{\pi_{i}} \\ %\where p_{2i0}=0\\
-%y_{2ij}|(y_{1i\,j-1}=y_{1ij}=0, p_{2ij}) & ~ \B{p_{2ij}} \where p_{2i0}=0\\
- \pi_{i} & = \Phi(\mu_u+f_u(t_{i}, {\bm{x}}_{i})) \where f_u \prior \mathrm{BART} 
+u_{i} \mid \pi_{i} & \sim \B{\pi_{i}} \\ %\where p_{2i0}=0\\
+%y_{2ij} \mid (y_{1i\,j-1}=y_{1ij}=0, p_{2ij})
+%& ~ \B{p_{2ij}} \where p_{2i0}=0\\
+ \pi_{i} & = \Phi(\mu_u+f_u(t_{i}, {\bm{x}}_{i})) \where f_u \prior
+ \mathrm{BART} 
 \end{align*}
-The likelihood is: $\wrap{\bm{y},\bm{u}|f_y, f_u} = \prod_{i=1}^N 
+%
+The likelihood is: $\wrap{\bm{y},\bm{u} \mid f_y, f_u} = \prod_{i=1}^N 
 \prod_{j=1}^{n_i} p_{ij}^{y_{ij}} (1-p_{ij})^{1-y_{ij}}
 \prod_{i' : \delta_{i'}\not=0} \pi_{i'}^{u_{i'}} (1-\pi_{i'})^{1-u_{i'}}$.
 Now, we can estimate the survival function and the cumulative
 incidence functions similar to the first approach.
-The returned object of type \code{crisk2bart} from \code{crisk2.bart}
+The returned object of type `\code{crisk2bart}' from \code{crisk2.bart}
 or \code{mc.crisk2.bart} provides the cumulative incidence functions
 and survival corresponding to \code{x.test} as follows: $F_1$ is
 \code{cif.test}, $F_2$ is \code{cif.test2} and $S$ is \code{surv.test}.
@@ -2254,16 +2686,17 @@ policies have evolved and now depend on each individual patient's
 risk/need which are assessed and updated regularly while a patient is
 on the waiting list.  Nevertheless, there still remains an acute shortage
 of donor livers today.  The \code{transplant} data set is provided by
-the \pkg{BART} \proglang{R} package as is this example:
-\code{demo("liver.crisk.bart", package="BART")}.  We
+the \pkg{BART} \proglang{R}~package as is this example:
+\code{demo("liver.crisk.bart", package = "BART")}.  We
 compare the nonparametric Aalen-Johansen competing risks estimator
 with BART for the transplant event of type O patients which are in
 general agreement; see Figure~\ref{liver-transplant}.
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.45]{figures/liver-BART.pdf}
-\end{center}
-\caption{ \label{liver-transplant}Liver transplant competing risks for
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.45]{liver-BART.pdf}
+  %\includegraphics[scale=0.45]{Figures/liver-BART.pdf}
+  \caption{Liver transplant competing risks for
   type O patients estimated by BART and Aalen-Johansen. This data is
   from the Mayo Clinic liver transplant waiting list from 1990-1999.
   During the study period, the liver transplant organ allocation
@@ -2272,8 +2705,10 @@ general agreement; see Figure~\ref{liver-transplant}.
   can be used by patients with all blood types; whereas a
   donor liver from the other types will only be transplanted to a
   matching recipient.  Therefore, type O subjects on the waiting list
-  were at a disadvantage since the pool of competitors was larger.}
+  were at a disadvantage since the pool of competitors was larger.  }
+  \label{liver-transplant}
 \end{figure}
+%
 
 \subsection{Recurrent events analysis with BART}%\label{recur}
 
@@ -2312,8 +2747,8 @@ but they may be a censoring time for any given subject).  Now consider
 binary event indicators $y_{ij}$ for each subject $i$ at each distinct
 time $t_{(j)}$ up to %and including
 the subject's last observation time $t_{(n_i)} \le s_{i}$ with
-$n_i=\arg \max_j \wrap{ t_{(j)}\leq s_{i}}$, i.e.,
-$y_{i1}, \dots, y_{in_i} \in \{0, 1\}$.  We then denote by $p_{ij}$
+$n_i=\arg \max_j \wrap{ t_{(j)}\leq s_{i}}$,
+i.e.,~$y_{i1}, \dots, y_{in_i} \in \{0, 1\}$. We then denote by $p_{ij}$
 the probability of an event at time $t_{(j)}$ conditional on
 %$\wrap[()]{t_{(j)}, N_i(t_{(j)}-), v_i(t_{(j)}), \bm{x}_i(t_{(j)})}$.
 $\wrap[()]{t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})}$ where
@@ -2322,7 +2757,7 @@ $\tilde{\bm{x}}_i(t_{(j)})=\wrap[()]{ N_i(t_{(j-1)}), v_i(t_{(j)}),
 Let $N_i(t-) \equiv \lim\limits_{s\uparrow t} N_i(s)$ be the number of
 events for subject $i$ just prior to time $t$ and we also note that
 $N_i=N_i(s_i)$.  Let $v_i(t)=t-u_{N_i(t-)}$ be the sojourn time for
-subject $i$, i.e., time since last event, if any.  Notice that we can
+subject $i$, i.e.,~time since last event, if any.  Notice that we can
 replace $N_i(t_{(j)}-)$ with $N_i(t_{(j-1)})$ since, by construction,
 the state of information available at time $t_{(j)}-$ is the same as
 that available at $t_{(j-1)}$.
@@ -2332,13 +2767,17 @@ that available at $t_{(j-1)}$.
 Assuming a constant intensity and constant covariates,
 $\tilde{\bm{x}}_i(t_{(j)})$, in the interval $(t_{(j-1)} , t_{(j)}]$, we
 define the cumulative intensity process as:
+%
 \begin{align}\label{cum-int}
 \Lambda(t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})) &
 = \int_0^{ t_{(j)}} \mathrm{d} \Lambda(t, \tilde{\bm{x}}_i(t)) 
-% = \sum_{j'=1}^j \int_{t_{(j'-1)}}^{t_{(j')}} \Pr{\mathrm{d} N_i(t)=1\left|\right. t, \tilde{\bm{x}}_i(t)} \\
- = \sum_{j'=1}^j \Pr{N_i(t_{(j')})-N_i(t_{(j'-1)})=1\left|\right. t_{(j')}, \tilde{\bm{x}}_i(t_{(j')})} 
+% = \sum_{j'=1}^j \int_{t_{(j'-1)}}^{t_{(j')}} \Pr{\mathrm{d}
+% N_i(t)=1\left|\right. t, \tilde{\bm{x}}_i(t)} \\
+ = \sum_{j'=1}^j \Pr{N_i(t_{(j')})-N_i(t_{(j'-1)})=1 \mid t_{(j')},
+ \tilde{\bm{x}}_i(t_{(j')})} 
   =\sum_{j'=1}^j p_{ij'} 
 \end{align}
+%
 where these $p_{ij}$ are currently unspecified and we provide their
 definition later in Equation~\ref{recur}.  N.B.\ we follow the
 recurrent events literature's favored terminology by using the term
@@ -2350,7 +2789,8 @@ interchangeable.
 % associated with ``hazard'').  
 % So, in our framework, we estimate the cumulative intensity process as follows.
 % \begin{align*}
-% \widehat{\Lambda}(t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})) =\sum_{i=1}^j \hat{p}_{ij} 
+% \widehat{\Lambda}(t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})) =\sum_{i=1}^j
+% \hat{p}_{ij} 
 % \end{align*}
 
 With absorbing events such as mortality there is no concern about the
@@ -2379,29 +2819,33 @@ However, note that the definition of $j$ is currently unspecified.
 To understand the impetus of the range of $j$, let's look at an example.
 
 Suppose that we have two subjects with the following values:
+%
 \begin{align*}
-N_1=2, s_1=9, {t}_{11}=3, {u}_{11}=7, {t}_{12}=8, {u}_{12}=8 & 
-\Rightarrow y_{11}=1, y_{12}=y_{13}=0, y_{14}=1, y_{15}=0\ (2.3)\\
-N_2=1, s_2=12, {t}_{21}=4, {u}_{21}=7 & 
-\Rightarrow y_{21}=0, y_{22}=1, y_{23}=y_{24}=y_{25}=y_{26}=0 \notag
+&N_1=2, s_1=9, {t}_{11}=3, {u}_{11}=7, {t}_{12}=8, {u}_{12}=8 & 
+&\Rightarrow y_{11}=1, y_{12}=y_{13}=0, y_{14}=1, y_{15}=0\ (2.3)\\
+&N_2=1, s_2=12, {t}_{21}=4, {u}_{21}=7 & 
+&\Rightarrow y_{21}=0, y_{22}=1, y_{23}=y_{24}=y_{25}=y_{26}=0 \notag
 \end{align*}
+%
 which creates the grid of times $(3, 4, 7, 8, 9, 12)$.  For subject 1
 (2), notice that $y_{12}=y_{13}=0$ ($y_{23}=0$) as it should be since
 no event occurred at times 4 or 7 (7).  However, there were no events 
-since their first event had not ended yet, i.e., these subjects are not
+since their first event had not ended yet, i.e.,~these subjects are not
 chronologically at risk for an event and, therefore, no corresponding random 
 behavior contributed to the likelihood.  The \pkg{BART} package provides the
 \code{recur.pre.bart} function which you can use to construct these
 data sets.  Here is a short demonstration of its capabilities adapted
 from \code{demo/data.recur.pre.bart.R} (re-formatted for display purposes).
-%\newpage
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> library("BART")
-R> times <- matrix(c(3, 8, 9, 4, 12, 12), nrow=2, ncol=3, byrow=TRUE)
-R> tstop <- matrix(c(7, 8, 0, 7,  0,  0), nrow=2, ncol=3, byrow=TRUE)
-R> delta <- matrix(c(1, 1, 0, 1,  0,  0), nrow=2, ncol=3, byrow=TRUE)
-R> recur.pre.bart(times=times, delta=delta, tstop=tstop)
+R> times <- matrix(c(3, 8, 9, 4, 12, 12), nrow = 2, ncol = 3, byrow = TRUE)
+R> tstop <- matrix(c(7, 8, 0, 7,  0,  0), nrow = 2, ncol = 3, byrow = TRUE)
+R> delta <- matrix(c(1, 1, 0, 1,  0,  0), nrow = 2, ncol = 3, byrow = TRUE)
+R> recur.pre.bart(times = times, delta = delta, tstop = tstop)
 \end{Sinput}
+\clearpage
 \begin{Soutput}
 $K   $times   $y.train  $tx.train     $tx.test   
 [1]  [1]      [1]             t v N         t v N
@@ -2418,9 +2862,10 @@ $K   $times   $y.train  $tx.train     $tx.test
                                      [11,]  9 5 1
                                      [12,] 12 8 1
 \end{Soutput} 
-%$
+\end{CodeChunk}
+%
 Notice that \code{\$tx.test} is not limited to the same time points as
-\code{\$tx.train}, i.e., we often want/need to estimate $f$
+\code{\$tx.train}, i.e.,~we often want/need to estimate $f$
 at counter-factual values not observed in the data so each subject
 contributes an equal number of evaluations for estimation purposes.
  
@@ -2435,26 +2880,31 @@ We formally define the risk set as
 % = \wrap[\{\}]{j : ( j \in \{1, \dots, n_i\} ) \cap
 %   \wrap[()]{\cap_{k=1}^{N_i} \{t_{(j)} \not\in (t_{ik}, u_{ik}) \} }
 % }$.
+%
 \begin{align*} 
 R_i = \wrap[\{\}]{j : \wrap{ j \in \{1, \dots, n_i\} \mbox{\
 and\ } {\cap_{k=1}^{N_i} \{t_{(j)} \not\in (t_{ik}, u_{ik}) \} } } }
 \end{align*}
+%
 % and we denote the binary outcomes for subject $i$ by the
 % longitudinally ordered vector
 % $\bm{y}_i=\wrap{y_{ij}} \where j \in R_i(t_{(j)})$.
-i.e., the risk set contains $j$ if $t_{(j)}$ is during the observation
+i.e.,~the risk set contains $j$ if $t_{(j)}$ is during the observation
 period for subject $i$ and $t_{(j)}$ is not contained within an
 already ongoing event for this subject.
 
 Putting it all together, we arrive at the following recurrent events
 discrete-time model with $i$ indexing subjects; $i=1, \dots, N$.
+%
 \begin{align}\label{recur}
-y_{ij}|p_{ij} & ~  \B{p_{ij}} \where j \in R_i \notag \\
-p_{ij} & = \Phi(\mu_{ij}),\ \mu_{ij} =\mu_0+f(t_{(j)}, \tilde{\bm{x}}_i(t_{(j)})) \\ % & \If  j \in R_i \\ 
+y_{ij} \mid p_{ij} & \sim  \B{p_{ij}} \where j \in R_i \notag \\
+p_{ij} & = \Phi(\mu_{ij}),\ \mu_{ij} =\mu_0+f(t_{(j)},
+\tilde{\bm{x}}_i(t_{(j)})) \\ % & \If  j \in R_i \\ 
 f & \prior \mathrm{BART} \notag
 \end{align}
+%
 This produces the following likelihood:
-$\wrap{\bm{y}|f} = \prod_{i=1}^N\prod_{j \in R_i} p_{ij}^{y_{ij}}
+$\wrap{\bm{y} \mid f} = \prod_{i=1}^N\prod_{j \in R_i} p_{ij}^{y_{ij}}
 (1-p_{ij})^{1-y_{ij}}$.
 %For binary data, $\mu_0=\Phi^{-1}({p_0})$ can be used for centering
 %the latents around the probability of an event $p_0$.
@@ -2464,13 +2914,13 @@ $\bar{y}=\frac{\sum_i \sum_{j \in R_i} y_{ij}} {\sum_i
   \sum_{j=1}^{n_i} \I[\,]{j \in R_i}}$.
 
 For computational efficiency, we carry out the probit regression via
-truncated Normal latent variables %$z_{ij}$ to reduce it to a
+truncated normal latent variables %$z_{ij}$ to reduce it to a
 %continuous outcome BART model like so 
 \citep{AlbeChib93} (this default can be over-ridden for logit with
-Logistic latents \citep{HolmHeld06,GramPols12} by specifying
-\code{type="lbart"}).
+logistic latents \citep{HolmHeld06,GramPols12} by specifying
+\code{type = "lbart"}).
 % \begin{align*}
-% z_{ij}|y_{ij},f & ~ \begin{cases} 
+% z_{ij} \mid y_{ij},f & ~ \begin{cases} 
 % \N{ \mu_{ij}}{1}\I{-\infty, 0} & \If y_{ij}=0 \\
 % \N{ \mu_{ij}}{1}\I{0, \infty} & \If y_{ij}=1 \\
 % \end{cases}  \\
@@ -2484,7 +2934,8 @@ Logistic latents \citep{HolmHeld06,GramPols12} by specifying
 % similarly center the latents by assuming the times of recurrent
 % events follow the Exponential distribution and the covariates,
 % $\tilde{\bm{x}}$, have no impact, i.e.,
-% $\mu_0=\Phi^{-1}\!\wrap[()]{1-\exp\wrap[()]{\frac{\sum_i N_i}{\sum_i s_{i}}}}$.
+% $\mu_0=\Phi^{-1}\!\wrap[()]{1-\exp\wrap[()]
+% {\frac{\sum_i N_i}{\sum_i s_{i}}}}$.
 
 With the data prepared as described in the above example, the BART
 model for binary data treats the probability of an event within an
@@ -2501,13 +2952,14 @@ as presented in Equation~\ref{cum-int}.  With these estimates, one
 can accomplish inference from the posterior via means, quantiles or
 other functions of $ p(t, \tilde{\bm{x}}_i(t))$ or
 $\Lambda(t,\tilde{\bm{x}}(t))$ as needed such as the relative
-intensity, i.e.,
-$RI(t,\tilde{\bm{x}}_n(t),\tilde{\bm{x}}_d(t))=\frac{p(t,\tilde{\bm{x}}_n(t))}{p(t,\tilde{\bm{x}}_d(t))}$\label{risk}
+intensity, i.e.,~$RI(t,\tilde{\bm{x}}_n(t),\tilde{\bm{x}}_d(t))=
+\frac{p(t,\tilde{\bm{x}}_n(t))}{p(t,\tilde{\bm{x}}_d(t))}$\label{risk}
 where $\tilde{\bm{x}}_n(t) $ and $\tilde{\bm{x}}_d(t) $ are two
 settings we wish to compare like two
 treatments. %treatment~1 vs.\ treatment~2.
 % Also, the cumulative intensity could be calculated for arbitrary intervals
-% on the grid, i.e., $\int_{t_{(a)}}^{ t_{(b)}} \mathrm{d} \Lambda(t, \tilde{\bm{x}}_i(t)) = \sum_{j=a}^b p_{ij}$.
+% on the grid, i.e., $\int_{t_{(a)}}^{ t_{(b)}} \mathrm{d}
+% \Lambda(t, \tilde{\bm{x}}_i(t)) = \sum_{j=a}^b p_{ij}$.
 
 \subsubsection{Recurrent events with BART example: bladder tumors}
 
@@ -2522,9 +2974,9 @@ new tumors were removed at each visit.  For each patient, their
 recurrence time, if any, was measured from the beginning of treatment.
 There were 118 patients enrolled but only 116 were followed beyond
 time zero and contribute information.  This data set is loaded by
-\code{data(bladder)} and the data frame of interest is
+\code{data("bladder", package = "BART")} and the data frame of interest is
 \code{bladder1}.  This data set is analyzed by
-\code{demo("bladder.recur.bart", package="BART")}.  In
+\code{demo("bladder.recur.bart", package = "BART")}.  In
 Figure~\ref{RI-Th-Pl}, notice that the relative intensity calculated
 by Friedman's partial dependence function finds thiotepa inferior to
 placebo from roughly 6 to 18 months and afterward they are about
@@ -2535,53 +2987,58 @@ dependence function finds thiotepa inferior to vitamin B6 from roughly
 credible intervals are wide throughout; see Figure~\ref{RI-Th-B6}.
 And, finally, vitamin B6 is superior to placebo throughout, but the
 95\% credible intervals are wide; see Figure~\ref{RI-B6-Pl}.
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.45]{figures/RI-Th-Pl.pdf}
-\end{center}
-\caption{\label{RI-Th-Pl}Relative Intensity: Thiotepa vs.\ Placebo.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.45]{RI-Th-Pl.pdf}
+  %\includegraphics[scale=0.45]{Figures/RI-Th-Pl.pdf}
+  \caption{Relative Intensity: Thiotepa vs.\ Placebo.
   The relative intensity function is as follows:
-  $RI(t,\tilde{\bm{x}}_T(t),\tilde{\bm{x}}_P(t))=\frac{p(t,\tilde{\bm{x}}_T(t))}{p(t,\tilde{\bm{x}}_P(t))}$
+  $RI(t,\tilde{\bm{x}}_T(t),\tilde{\bm{x}}_P(t))=
+  \frac{p(t,\tilde{\bm{x}}_T(t))}{p(t,\tilde{\bm{x}}_P(t))}$
   where $T$ is for Thiotepa and $P$ is for Placebo.  The blue lines
   are the relative intensity functions themselves and the red lines
   are their 95\% credible intervals.  The relative intensity is
-  calculated by Friedman's partial dependence function, i.e., 
-  aggregated over all other covariates.}
+  calculated by Friedman's partial dependence function,
+  i.e.,~aggregated over all other covariates.}
+  \label{RI-Th-Pl}
 \end{figure}
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.45]{figures/RI-Th-B6.pdf}
-\end{center}
-\caption{\label{RI-Th-B6}  
-Relative Intensity: Thiotepa vs.\ Vitamin B6.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.45]{RI-Th-B6.pdf}
+  %\includegraphics[scale=0.45]{Figures/RI-Th-B6.pdf}
+  \caption{Relative Intensity: Thiotepa vs.\ Vitamin B6.
   The relative intensity function is as follows:
-  $RI(t,\tilde{\bm{x}}_T(t),\tilde{\bm{x}}_B(t))=\frac{p(t,\tilde{\bm{x}}_T(t))}{p(t,\tilde{\bm{x}}_{B}(t))}$
+  $RI(t,\tilde{\bm{x}}_T(t),\tilde{\bm{x}}_B(t))=
+  \frac{p(t,\tilde{\bm{x}}_T(t))}{p(t,\tilde{\bm{x}}_{B}(t))}$
   where $T$ is for Thiotepa and $B$ is for Vitamin B6.  The blue lines
   are the relative intensity functions themselves and the red lines
   are their 95\% credible intervals.  The relative intensity is
-  calculated by Friedman's partial dependence function, i.e., 
-  aggregated over all other covariates.}
+  calculated by Friedman's partial dependence function,
+  i.e.,~aggregated over all other covariates.}
+  \label{RI-Th-B6}  
 \end{figure}
-
-\begin{figure}[h]
-\begin{center}
-\includegraphics[scale=0.45]{figures/RI-B6-Pl.pdf}
-\end{center}
-\caption{\label{RI-B6-Pl}
-Relative Intensity: Vitamin B6 vs.\ Placebo.  
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.45]{RI-B6-Pl.pdf}
+  %\includegraphics[scale=0.45]{Figures/RI-B6-Pl.pdf}
+  \caption{Relative Intensity: Vitamin B6 vs.\ Placebo.  
   The relative intensity function is as follows:
-  $RI(t,\tilde{\bm{x}}_B(t),\tilde{\bm{x}}_P(t))=\frac{p(t,\tilde{\bm{x}}_B(t))}{p(t,\tilde{\bm{x}}_{P}(t))}$
+  $RI(t,\tilde{\bm{x}}_B(t),\tilde{\bm{x}}_P(t))=
+  \frac{p(t,\tilde{\bm{x}}_B(t))}{p(t,\tilde{\bm{x}}_{P}(t))}$
   where $B$ is for Vitamin B6 and $P$ is for Placebo.  The blue lines
   are the relative intensity functions themselves and the red lines
   are their 95\% credible intervals.  The relative intensity is
-  calculated by Friedman's partial dependence function, i.e., 
-  aggregated over all other covariates.}
+  calculated by Friedman's partial dependence function,
+  i.e.,~aggregated over all other covariates.}
+  \label{RI-B6-Pl}
 \end{figure}
-
+%
 \section{Discussion}
 
-The \pkg{BART} \proglang{R} package provides a user-friendly reference
+The \pkg{BART} \proglang{R}~package provides a user-friendly reference
 implementation of Bayesian Additive Regression Trees (BART).  BART is
 a Bayesian nonparametric, tree-based ensemble, machine learning
 technique with best-of-breed properties.  In the spirit of machine
@@ -2619,6 +3076,7 @@ languages.  The package supports missing data handling of the
 covariates and provides the user with access to BART implementations
 for several types of responses.  The \pkg{BART} package supports the
 following:
+%
 \begin{itemize}
 \item continuous outcomes;
 \item binary outcomes via probit or logit transformation;
@@ -2630,7 +3088,7 @@ following:
 \item recurrent events.
 \end{itemize}
 \end{itemize}
-
+%
 In this article, we have provided the user with an overview of much
 that is described in this section including (but not limited to): details of
 the BART prior and its arguments, sparse variable selection,
@@ -2644,29 +3102,39 @@ this article, and the \pkg{BART} package itself, we believe that
 interested users now have the tools to successfully employ
 BART for their rigorous data analysis needs.
 
-\clearpage
+\bibliography{ref}
+
+\newpage
 \appendix
-\section{Getting and installing the BART R package}\label{BART}
+\section[Getting and installing the BART R package]{Getting and installing
+the \pkg{BART} \proglang{R}~package}\label{BART}
 
 The \pkg{BART} package \citep{McCuSpar18} is GNU General Public
-License (GPL) software available on the Comprehensive \proglang{R} Archive
-Network (CRAN).  You can install it from CRAN as follows.
+License (GPL) software, available from the Comprehensive \proglang{R} Archive
+Network (CRAN) at \url{https://CRAN.R-project.org/package=BART}. You can install it from CRAN as follows.
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> options(repos=c(CRAN="https://cran.r-project.org"))
-R> install.packages("BART", dependencies=TRUE)
+R> options(repos = c(CRAN = "https://cran.r-project.org"))
+R> install.packages("BART", dependencies = TRUE)
 \end{Sinput}
+\end{CodeChunk}
+%
 The examples in this article are included in the package.  You can run
 the first example (described in Section~\ref{boston}) as follows.
 %    ## there are diminishing returns so often 8 cores is sufficient
+%
+\begin{CodeChunk}
 \begin{Sinput}
-R> options(figures=".")
-R> if(.Platform$OS.type=="unix") {
-R>   options(mc.cores=min(8, parallel::detectCores()))
+R> options(figures = ".")
+R> if(.Platform$OS.type == "unix") {
+R>   options(mc.cores = min(8, parallel::detectCores()))
 R> } else {
-R>   options(mc.cores=1)
+R>   options(mc.cores = 1)
 R> }
-R> demo("boston", package="BART"))
+R> demo("boston", package = "BART"))
 \end{Sinput}
+\end{CodeChunk}
 %$
 %source(system.file('demo/boston.R', package='BART'))
 As we shall see, these examples produce \proglang{R} objects
@@ -2684,10 +3152,10 @@ multi-threading when it is available (for a discussion of efficient
 computation with BART including multi-threading, see Appendix
 Section~\ref{efficient}).  Returning to the snippet above, the option
 \code{mc.cores} specifies the number of cores to employ in
-multi-threading, e.g., there are diminishing returns so often 8
+multi-threading, e.g.,~there are diminishing returns so often 8
 cores is sufficient.  And, finally, to run all of the examples in this
-article (with the options as specified above), then do the following.
-\code{demo("replication", package="BART")}
+article (with the options as specified above), then do the following
+\code{demo("replication", package = "BART")}.
 
 %  This requires delving into the details of the BART
 % prior itself and the corresponding arguments to the \code{wbart} and
@@ -2724,16 +3192,21 @@ leaves which we express as $B= L-1$.
 The ensemble of trees is encoded in an ASCII string
 which is returned in the \code{treedraws\$trees} list item.  This
 string can be easily %exported and 
-imported by \proglang{R} with the following:\\
+imported by \proglang{R} with the following:
+%
+\begin{CodeChunk}
 \begin{Sinput}
 R> write(post$treedraws$trees, "trees.txt")
 R> tc <- textConnection(post$treedraws$tree)
-R> trees <- read.table(file=tc, fill=TRUE, row.names=NULL, header=FALSE,
-+    col.names=c("node", "var", "cut", "leaf"))
+R> trees <- read.table(file = tc, fill = TRUE, row.names = NULL,
++    header = FALSE, col.names = c("node", "var", "cut", "leaf"))
 R> close(tc)
 R> head(trees)
 \end{Sinput}
+\end{CodeChunk}
+%
 \begin{minipage}{9cm}
+\begin{CodeChunk}
 \begin{Soutput}
   node var cut         leaf
 1 1000 200   1           NA
@@ -2743,7 +3216,9 @@ R> head(trees)
 5    3   0   0  0.035709372
 6    3  NA  NA           NA
 \end{Soutput}
+\end{CodeChunk}
 \end{minipage}
+%
 \begin{minipage}{4cm}
 \usetikzlibrary{shadows}
  \begin{tikzpicture}
@@ -2752,9 +3227,9 @@ R> head(trees)
    ter/.style={fill=white,rectangle,draw=black,drop shadow}]
  \node[int]  {$x_1$} [grow=up]
  child {node[ter] {$0.036$}
- edge from parent node [right,pos=0.3] {$> c_{1,67}$}}
+ edge from parent node [right,pos=0.3] {$\ge c_{1,67}$}}
  child {node[ter] {$0.005$}
- edge from parent node [left,pos=0.3] {$\le c_{1,67}$}};
+ edge from parent node [left,pos=0.3] {$< c_{1,67}$}};
  \end{tikzpicture}
 \end{minipage}
 
@@ -2767,10 +3242,11 @@ of nodes in the tree when all other fields are \code{NA}; or for a
 specific node when the other fields are present.  The nodes are
 numbered in relation to the tree's tier level, 
 $t(n)=\lfloor \log_2 n \rfloor$ or
-\code{t=floor(log2(node))}, as follows.
+\code{t = floor(log2(node))}, as follows.
+%
 \begin{table}[!h]\label{tree-schematic}
-\begin{center}
-\begin{tabular}{r|ccccccc} \hline
+\centering
+\begin{tabular}{@{}l|rrrrrrr@{}} \hline
 Tier & \\ %\hline
 $t$ & \multicolumn{3}{c}{$2^t$} & $\dots$ &
 \multicolumn{3}{c}{$2^{t+1}\!-\!1$} \\ 
@@ -2779,9 +3255,9 @@ $\vdots$ & \\
 1 &   & 2 &   &   &   & 3 &   \\
 0 &   &   &   & 1 &   &   &   \\ \hline
 \end{tabular}
-\end{center}
+\caption{Schematic diagram of a binary tree}
 \end{table}
-
+%
 The \code{var} field is the variable in the branch decision rule which
 is encoded $0, \dots, P-1$ as a \proglang{C}/\proglang{C++} array
 index (rather than an \proglang{R} index).  Similarly, the \code{cut}
@@ -2792,7 +3268,7 @@ The terminal leaf output value is contained in the field \code{leaf}.
 It is not immediately obvious which nodes are branches vs.\ leaves
 since, at first, it would appear that the \code{leaf} field is given
 for both branches and leaves.  Leaves are always associated with
-\code{var=0} and \code{cut=0}; however, note that this is also a valid
+\code{var = 0} and \code{cut = 0}; however, note that this is also a valid
 branch variable/cutpoint since these are \proglang{C}/\proglang{C++}
 indices.
 % The key insight is that the 
@@ -2800,7 +3276,7 @@ indices.
 The key to discriminating between branches and leaves is via the
 algebraic relationship between a branch, $n$, at tree tier $t(n)$
 leading to its left, $l=2n$, and right, $r=2n+1$, nodes at tier
-$t(n)+1$, i.e., for each node, besides root,
+$t(n)+1$, i.e.,~for each node, besides root,
 %$l=2^{t+1}+2k$ and $r=2^{t+1}+2k+1$, i.e., for each node, besides root,
 you can determine from which branch it arose and those nodes that are
 not a branch (since they have no leaves) are necessarily leaves.
@@ -2818,7 +3294,7 @@ represented by a set of ordered triples, $(n, j, k)$, representing
 branch decision rules: $n \in \mathcal{B}$ for node $n$ in the set of
 branches $\mathcal{B}$, $j$ for covariate $x_j$ and $k$ for the
 cutpoint $c_{jk}$.  The branch decision rules are of the form
-$x_j\le c_{jk}$ which means branch left and $x_j>c_{jk}$, branch
+$x_j<c_{jk}$ which means branch left and $x_j\ge c_{jk}$, branch
 right; or terminal leaves where it stops.  $\mathcal{M}$ represents
 leaves and is a set of ordered pairs, $(n, \mu_n)$:
 $n \in \mathcal{L}$ where $\mathcal{L}$ is the set of leaves
@@ -2832,24 +3308,30 @@ outcome value.
 %including interior decision rules as branches and terminal nodes as
 %leaves; and $M=.  
 The function, $f(\bm{x})$, is a sum of $H$ trees:
+%
 \begin{align}\label{BARTfunction}
 f(\bm{x})=\sum_{h=1}^H g(\bm{x}; \mathcal{T}_h, \mathcal{M}_h)
 \end{align} 
+%
 where $H$ is ``large'', let's say, 50, 100 or 200.
 
 For a continuous outcome, $y_i$, we have the following BART regression
 on the vector of covariates, $\bm{x}_i$:
+%
 \begin{align*}
 y_i=\mu_0+f(\bm{x}_i)+\epsilon_i \where \epsilon_i \iid \N{0}{ w_i^2
   \sd^2}
 \end{align*}
+%
 with $i$ indexing subjects $i=1, \dots, N$.  The unknown random
 function, $f$, and the error variance, $\sd^2$, follow the BART prior
 expressed notationally as
+%
 \begin{align*}
 (f,\sd^2)\prior\mathrm{BART}(H, \mu_{0}, \tau, k, \alpha, \gamma;
 \nu, \lambda, q)
 \end{align*}
+%
 where $H$ is the number of trees, $\mu_0$ is a known constant which
 centers ${y}$ and the rest of the parameters will be explained later
 in this section (for brevity, we will often use the simpler shorthand
@@ -2867,16 +3349,16 @@ of the collection of all trees, $\mathcal{T}$; collection of all leaves,
 $\mathcal{M}$; and the error variance, $\sd^2$, as the following
 product: $\wrap{\mathcal{T}, \mathcal{M}, \sd^2}=
 \wrap{\sd^2}\wrap{\mathcal{T}, \mathcal{M}}=
-\wrap{\sd^2}\wrap{\mathcal{T}}\wrap{\mathcal{M}|\mathcal{T}}$.
+\wrap{\sd^2}\wrap{\mathcal{T}}\wrap{\mathcal{M} \mid \mathcal{T}}$.
 Furthermore, the individual trees themselves are independent:
 $\wrap{\mathcal{T}, \mathcal{M}}=\prod_h
-\wrap{\mathcal{T}_h}\wrap{\mathcal{M}_h|\mathcal{T}_h}$.
+\wrap{\mathcal{T}_h}\wrap{\mathcal{M}_h \mid \mathcal{T}_h}$.
 where $\wrap{\mathcal{T}_h}$ is the prior for the $h$th tree and
-$\wrap{\mathcal{M}_h|\mathcal{T}_h}$ is the collection of leaves for
+$\wrap{\mathcal{M}_h \mid \mathcal{T}_h}$ is the collection of leaves for
 the $h$th tree.  And, finally, the collection of leaves for the
 $h$th tree are independent:
-$\wrap{\mathcal{M}_h|\mathcal{T}_h}=
-\prod_n\wrap{\mu_{hn}|\mathcal{T}_h}$
+$\wrap{\mathcal{M}_h \mid \mathcal{T}_h}=
+\prod_n\wrap{\mu_{hn} \mid \mathcal{T}_h}$
 where $n$ indexes the leaf nodes.
 
 The tree prior: $\wrap{\mathcal{T}_h}$.  There are three prior
@@ -2887,16 +3369,18 @@ grow or are pruned.
 % numbered as follows: $n=1, \dots$.  
 The first tree prior regularizes the probability of a branch at leaf
 node $n$ in tree tier $t(n)=\lfloor\log_2 n\rfloor$ as
+%
 \begin{align}\label{regularity}
 \P{B_n=1}=\alpha (t(n)+1)^{-\gamma}
 \end{align}
+%
 where $B_n=1$ represents
 a branch while $B_n=0$ is a leaf, $0<\alpha<1$ and $\gamma\ge 0$.  You
 can specify these prior parameters with arguments, but the following
 defaults are recommended: $\alpha$ is set by the parameter
-\code{base=0.95} and $\gamma$ by \code{power=2}; for a detailed
+\code{base = 0.95} and $\gamma$ by \code{power = 2}; for a detailed
 discussion of these parameter settings, see \citet{ChipGeor98}.  Note
-that this prior penalizes branch growth, i.e., in prior probability,
+that this prior penalizes branch growth, i.e.,~in prior probability,
 the default number of branches will likely be 1 or 2.  Next, there is
 a prior dictating the choice of a splitting variable $j$ conditional on a
 branch event $B_n$ which defaults to uniform probability $s_j=P^{-1}$ where
@@ -2909,11 +3393,11 @@ uniform.
 
 We can also represent the probability of variable selection via the
 sparse Dirichlet prior as
-$\wrap{s_1, \dots, s_P}|\theta \prior \Dir{\theta/P, \dots, \theta/P}$ which
-is specified by the argument \code{sparse=TRUE} while the default is
-\code{sparse=FALSE} for uniform $s_j=P^{-1}$.  The prior parameter
+$\wrap{s_1, \dots, s_P} \mid \theta \prior \Dir{\theta/P, \dots, \theta/P}$
+which is specified by the argument \code{sparse = TRUE} while the default is
+\code{sparse = FALSE} for uniform $s_j=P^{-1}$.  The prior parameter
 $\theta$ can be fixed or random: supplying a positive number will specify
-$\theta$ fixed at that value while the default \code{theta=0} is random
+$\theta$ fixed at that value while the default \code{theta = 0} is random
 and its value will be learned from the data.  The random $\theta$ prior
 is induced via $\theta/(\theta+\rho) \prior \Bet{a}{b}$ where the
 parameter $\rho$ can be specified by the argument \code{rho} (which
@@ -2921,8 +3405,8 @@ defaults to \code{NULL} representing the value $P$; provide a value to
 over-ride), the parameter $b$ defaults to 1 (which can be over-ridden
 by the argument \code{b}) and the parameter $a$ defaults to 0.5 (which
 can be over-ridden by the argument \code{a}).  The distribution of
-\code{theta} controls the sparsity of the model: \code{a=0.5} induces
-a sparse posture while \code{a=1} is not sparse and similar to the
+\code{theta} controls the sparsity of the model: \code{a = 0.5} induces
+a sparse posture while \code{a = 1} is not sparse and similar to the
 uniform prior with probability $s_j=P^{-1}$.  
 If additional sparsity is desired,
 then you can set the argument \code{rho} to a value smaller than $P$.
@@ -2932,30 +3416,30 @@ the sparse prior works as desired. The key to understanding the
 inducement of sparsity is the distribution of the arguments to
 the Dirichlet prior: $\theta/P$.  We are unaware of this result 
 appearing elsewhere in the literature.  But, it can be
-shown that $\theta/P ~ F(a, b, \rho/P)$ where $F(.)$ is the Beta Prime
+shown that $\theta/P ~ F(a, b, \rho/P)$ where $F(.)$ is the beta prime
 distribution scaled by $\rho/P$ \citep{JohnKotz95}.  The non-sparse
 setting is $(a, b, \rho/P)=(1, 1, 1)$.  As you can see in the
 Figure~\ref{sparse}, sparsity is increased by reducing $\rho$, reducing
 $a$ or reducing both.
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.48]{figures/sparse-beta-prime.pdf}
-\end{center}
-\caption{\label{sparse}
-The distribution of $\theta/P$ and the sparse Dirichlet prior.
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.48]{sparse-beta-prime.pdf}
+  %\includegraphics[scale=0.48]{Figures/sparse-beta-prime.pdf}
+  \caption{The distribution of $\theta/P$ and the sparse Dirichlet prior.
 The key to understanding the inducement of sparsity is the 
 distribution of the arguments to the Dirichlet prior: 
-$\theta/P ~ F(a, b, \rho/P)$ where $F(.)$ is the Beta Prime
+$\theta/P ~ F(a, b, \rho/P)$ where $F(.)$ is the beta prime
 distribution scaled by $\rho/P$.  Here we plot the natural
-logarithm of the scaled Beta Prime density, $f(.)$, at a
+logarithm of the scaled beta prime density, $f(.)$, at a
 non-sparse setting and three sparse settings.  The non-sparse
 setting is $(a, b, \rho/P)=(1, 1, 1)$ (solid black line).  As 
 you can see in the figure, sparsity is increased by reducing $\rho$
 (long dashed red line), reducing $a$ (short dashed blue line) or 
-reducing both (mixed dashed gray line).
-}
+reducing both (mixed dashed gray line).}
+\label{sparse}
 \end{figure}
-
+%
 Unlike matrices, data frames can contain categorical factors.
 Therefore, factors can be supplied when \code{x.train} is a data
 frame. Factors with multiple levels are transformed into dummy
@@ -2980,30 +3464,32 @@ single dummy variable.
 % parameter $\omega$ is fixed and the default specification is set by
 % the argument \code{omega=1}.
 
-The leaf prior: $\wrap{\mu_{hn}|\mathcal{T}_h}$.  Given a tree, $\mathcal{T}_h$, there is
-a prior on its leaf values, $\mu_{hn}|\mathcal{T}_h$ and we denote the
+The leaf prior: $\wrap{\mu_{hn} \mid \mathcal{T}_h}$.  Given a tree,
+$\mathcal{T}_h$, there is
+a prior on its leaf values, $\mu_{hn} \mid \mathcal{T}_h$ and we denote the
 collection of all leaves in $\mathcal{T}_h$ by
 $\mathcal{M}_h=\{(n, \mu_{hn}): n \in \mathcal{L}_h \}$.
 %\wrap{\mu_{h1}, \dots, \mu_{hL_h}}$.  
 Suppose that $y_i \in [y_{\min}, y_{\max}]$ for all $i$ and denote 
 $\wrap{\mu_{1(i)}, \dots, \mu_{H(i)}}$ as the leaf output values from each 
 tree corresponding to the vector of covariates, $\bm{x}_i$.
-If $\mu_{h(i)}|\mathcal{T}_h \iid \N{0}{\sd_{\mu}^2}$, then the model 
+If $\mu_{h(i)} \mid \mathcal{T}_h \iid \N{0}{\sd_{\mu}^2}$, then the model 
 estimate for subject~$i$ is 
-$\mu_i=\E{y_i|\bm{x}_i}=\mu_0+\sum_h\mu_{h(i)}$ where
+$\mu_i=\E{y_i \mid \bm{x}_i}=\mu_0+\sum_h\mu_{h(i)}$ where
 $\mu_i ~ \N{\mu_0}{H \sd_{\mu}^2}$.  We
-%$\mu_{h(i)}|T_h \iid \N{\mu_{\mu}}{\sd_{\mu}^2}$, then
-%$\E{y_i|\bm{x}_i}=\mu_i ~ \N{\mu_0+H\mu_{\mu}}{H \sd_{\mu}^2}$.  We
+%$\mu_{h(i)} \mid T_h \iid \N{\mu_{\mu}}{\sd_{\mu}^2}$, then
+%$\E{y_i \mid \bm{x}_i}=\mu_i ~ \N{\mu_0+H\mu_{\mu}}{H \sd_{\mu}^2}$.  We
 choose a value for $\sd_{\mu}$ which is the solution to the equations
-%the system of equations created by the following $1-\alpha/2$ symmetric intervals: 
+%the system of equations created by the following $1-\alpha/2$ 
+%symmetric intervals: 
 $y_{\min}=\mu_0-k\sqrt{H}\sd_{\mu}$
-%$y_{\min}=\mu_0-|z_{\alpha/2}|\sqrt{H}\sd_{\mu}$
-and $y_{\max}=\mu_0+k\sqrt{H}\sd_{\mu}$, i.e.,
+%$y_{\min}=\mu_0- \mid z_{\alpha/2}|\sqrt{H}\sd_{\mu}$
+and $y_{\max}=\mu_0+k\sqrt{H}\sd_{\mu}$, 
 %and $y_{\max}=\mu_0+|z_{\alpha/2}|\sqrt{H}\sd_{\mu}$, i.e.,
 %$y_{\min}=\mu_0+H\mu_{\mu}-|z_{\alpha/2}|\sqrt{H}\sd_{\mu}$
 %and $y_{\max}=\mu_0+H\mu_{\mu}+|z_{\alpha/2}|\sqrt{H}\sd_{\mu}$, i.e.,
 %$\mu_{\mu}=\frac{y_{\max}-\mu_0+y_{\min}-\mu_0}{2H}$ and
-$\sd_{\mu}=\frac{y_{\max}-y_{\min}}{2 k \sqrt{H}}$.
+i.e.,~$\sd_{\mu}=\frac{y_{\max}-y_{\min}}{2 k \sqrt{H}}$.
 %$\sd_{\mu}=\frac{y_{\max}-y_{\min}}{2 |z_{\alpha/2}| \sqrt{H}}$.
 %Since $y$ is centered around $\mu_0$, the solution for $\mu_{\mu}$
 %will generally be near zero so we set it to zero.  
@@ -3013,13 +3499,16 @@ $\mu_{hn} \prior \N{0}{\wrap{\frac{\tau}{2k\sqrt{H}}}^2} \where
 by the data, $y$, but only weakly via the extrema,
 $y_{\min}\mbox{\ and\ }y_{\max}$.  The parameter $k$ calibrates this
 prior as follows.
+%
 \begin{align*}
-\mu_i ~\N{\mu_0}{\wrap{\frac{\tau}{2 k}}^2}& \\
+\mu_i  \sim \N{\mu_0}{\wrap{\frac{\tau}{2 k}}^2}& \\
 \P{y_{\min} \le \mu_i \le y_{\max}} &  = \Phi(k) - \Phi(-k)\\
-\mbox{Since\ }\P{\mu_i \le y_{\max}} &= \P{z \le 2k \frac{y_{\max}-\mu_0}{\tau}} \approx
+\mbox{Since\ }\P{\mu_i \le y_{\max}} &= \P{z \le 2k
+\frac{y_{\max}-\mu_0}{\tau}} \approx
  \P{z \le k} = \Phi(k) \\
 \mbox{Similarly\ }\P{\mu_i \le y_{\min}} &= \Phi(-k)
 \end{align*}
+%
 The default value, $k=2$, corresponds to
 $\mu_i$ falling within the extrema with approximately 0.95
 probability.  Alternative choices of
@@ -3029,8 +3518,8 @@ $k$ is a potential candidate parameter for choice via
 cross-validation.
 
 The error variance prior: $\wrap{\sd^2}$. The prior for $\sd^2$ is the
-conjugate scaled inverse Chi-square distribution, i.e.,
-$\nu \lambda \IC{\nu}$.  We recommend that the degrees of freedom,
+conjugate scaled inverse Chi-square distribution,
+i.e.,~$\nu \lambda \IC{\nu}$.  We recommend that the degrees of freedom,
 $\nu$, be from 3 to 10 and the default is 3 which can be over-ridden
 by the argument \code{sigdf}.  The $\lambda$ parameter can be specified by
 the \code{lambda} argument which defaults to \code{NA}.  If
@@ -3039,7 +3528,7 @@ $\lambda$ based on an estimate, $\widehat\sd$, (which can be specified by
 the argument \code{sigest} and defaults to \code{NA}).  If
 \code{sigest} is unspecified, the default value of \code{sigest} is
 determined via linear regression or the sample standard deviation: if
-$P<N$, then $y_i ~\N{\bm{x}_i'\widehat{\bm{\beta}}}{\widehat{\sd}^2}$;
+$P<N$, then $y_i \sim \N{\bm{x}_i'\widehat{\bm{\beta}}}{\widehat{\sd}^2}$;
 otherwise, $\widehat{\sd}=s_y$.  Now we solve for $\lambda$ such that
 $\P{\sd^2\le \widehat{\sd}^2}=q$.  This quantity, $q$, can be specified by
 the argument \code{sigquant} and the default is 0.9 whereas we also
@@ -3055,7 +3544,7 @@ The number of cutpoints is provided by the argument \code{numcut} and
 the default is 100.  The default number of cutpoints is achieved for
 continuous covariates.  For continuous covariates, the cutpoints are
 uniformly distributed by default, or generated via uniform quantiles
-if the argument \code{usequants=TRUE} is provided.  By default,
+if the argument \code{usequants = TRUE} is provided.  By default,
 discrete covariates which have fewer than 100 values will necessarily
 have fewer cutpoints.  However, if you want a single discrete
 covariate to be represented by a group of binary dummy variables, one
@@ -3076,12 +3565,12 @@ when the sparsity parameter is random, samples of $\theta$.
 The leaf and variance parameters are sampled from the posterior using
 Gibbs sampling \citep{GemaGema84,GelfSmit90}.  Since the priors on these
 parameters are conjugate, the Gibbs conditionals are specified
-analytically. For the leaves, each $\mu_{hn}$ is drawn from a Normal
+analytically. For the leaves, each $\mu_{hn}$ is drawn from a normal
 conditional density. The error variance, $\sd^2$, is drawn from a
 scaled inverse Chi-square conditional.
 
 Drawing a tree from the posterior requires a Metropolis-within-Gibbs
-sampling scheme \citep{Muel91,Muel93}, i.e., a Metropolis-Hastings
+sampling scheme \citep{Muel91,RobeCase13}, i.e.,~a Metropolis-Hastings
 (MH) step \citep{MetrRose53,Hast70} within Gibbs sampling.  For
 single-tree models, four different proposal mechanisms are defined
 \citep{ChipGeor98} (N.B.\ other MCMC tree sampling strategies have been
@@ -3093,7 +3582,7 @@ BIRTH/DEATH proposals are essential (the two other proposals
 % necessary to explore the ensemble sample space. 
  For programming simplicity, the \pkg{BART} package only implements
  the BIRTH and DEATH proposals each with equal probability.  BIRTH
- selects a leaf and turns it into a branch, i.e., selects a new
+ selects a leaf and turns it into a branch, i.e.,~selects a new
  variable and cutpoint with two leaves ``born'' as its
  descendants. DEATH selects a branch leading to two terminal leaves
  and ``kills'' the branch by replacing it with a single
@@ -3116,19 +3605,22 @@ $\mathcal{T}^*$ are identical $\mathcal{T}^m$ except that one terminal
 leaf of $\mathcal{T}^m$ is replaced by a branch of $\mathcal{T}^*$
 with two terminal leaves.  The proposed tree is accepted with the
 following probability:
+%
 \begin{align*}
 \pi_{\mathrm{BIRTH}}=\min\wrap[()]{1, 
 \frac{\P{\mathcal{T}^*\,}}{\P{\mathcal{T}^m}}
-\frac{\P{\mathcal{T}^m|\mathcal{T}^*\,}}
-{\P{\mathcal{T}^*\,|\mathcal{T}^m}}}
-\end{align*} where $\P{\mathcal{T}^m}$ and $\P{\mathcal{T}^*}$
+\frac{\P{\mathcal{T}^m \mid \mathcal{T}^*\,}}
+{\P{\mathcal{T}^*\, \mid \mathcal{T}^m}}}
+\end{align*}
+%
+where $\P{\mathcal{T}^m}$ and $\P{\mathcal{T}^*}$
 are the posterior probabilities of ${T}^m$ and ${T}^*$
 respectively. These are the targets of this sampling,
 each consisting of a likelihood contribution and prior
-contribution. Additionally, $\P{\mathcal{T}^m|\mathcal{T}^*}$
+contribution. Additionally, $\P{\mathcal{T}^m \mid \mathcal{T}^*}$
 is the probability of proposing $\mathcal{T}^m$ given current
 state $\mathcal{T}^*$ (a DEATH) and
-$\P{\mathcal{T}^*\,|\mathcal{T}^m}$
+$\P{\mathcal{T}^*\, \mid \mathcal{T}^m}$
 is the probability of proposing $\mathcal{T}^*$ given current
 state $\mathcal{T}^m$ (a BIRTH).
 
@@ -3136,48 +3628,52 @@ First, we describe the likelihood contribution to the posterior.  Let
 $\bm{y}_n$ denote the partition of $\bm{y}$ corresponding to the leaf
 node $n$ given the tree $\mathcal{T}$.  Because the leaf values are a
 priori conditionally independent, we have
-$\wrap{\bm{y}|\mathcal{T}}=\prod_n\wrap{\bm{y}_n|\mathcal{T}}$.  So,
-for the ratio $\frac{\P{\mathcal{T}^*\,}}{\P{\mathcal{T}^m}}$ after
+$\wrap{\bm{y} \mid \mathcal{T}}=\prod_n\wrap{\bm{y}_n \mid \mathcal{T}}$.
+So, for the ratio $\frac{\P{\mathcal{T}^*\,}}{\P{\mathcal{T}^m}}$ after
 cancellation of terms in the numerator and denominator, we have
 the likelihood contribution:
+%
 \begin{align*}
-\frac{\P{\bm{y}_{\mathrm{L}},\bm{y}_{\mathrm{R}}|\mathcal{T}^*}}
-{\P{\bm{y}_{\mathrm{LR}}|\mathcal{T}^m}}
-&=\frac{\P{\bm{y}_{\mathrm{L}}|\mathcal{T}^*}
-\P{\bm{y}_{\mathrm{R}}|\mathcal{T}^*}}
-{\P{\bm{y}_{\mathrm{LR}}|\mathcal{T}^m}}
+\frac{\P{\bm{y}_{\mathrm{L}},\bm{y}_{\mathrm{R}} \mid \mathcal{T}^*}}
+{\P{\bm{y}_{\mathrm{LR}} \mid \mathcal{T}^m}}
+&=\frac{\P{\bm{y}_{\mathrm{L}} \mid \mathcal{T}^*}
+\P{\bm{y}_{\mathrm{R}} \mid \mathcal{T}^*}}
+{\P{\bm{y}_{\mathrm{LR}} \mid \mathcal{T}^m}}
 \end{align*}
+%
 where $\bm{y}_{\mathrm{L}}$ is the partition corresponding to the
 newborn left leaf node; $\bm{y}_{\mathrm{R}}$, the partition for the
 newborn right leaf node; and
 $\bm{y}_{\mathrm{LR}}=\wrap{\bm{y}_{\mathrm{L}} \atop \bm{y}_{\mathrm{R}}}$.
-N.B.\ the terms in the ratio are the predictive densities of a Normal
-mean with a known variance and a Normal prior for the mean.
+N.B.\ the terms in the ratio are the predictive densities of a normal
+mean with a known variance and a normal prior for the mean.
 
 Similarly, the terms that the prior contributes to the posterior ratio
 often cancel since there is only one ``place'' where the trees differ
 and the prior draws components independently at different ``places''
 of the tree.  Therefore, the prior contribution to
 $\frac{\P{\mathcal{T}^*\,}}{\P{\mathcal{T}^m}}$ is 
+%
 \begin{align*}
 \frac{\P{B_n=1}\P{B_l=0} \P{B_r=0} s_j} {\P{B_n=0}} & =
 \frac{\alpha(t(n)+1)^{-\gamma}\wrap{1-\alpha(t(n)+2)^{-\gamma}}^2 s_j}
 {1-\alpha(t(n)+1)^{-\gamma}}
 \end{align*}
+%
 where $\P{B_n}$ is the branch regularity prior (see
 Equation~\ref{regularity}), $s_j$ is the splitting variable selection
 probability, $n$ is the chosen leaf node in tree $\mathcal{T}^m$,
 $l=2n$ is the newborn left leaf node in tree $\mathcal{T}^*$ and
 $r=2n+1$ is the newborn right leaf node in tree $\mathcal{T}^*$.
 
-Finally, the ratio $ \frac{\P{\mathcal{T}^m|\mathcal{T}^*\,}}
-{\P{\mathcal{T}^*\,|\mathcal{T}^m}}$ is 
+Finally, the ratio $ \frac{\P{\mathcal{T}^m \mid \mathcal{T}^*\,}}
+{\P{\mathcal{T}^*\, \mid \mathcal{T}^m}}$ is 
 \begin{align*}
-\frac{\P{\mathrm{DEATH}|\mathcal{T}^*}
-\P{n|\mathcal{T}^*}}
-{\P{\mathrm{BIRTH}|\mathcal{T}^m}\P{n|\mathcal{T}^m} s_j}
+\frac{\P{\mathrm{DEATH} \mid \mathcal{T}^*}
+\P{n \mid \mathcal{T}^*}}
+{\P{\mathrm{BIRTH} \mid \mathcal{T}^m}\P{n \mid \mathcal{T}^m} s_j}
 \end{align*}
-where $\P{n|\mathcal{T}} $ is the probability of choosing node
+where $\P{n \mid \mathcal{T}} $ is the probability of choosing node
 $n$ given tree $\mathcal{T}$.
 
 N.B.\ $s_j$ appears in both the numerator and denominator
@@ -3200,8 +3696,8 @@ variable splitting probabilities, $\bm{s}$, then its posterior samples
 are drawn via Gibbs sampling with conjugate Dirichlet draws.  The
 Dirichlet parameter is updated by adding the total variable
 branch count over the ensemble, $m_j$, to the prior setting,
-$\frac{\theta}{P}$, i.e.,
-$\wrap{\frac{\theta}{P}+m_1, \dots, \frac{\theta}{P}+m_P}$.
+$\frac{\theta}{P}$,
+i.e.,~$\wrap{\frac{\theta}{P}+m_1, \dots, \frac{\theta}{P}+m_P}$.
 % This is equivalent to any similar Multinomial-Dirichlet system where
 % the components with the most observed counts get a larger share of
 % probability from the Dirichlet.
@@ -3221,12 +3717,14 @@ method such as BART.  So what is needed?  Restricting ourselves to
 widely available off-the-shelf hardware and open-source software,
 we believe there are four key technologies necessary for a successful
 BART implementation.
+%
 \begin{itemize}
 \item an object-oriented language to facilitate working with trees and matrices
 \item a parallel (or distributed) CPU computing framework for faster processing
 \item a high-quality parallel random number generator
 \item an interpreted shell for high-level data processing and analysis
 \end{itemize}
+%
 In our implementation of BART, we pair the objected-oriented languages
 of \proglang{R} and \proglang{C++} to satisfy these requirements.  In
 this Section, we give a brief introduction to the concepts and
@@ -3237,7 +3735,7 @@ package.
 
 Writing multi-threaded programs is a fairly routine practice today
 with a high-level language like \proglang{R} and corresponding
-user-friendly interfaces such as the \pkg{parallel} \proglang{R} package
+user-friendly interfaces such as the \pkg{parallel} \proglang{R}~package
 \citep{RCor18}.  Modern off-the-shelf laptops typically have 4 or
 8 CPU cores placing reasonably priced multi-threaded hardware at your
 fingertips.  Although, BART is often computationally undemanding, we
@@ -3301,14 +3799,14 @@ various programming techniques can be used to create multi-threaded
 software.  Basic multi-threading can be provided by the \code{fork}
 system call which is often termed forking.  More advanced
 multi-threading is provided by software frameworks such as
-\pkg{OpenMP} and the Message Passing Interface (MPI).  Please note
-that MPI can be employed for both simple multi-threading and for
-distributed computing, e.g., MPI software initially written for a
-single system could be extended to operate on multiple systems as
-computational needs expand.  In the following, BART computations with
-multi-threading are explored where the term multi-threading is used
-for a single system and the term distributed computing is used for
-multiple systems.
+\pkg{OpenMP} \citep{DaguMeno98} and the Message Passing Interface
+(MPI).  Please note that MPI can be employed for both simple
+multi-threading and for distributed computing, e.g.,~MPI software
+initially written for a single system could be extended to operate on
+multiple systems as computational needs expand.  In the following,
+BART computations with multi-threading are explored where the term
+multi-threading is used for a single system and the term distributed
+computing is used for multiple systems.
 % end
 
 In the late 1990s, MPI
@@ -3323,9 +3821,9 @@ is extended by other CRAN packages such as \pkg{snow}
 software was created with a \proglang{C++} object schema
 that is simple to program and maintain for distributed computing: we
 call this the MPI BART code-base \citep{PratChip14}.  The \pkg{BART}
-package source code is a descendent of MPI BART and its
+package source code is a descendant of MPI BART and its
 programmer-friendly objects, although, the multi-threading MPI support
-is now provided by \proglang{R} packages, e.g., \pkg{parallel},
+is now provided by \proglang{R}~packages, e.g., \pkg{parallel},
 \pkg{snow} and \pkg{Rmpi}.
 
 The \pkg{BART} package supports multi-threading in two ways: 1)~via
@@ -3392,7 +3890,7 @@ Kit (JDK).  Therefore, we highly recommend \pkg{bartMachine} for
 \proglang{Java} users. 
 
 The third entrant is \pkg{dbarts} which is written in \proglang{C++}
-and was first released in 2014 \citep{DoriChip16}.  It is a clone of
+and was first released in 2014 \citep{ChipGeor10}.  It is a clone of
 the \pkg{BayesTree} interface, but it does not share the source code;
 \pkg{dbarts} source has been re-written from scratch for efficiency
 and maintainability.  \pkg{dbarts} is a drop-in replacement for
@@ -3404,7 +3902,7 @@ The \pkg{BART} package which is written in \proglang{C++} was first
 released in 2017 \citep{McCuSpar18}.  It provides advanced features
 like multi-threading, variable selection \citep{Line16}, a
 \code{predict} function and convergence diagnostics.  The source code
-is a descendent of MPI BART.  Although, \proglang{R} is mainly written
+is a descendant of MPI BART.  Although, \proglang{R} is mainly written
 in \proglang{C} and \proglang{Fortran} (at the time of this writing,
 39.2\% and 26.8\% lines of source code respectively), \proglang{C++}
 is a natural choice for creating \proglang{R} functions since they are
@@ -3420,68 +3918,98 @@ by either the standalone Rmath library \citep{RCor17} or the
 it is the only BART package to support categorical; and time-to-event
 outcomes \citep{SparLoga16,SparRein18,SparLoga19}.  For one or more
 missing covariates, record-level hot-decking imputation
-\citep{deWaPann11} is employed that is biased towards the null, i.e.,
-non-missing values from another record are randomly selected regardless
+\citep{deWaPann11} is employed that is biased towards the null,
+i.e.,~non-missing values from another record are randomly selected regardless
 of the outcome.  This simple missing data imputation method is
 sufficient for data sets with relatively few missing values; for more
 advanced needs, we recommend the \pkg{sbart} package which utilizes
 the Sequential BART algorithm \citep{DaniSing17,XuDani16} (N.B.\
-\pkg{sbart} is also a descendent of MPI BART).
-
+\pkg{sbart} is also a descendant of MPI BART).
+%
 \begin{sidewaystable}
-\begin{center}%\label{BARTcompare}
-\begin{tabular}{l|llll}
-Category                 & \pkg{BayesTree}      & \pkg{bartMachine}  & \pkg{dbarts}     & \pkg{BART}           \\ \hline
-First release            & 2006                 & 2013               & 2014             & 2017                 \\
-Authors                  & Chipman              & Kapelner           & Dorie,           & McCulloch, Sparapani \\
-                         & \& McCulloch         & \& Bleich          & Chipman          & Gramacy, Spanbauer   \\
-                         &                      &                    & \& McCulloch     & \& Pratola           \\
-Source code              & \proglang{C++}       & \proglang{Java}    & \proglang{C++}   & \proglang{C++}       \\
+\centering%\label{BARTcompare}
+\begin{tabular}{@{}l|rrrr@{}}
+Category
+         & \pkg{BayesTree}  & \pkg{bartMachine} & \pkg{dbarts} & \pkg{BART}
+\\ \hline
+First release
+         & 2006           & 2013        & 2014          & 2017                 \\
+Authors  & Chipman        & Kapelner    & Dorie,        & McCulloch, Sparapani \\
+         & \& McCulloch   & \& Bleich   & Chipman       & Gramacy, Spanbauer   \\
+         &                &             & \& McCulloch  & \& Pratola           \\
+Source code 
+         & \proglang{C++} & \proglang{Java} & \proglang{C++} & \proglang{C++} \\
 % R package dependencies   & \pkg{nnet}        & \pkg{rJava},
 %                                                   \pkg{car},      &
-%                                                                                         & \pkg{Rcpp}, \pkg{nlme},
-%                                                                                           \pkg{nnet},       \\
-%                          &                      & \pkg{randomForest},&               & \pkg{parallel}, 
-%                                                                                           \pkg{survival},   \\
-%                          &                      & \pkg{missForest}&                  & \pkg{tools}       \\
-R package dependencies   & None                 & \pkg{rJava}, \pkg{car},& None         & \pkg{Rcpp}           \\
-excluding Recommended    &                      & \pkg{randomForest},&                  &                      \\
-                         &                      & \pkg{missForest}   &                  &                      \\
-Tree transition proposals& 4                    & 3                  & 4                & 2                    \\
-Multi-threaded           & No                   & Yes                & No               & Yes                  \\
-\code{predict} function  & No                   & Yes                & No               & Yes                  \\
-Variable selection       & No                   & Yes                & No               & Yes                  \\
-Continuous outcomes      & Yes                  & Yes                & Yes              & Yes                  \\
+%                                                                    
+%                      & \pkg{Rcpp}, \pkg{nlme},
+%                                                 
+%                                          \pkg{nnet},       \\
+%                          &                      & \pkg{randomForest},
+% &               & \pkg{parallel}, 
+%                                                 
+%                                          \pkg{survival},   \\
+%                          &                      & 
+% \pkg{missForest}&                  & \pkg{tools}       \\
+\proglang{R}~package dependencies  
+        & None           & \pkg{rJava}, \pkg{car}, & None & \pkg{Rcpp}  \\
+excluding ``Recommended'' 
+        &                & \pkg{randomForest}, &        &               \\
+        &                & \pkg{missForest}    &        &               \\
+Tree transition proposals
+        & 4             & 3             & 4            & 2              \\
+Multi-threaded 
+        & No            & Yes           & No           & Yes            \\
+\code{predict} function 
+        & No           & Yes            & No           & Yes            \\
+Variable selection      
+        & No           & Yes            & No           & Yes            \\
+Continuous outcomes
+        & Yes          & Yes            & Yes          & Yes            \\
 Binary outcomes probit      
-                         & Yes                  & Yes                & Yes              & Yes                  \\
+       & Yes          & Yes             & Yes          & Yes            \\
 Binary outcomes logit    
-                         & No                   & No                 & No               & Yes                  \\
-Categorical outcomes     & No                   & No                 & No               & Yes                  \\
-Time-to-event outcomes   & No                   & No                 & No               & Yes                  \\
-Convergence diagnostics  & No                   & Yes                & No               & Yes                  \\
-Thinning                 & Yes                  & No                 & Yes              & Yes                  \\
-Missing data handling    & No                   & Yes                & No               & Yes                  \\
-Cross-validation         & No                   & Yes                & Yes              & No                   \\
-Partial dependence plots & Yes                  & Yes                & Yes              & No                   \\ \hline
-% Citations                & \multicolumn{4}{l}{\cite{ChipMcCu16}}                                               \\ 
-%                          &                      & \multicolumn{3}{l}{\cite{KapeBlei16}}                        \\ 
-%                          &                      &                    & \multicolumn{2}{l}{\cite{DoriChip16}}   \\ 
-%                          &                      &                    &                  & \cite{McCuSpar18}    \\ \hline
-\end{tabular}\\
-\end{center}
-\begin{quote}
-\cite{ChipMcCu16}\\
-\cite{KapeBlei16}\\
-\cite{DoriChip16}\\
-\cite{McCuSpar18}
-\end{quote}
+       & No           & No              & No           & Yes            \\
+Categorical outcomes
+       & No           & No              & No           & Yes            \\
+Time-to-event outcomes
+       & No           & No              & No           & Yes            \\
+Convergence diagnostics 
+       & No           & Yes             & No           & Yes            \\
+Thinning  
+       & Yes          & No              & Yes          & Yes            \\
+Missing data handling 
+       & No           & Yes             & No           & Yes            \\
+Cross-validation
+      & No            & Yes             & Yes          & No             \\
+Partial dependence plots
+      & Yes          & Yes              & Yes          & No             \\ \hline
+% Citations                & \multicolumn{4}{l}{\cite{ChipMcCu16}}
+%                                        \\
+%                          &
+% & \multicolumn{3}{l}{\cite{KapeBlei16}}                        \\
+%                          &                      &
+% & \multicolumn{2}{l}{\cite{DoriChip16}}   \\
+%                          &                      &
+% &                  & \cite{McCuSpar18}    \\ \hline
+\end{tabular} %\\
+% \begin{quote}
+% \cite{ChipMcCu16}\\
+% \cite{KapeBlei16}\\
+% \cite{ChipGeor10}\\
+% \cite{McCuSpar18}
+% \end{quote}
+\caption{A comparison of BART packages available on CRAN
+\citep{ChipMcCu16,KapeBlei16,McCuSpar18}}
+\label{}
 \end{sidewaystable}
+%
 
 \subsection{MCMC is embarrassingly parallel}
 
 In general, Bayesian Markov chain Monte Carlo (MCMC) posterior
 sampling is considered to be embarrassingly parallel
-\citep{RossTier07}, i.e., since the chains only share the data and
+\citep{RossTier07}, i.e.,~since the chains only share the data and
 don't have to communicate with each other, parallel implementations
 are considered to be trivial.  BART MCMC also falls into this class.
 
@@ -3520,11 +4048,12 @@ $((1-b)/B+b)^{-1}=3.67$ fold reduction which is the gain in
 efficiency.  In Figure~\ref{Amdahl}, we plot theoretical gains
 on the y-axis and the number of CPUs on the x-axis
 for two settings: $b \in \{0.025, 0.1\}$.
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.48]{figures/parallel.pdf}
-\end{center}
-\caption{\label{MCMC}The theoretical gain due to multi-threading can
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.48]{parallel.pdf}
+  %\includegraphics[scale=0.48]{Figures/parallel.pdf}
+  \caption{The theoretical gain due to multi-threading can
   be calculated by Amdahl's Law.  Let $b$ be the burn-in fraction and
   $B$ be the number of threads, then the theoretical gain limit is
   $((1-b)/B+b)^{-1}$.  In this diagram, the burn-in fraction,
@@ -3532,19 +4061,22 @@ for two settings: $b \in \{0.025, 0.1\}$.
   an elapsed time of only $((1-b)/B+b)=0.27$ or a
   $((1-b)/B+b)^{-1}=3.67$ fold reduction which is the gain in
   efficiency.  }
+  \label{MCMC}
 \end{figure}
-
-\begin{figure}%[t!]
-\begin{center}
-\includegraphics[scale=0.42]{figures/amdahl.pdf}
-\end{center}
-\caption{\label{Amdahl}The theoretical gain due to multi-threading can
+%
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.42]{amdahl.pdf}
+  %\includegraphics[scale=0.42]{Figures/amdahl.pdf}
+  \caption{The theoretical gain due to multi-threading can
   be calculated by Amdahl's Law.  Let $b$ be the burn-in fraction and
   $B$ be the number of threads, then the theoretical gain limit is
   $((1-b)/B+b)^{-1}$.  In this figure, the theoretical gains are on
   the y-axis and the number of CPUs, the x-axis, for two settings:
   $b \in \{0.025, 0.1\}$.  }
+  \label{Amdahl}
 \end{figure}
+%
 
 \subsection{Multi-threading and random access memory}
 
@@ -3562,6 +4094,7 @@ you can determine the size of an object with the \code{object.size}
 function.
 
 Mathematically, a matrix is represented as follows.
+%
 \begin{align*}
 A=\wrap{\begin{array}{cccc}
 a_{11} & a_{12} & \cdots & a_{1n} \\
@@ -3570,27 +4103,28 @@ a_{21} & a_{22} & \cdots & a_{2n} \\
 a_{m1} & a_{m2} & \cdots & a_{mn} \\
 \end{array}}
 \end{align*}
-\proglang{R} is a column-major language, i.e., matrices are laid out
+%
+\proglang{R} is a column-major language, i.e.,~matrices are laid out
 in consecutive memory locations by traversing the columns:
 $\wrap{a_{11}, a_{21}, \., a_{12}, a_{22}, \.}$.  \proglang{R} is
 written in \proglang{C} and \proglang{Fortran} where
 \proglang{Fortran} is a column-major language as well.  However,
-\proglang{C} and \proglang{C++} are row-major languages, i.e.,
-matrices are laid out in consecutive memory locations by traversing
+\proglang{C} and \proglang{C++} are row-major languages,
+i.e.,~matrices are laid out in consecutive memory locations by traversing
 the rows: $\wrap{a_{11}, a_{12}, \., a_{21}, a_{22}, \.}$.  So, if you
 have written an \proglang{R} function in \proglang{C}/\proglang{C++},
 then you need to be cognizant of the clash in paradigms (also note
 that \proglang{R/Fortran} array indexing goes from 1 to $m$ while
 \proglang{C}/\proglang{C++} indexing goes from 0 to $m-1$).  As you
-might surmise, this is easily addressed with a transpose, i.e.,
-instead of passing $A$ from \proglang{R} to
+might surmise, this is easily addressed with a transpose,
+i.e.,~instead of passing $A$ from \proglang{R} to
 \proglang{C}/\proglang{C++} pass $A^{\top}$.
 
 \proglang{R} is very efficient in passing objects; rather, than
 passing an object (along with all of its memory consumption) on the
 stack, it passes objects merely by a pointer referencing the original
 memory location.  However, \proglang{R} follows copy-on-write memory
-allocation, i.e., all objects present in the parent thread can be read
+allocation, i.e.,~all objects present in the parent thread can be read
 by a child thread without a copy, but when an object is
 altered/written by the child, then a new copy is created in memory.
 Therefore, if we pass $A$ from \proglang{R} to
@@ -3599,7 +4133,7 @@ multiple copies of $A$ consuming $8 \times m \times n \times B$ where
 $B$ is the number of children.  If $A$ is a large matrix, then you may
 stress the system's limits.  The simple solution is for the parent to
 create the transpose before passing $A$ and avoiding the multiple
-copies, i.e., \code{A <- t(A)}.  And this is the philosophy that the
+copies, i.e.,~\code{A <- t(A)}.  And this is the philosophy that the
 \pkg{BART} package follows for the multi-threaded BART functions; see
 the documentation for the \code{transposed} argument.
 
@@ -3615,6 +4149,7 @@ this can easily be avoided by operating system support provided by
 \proglang{R}.  In the \pkg{tools} package \citep{RCor18}, there is
 the \code{psnice} function.  Paraphrased from the \code{?psnice} help
 page.
+%
 \begin{quote}
   Unix has a concept of process priority.  Priority is assigned values from 0
   to 39 with 20 being the normal priority and (counter-intuitively)
@@ -3625,6 +4160,7 @@ page.
   Generally, processes with nice 19 are only run when the system would
   otherwise be idle.
 \end{quote}
+%
 Therefore, by default, the \pkg{BART} package children have their nice
 value set to 19.
 
@@ -3708,7 +4244,8 @@ value set to 19.
 % x_{2} \\
 % \vdots \\
 % x_{Q} \\
-% \end{array}} \where \bm{x}_{i} \mbox{\ is the $i^{th}$ row and\ } i=1, \., Q \\
+% \end{array}} \where \bm{x}_{i} \mbox{\ is the $i^{th}$ row and\ }
+% i=1, \., Q \\
 % \mbox{Output matrix:\ } &
 % \wrap{\begin{array}{ccc}
 % \hat{y}_{11}& \dots & \hat{y}_{Q1} \\
@@ -3730,13 +4267,13 @@ you need to debug the \pkg{BART} package \proglang{C++} source code
 which is more difficult to do when you are calling the function from
 \proglang{R}.  Several examples of these are provided with the
 \pkg{BART} package.  With \proglang{R}, you can find the
-\code{Makefile} and the weighted BART example with
-\code{system.file("cxx-ex/Makefile", package="BART")} and\\
-\code{system.file("cxx-ex/wmain.cpp", package="BART")} respectively.
+\code{Makefile} and the weighted BART continuous outcome example with
+\code{system.file("cxx-ex/Makefile", package = "BART")} and
+\code{system.file("cxx-ex/wmain.cpp", package = "BART")} respectively.
 Note that these examples require the installation of the standalone
 Rmath library \citep{RCor17} which is contained in the \proglang{R}
 source code distribution.  Rmath provides common \proglang{R}
-functions and random number generation, e.g., \code{pnorm} and
+functions and random number generation, e.g.,~\code{pnorm} and
 \code{rnorm}.  You will likely need to copy the \code{cxx-ex}
 directory to your workspace.  Once done, you can build and run the
 weighted BART executable example from the command line shell as
@@ -3747,14 +4284,11 @@ generator.  However, you can specify the \proglang{C++} Standard
 Template Library random number generator (contained in the STL
 \code{random} header file) by uncommenting the following line in
 the \code{Makefile} (by removing the pound, \#, symbols):\\
-\code{\#\# CPPFLAGS = -I. -I/usr/local/include -DMATHLIB_STANDALONE -DRNG_random}\\
+\code{\#\# CPPFLAGS = -I. -I/usr/local/include 
+-DMATHLIB_STANDALONE -DRNG_random}\\
 (which still requires Rmath for other purposes).  These examples were
 developed on Linux and macOS, but they should be readily adaptable to
 UNIX and Windows as well.
-
-\pagebreak
-
-\bibliography{references}
 
 \end{document}
 

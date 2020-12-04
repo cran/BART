@@ -21,7 +21,8 @@ set.
 
 The full data sets, \code{ydm.train} and \code{ydm.test}, can be
 obtained online at
-\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.tar}.
+%\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.tar}.
+\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/Tech-Report-64-April-2017-data-file.tar?la=en}.
 There are 488 patients in the full cohort: 235 in the training set and
 253 in the testing set.
 
@@ -37,11 +38,14 @@ data(ydm20.test)
 }
 \seealso{xdm20.train}
 \references{
-Sparapani R., Rein L., Tarima S., Jackson T., Meurer J. (2017)
-Nonparametric recurrent events analysis with BART
-and an application to the hospital admissions of patients with diabetes.
-\emph{MCW Biostatistics Technical Report 64}
-\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}.
+Sparapani, Rein, Tarima, Jackson, Meurer (2020).  Non-parametric recurrent
+events analysis with BART and an application to the hospital admissions
+of patients with diabetes. \emph{Biostatistics} doi:10.1093/biostatistics/kxy032
+%% Sparapani R., Rein L., Tarima S., Jackson T., Meurer J. (2017)
+%% Nonparametric recurrent events analysis with BART
+%% and an application to the hospital admissions of patients with diabetes.
+%% \emph{MCW Biostatistics Technical Report 64}
+%% \url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}.
 }
 \examples{
 data(ydm20.train)

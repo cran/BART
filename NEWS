@@ -1,3 +1,8 @@
+Changes and New Features in 2.8 (2020-11-27):
+	* fix bugs in mc.pwbart
+
+	* gbart: return ndpost as an item like mc.gbart
+
 Changes and New Features in 2.7 (2019-12-04):
 	* addressing new behavior of class function
 
