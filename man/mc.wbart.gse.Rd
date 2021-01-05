@@ -123,11 +123,11 @@ draws of \eqn{f(t, x)} for each \eqn{x} which is a row of x.train.  }
 \references{
   Bleich, J., Kapelner, A., George, E.I., and Jensen, S.T. (2014).
   Variable selection for BART: an application to gene regulation.
-   \emph{The Annals of Applied Statistics}, \bold{8:1750-81}.
+  \emph{The Annals of Applied Statistics}, \bold{8:1750-81}.
 }
-\author{
-Rodney Sparapani: \email{rsparapa@mcw.edu}
-}
+%% \author{
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}
+%% }
 \seealso{
 \code{\link{mc.wbart}}
 }

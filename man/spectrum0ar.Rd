@@ -36,7 +36,8 @@ Martyn Plummer, Nicky Best, Kate Cowles and Karen Vines (2006).
 CODA: Convergence Diagnosis and Output Analysis for MCMC, R News, vol 6,
 7-11.
 
-BW Silverman (1986).  Density estimation for statistics and data analysis.
+BW Silverman (1986).
+Density estimation for statistics and data analysis.
 Chapman and Hall, London.
 }
 

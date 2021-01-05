@@ -78,17 +78,15 @@ another event in the WLW data set.
     enum:\tab which recurrence (up to 4)\cr
   }
 }
-\references{
 
-Byar, DP (1980),
-"The Veterans Administration Study of Chemoprophylaxis for Recurrent
-Stage I Bladder Tumors: Comparisons of Placebo, Pyridoxine, and Topical Thiotepa,"
-in \emph{Bladder Tumors and Other Topics in Urological Oncology}, eds.
-M Pavone-Macaluso, PH Smith, and F Edsmyn, New York: Plenum, pp. 363-370.
+\references{
+  Byar, DP (1980),
+  "The Veterans Administration Study of Chemoprophylaxis for Recurrent Stage I Bladder Tumors: Comparisons of Placebo, Pyridoxine, and Topical Thiotepa,"
+  in \emph{Bladder Tumors and Other Topics in Urological Oncology}, eds.
+  M Pavone-Macaluso, PH Smith, and F Edsmyn, New York: Plenum, pp. 363-370.
 
   Andrews DF, Hertzberg AM (1985), 
-DATA: A Collection of Problems from Many Fields for the Student 
-and Research Worker, New York: Springer-Verlag.
+  DATA: A Collection of Problems from Many Fields for the Student and Research Worker, New York: Springer-Verlag.
 
   LJ Wei, DY Lin, L Weissfeld (1989),
   Regression analysis of multivariate incomplete failure time data by
@@ -96,6 +94,7 @@ and Research Worker, New York: Springer-Verlag.
   \emph{Journal of the American Statistical Association},
   \bold{84}.
 }
+
 \examples{
   data(bladder)
 }

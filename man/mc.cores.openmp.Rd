@@ -23,10 +23,10 @@ mc.cores.openmp()
   you are running in a multi-threaded process).
 }
 
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{pwbart}}
 }

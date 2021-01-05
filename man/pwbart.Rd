@@ -74,24 +74,24 @@ mc.pwbart( x.test, treedraws, mu=0, mc.cores=2L, transposed=FALSE,
 \value{
   Returns a matrix of predictions corresponding to \code{x.test}.
 }
-\references{
-Chipman, H., George, E., and McCulloch R. (2010)
-   Bayesian Additive Regression Trees.
-   \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
+%% \references{
+%% Chipman, H., George, E., and McCulloch R. (2010)
+%%    Bayesian Additive Regression Trees.
+%%    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
 
-Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning.
-   Advances in Neural Information Processing Systems 19,
-   Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+%% Chipman, H., George, E., and McCulloch R. (2006)
+%%    Bayesian Ensemble Learning.
+%%    Advances in Neural Information Processing Systems 19,
+%%    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 
-Friedman, J.H. (1991)
-   Multivariate adaptive regression splines.
-        \emph{The Annals of Statistics}, \bold{19}, 1--67.
-}
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% Friedman, J.H. (1991)
+%%    Multivariate adaptive regression splines.
+%%         \emph{The Annals of Statistics}, \bold{19}, 1--67.
+%% }
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{wbart}}
 \code{\link{predict.wbart}}

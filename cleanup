@@ -6,10 +6,6 @@ for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 inst/cxx-ex/*.o inst/cxx-ex/*.out inst/cxx-ex/core* \
 	 demo/myeloid.multi.state.R vignettes/wbart.Rmd vignettes/jss.* \
 	 vignettes/Sweave.sty vignettes/jsslogo.* \
-	 vignettes/*.aux vignettes/*.bbl vignettes/*.blg \
-	 vignettes/*.log vignettes/*.out \
-	 vignettes/*.tex vignettes/*.tpt vignettes/*.pdf \
-	 vignettes/*.md  vignettes/*.html \
 	 R/dpmbart.R man/dpmbart.Rd R/dpmwbart.R man/dpmwbart.Rd \
 	 src/cdpmbart.cpp src/cdpmwbart.cpp \
 	 src/dp.h src/dp.cpp src/dpm.h src/dpm.cpp src/dps.h src/dps.cpp \
@@ -19,13 +15,10 @@ for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 src/randomkit.* src/rand_draws.* src/latent.* \
 	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R \
 	 R/class.ind.R man/class.ind.Rd src/cmbart.cpp \
-	 vignettes/bincat.Rnw vignettes/computing.Rnw \
-	 vignettes/cont1.Rnw vignettes/cont2.Rnw \
-	 vignettes/time-to-event.Rnw vignettes/hwbart.Rmd \
 	 data/datafromsection13.txt data/leukemia.R \
 	 src/DpBase.* src/DpMuTau.* src/cdpgbart.cpp \
-	 R/dpgbart.R demo/cube.dpgbart.R 
-##	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp
+	 R/dpgbart.R demo/cube.dpgbart.R \
+	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp
 do
     if [ -f $i ]
        then rm -rf $i

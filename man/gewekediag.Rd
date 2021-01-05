@@ -47,14 +47,14 @@ rather than matrices.
 }
 
 \references{
-Geweke, J. Evaluating the accuracy of sampling-based approaches
-to calculating posterior moments. In \emph{Bayesian Statistics 4}
-(ed JM Bernado, JO Berger, AP Dawid and AFM Smith). Clarendon Press,
-Oxford, UK.
-
-Martyn Plummer, Nicky Best, Kate Cowles and Karen Vines (2006). 
-CODA: Convergence Diagnosis and Output Analysis for MCMC, R News, vol 6,
-7-11.
+  Geweke J. (1992)
+  Evaluating the Accuracy of Sampling-Based Approaches to the Calculation of Posterior Moments.
+  In JM Bernado, JO Berger, AP Dawid, AFM Smith (eds.), Bayesian Statistics 4, pp. 169-193.
+  Oxford University Press, Oxford.
+  
+  Plummer M., Best N., Cowles K. and Vines K. (2006)
+  CODA: Convergence Diagnosis and Output Analysis for MCMC.
+  R News, vol 6, 7-11.
 }
 \examples{
 

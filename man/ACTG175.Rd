@@ -48,8 +48,11 @@ covariates: CD4 and CD8 T cell count at 20+/-5 weeks and the indicator
 of whether or not the patient was taken off-treatment before
 96+/-5 weeks.}
 
-\references{Hammer SM, et al. (1996), "A trial comparing nucleoside monotherapy with combination therapy in 
-HIV-infected adults with CD4 cell counts from 200 to 500 per cubic millimeter.", \emph{New England Journal of Medicine}, 
-335:1081--1090.}
+\references{
+  Hammer SM, et al. (1996)
+  A trial comparing nucleoside monotherapy with combination therapy in 
+  HIV-infected adults with CD4 cell counts from 200 to 500 per cubic millimeter.
+  \emph{New England Journal of Medicine} \bold{335}, 1081-1090.
+}
 
 \keyword{datasets}

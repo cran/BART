@@ -77,21 +77,21 @@ Besides the items listed below, the list has
    %% \item{pattern}{Generated from \code{x.train} (see discussion above included in
    %%   the argument \code{probs}).}
 }
-\references{
-Sparapani, Rein, Tarima, Jackson, Meurer (2020).  Non-parametric recurrent
-events analysis with BART and an application to the hospital admissions
-of patients with diabetes. \emph{Biostatistics} doi:10.1093/biostatistics/kxy032
-%%MCW Biostatistics Technical Report 64
-%%\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
+%% \references{
+%% Sparapani, Rein, Tarima, Jackson, Meurer (2020).  Non-parametric recurrent
+%% events analysis with BART and an application to the hospital admissions
+%% of patients with diabetes. \emph{Biostatistics} doi:10.1093/biostatistics/kxy032
+%% %%MCW Biostatistics Technical Report 64
+%% %%\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.pdf}
 
-%% Xu, Daniels and Winterstein (2016).  Sequential BART for imputation of
-%% missing covariates.  \emph{Biostatistics} doi:10.1093/biostatistics/kxw009
-%% %% with supplement
-%% \url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
-}
-\author{
-Rodney Sparapani: \email{rsparapa@mcw.edu}
-}
+%% %% Xu, Daniels and Winterstein (2016).  Sequential BART for imputation of
+%% %% missing covariates.  \emph{Biostatistics} doi:10.1093/biostatistics/kxw009
+%% %% %% with supplement
+%% %% \url{http://biostatistics.oxfordjournals.org/content/early/2016/03/15/biostatistics.kxw009/suppl/DC1}
+%% }
+%% \author{
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}
+%% }
 \seealso{
 \code{\link{recur.bart}}
 }

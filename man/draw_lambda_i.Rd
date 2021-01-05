@@ -21,11 +21,11 @@ draw_lambda_i(lambda, mean, kmax=1000, thin=1)
 \value{ Returns the variance for a truncated Normal, i.e., \eqn{N(mean,
   lambda)I(tau, infinity)}.  }
 
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
-Robert Gramacy: \email{rbg@vt.edu}.
-}
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
+%% Robert Gramacy: \email{rbg@vt.edu}.
+%% }
 \seealso{
 \code{\link{rtnorm}, \link{lbart}}
 }

@@ -216,33 +216,33 @@ mc.pbart(
    \eqn{P(Y=1 | x)} you need to apply the normal cdf (\code{pnorm})
    to these values.
 }
-\references{
+%% \references{
 
-Chipman, H., George, E., and McCulloch R. (2010)
-   Bayesian Additive Regression Trees.
-   \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi: 10.1214/09-AOAS285>.
+%% Chipman, H., George, E., and McCulloch R. (2010)
+%%    Bayesian Additive Regression Trees.
+%%    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi: 10.1214/09-AOAS285>.
 
-Friedman, J.H. (1991)
-   Multivariate adaptive regression splines.
-   \emph{The Annals of Statistics}, \bold{19}, 1--67.
+%% Friedman, J.H. (1991)
+%%    Multivariate adaptive regression splines.
+%%    \emph{The Annals of Statistics}, \bold{19}, 1--67.
 
-Gramacy, RB and Polson, NG (2012)
-   Simulation-based regularized logistic regression.
-   \emph{Bayesian Analysis}, \bold{7}, 567--590.
+%% Gramacy, RB and Polson, NG (2012)
+%%    Simulation-based regularized logistic regression.
+%%    \emph{Bayesian Analysis}, \bold{7}, 567--590.
 
-Holmes, C and Held, L (2006)
-   Bayesian auxiliary variable models for binary and multinomial regression.
-   \emph{Bayesian Analysis}, \bold{1}, 145--68.
+%% Holmes, C and Held, L (2006)
+%%    Bayesian auxiliary variable models for binary and multinomial regression.
+%%    \emph{Bayesian Analysis}, \bold{1}, 145--68.
 	
-Linero, A.R. (2018)
-  Bayesian regression trees for high dimensional prediction and variable
-  selection. \emph{JASA}, \bold{113}, 626--36.
+%% Linero, A.R. (2018)
+%%   Bayesian regression trees for high dimensional prediction and variable
+%%   selection. \emph{JASA}, \bold{113}, 626--36.
   
-}
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% }
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{pbart}}
 }

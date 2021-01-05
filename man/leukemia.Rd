@@ -45,18 +45,16 @@ in Philadelphia)}
 }
 
 \source{
-Klein, J. and Moeschberger, M.L. (2003).
-   \emph{Survival Analysis: Techniques for Censored and Truncated Data},  
-   New York: Springer-Verlag, 2nd Ed., Section 1.3.
-   \url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/datafromsection13.txt}
+  Klein J. and Moeschberger M.L. (2003)
+  \emph{Survival Analysis: Techniques for Censored and Truncated Data},  
+  New York: Springer-Verlag, 2nd Ed., Section 1.3.
+  \url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/datafromsection13.txt}
  }
 
 \references{
-Copelan, E.A., Biggs, J.C., Thompson, J.M., Crilley, P., Szer, J.,
-Klein, J.P., Kapoor, N., Avalos, B.R., Cunningham, I. and Atkinson,
-K. (1991).
-    "Treatment for acute myelocytic leukemia with allogeneic bone marrow transplantation following preparation with BuCy2". \emph{Blood}, \bold{78(3)}, pp.838-843.
-
+  Copelan E., Biggs J., Thompson J., Crilley P., Szer J., Klein, J., Kapoor N., Avalos, B., Cunningham I. and Atkinson, K. (1991)
+  "Treatment for acute myelocytic leukemia with allogeneic bone marrow transplantation following preparation with BuCy2".
+  \emph{Blood}, \bold{78(3)}, pp.838-843.
 }
 
 \keyword{datasets}

@@ -34,18 +34,18 @@ the response variable.  \code{fish} is the most frequent choice, and
 often taken as a baseline category in multinomial response models.  }
 
 \source{ 
-Agresti, A. (2002).
-   \emph{Categorical Data Analysis},
-        New York: Wiley, 2nd Ed., Table 7.1
+  Agresti, A. (2002).
+  \emph{Categorical Data Analysis},
+  New York: Wiley, 2nd Ed., Table 7.1
 }
 
 \references{
-Delany MF, Linda SB, Moore CT (1999).
-   "Diet and condition of American alligators in 4 Florida lakes."
-       In \emph{Proceedings of the Annual Conference of the Southeastern
-	 Association of Fish and Wildlife Agencies}, \bold{53},
-       375--389. 
-     }
+  Delany MF, Linda SB, Moore CT (1999).
+  "Diet and condition of American alligators in 4 Florida lakes."
+  In \emph{Proceedings of the Annual Conference of the Southeastern
+    Association of Fish and Wildlife Agencies}, \bold{53},
+  375--389. 
+}
 
 \examples{
 

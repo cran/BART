@@ -307,41 +307,41 @@ argument \code{type} to specify a logit BART model.
    The rough error standard deviation (\eqn{\sigma}{sigma}) used in the prior.
    }
 }
-\references{
-Chipman, H., George, E., and McCulloch R. (2010)
-   Bayesian Additive Regression Trees.
-   \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
+%% \references{
+%% Chipman, H., George, E., and McCulloch R. (2010)
+%%    Bayesian Additive Regression Trees.
+%%    \emph{The Annals of Applied Statistics}, \bold{4,1}, 266-298 <doi:10.1214/09-AOAS285>.
 
-Chipman, H., George, E., and McCulloch R. (2006)
-   Bayesian Ensemble Learning.
-   Advances in Neural Information Processing Systems 19,
-   Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
+%% Chipman, H., George, E., and McCulloch R. (2006)
+%%    Bayesian Ensemble Learning.
+%%    Advances in Neural Information Processing Systems 19,
+%%    Scholkopf, Platt and Hoffman, Eds., MIT Press, Cambridge, MA, 265-272.
 
-De Waal, T., Pannekoek, J. and Scholtus, S. (2011)
-   Handbook of statistical data editing and imputation.
-   John Wiley & Sons, Hoboken, NJ.
+%% De Waal, T., Pannekoek, J. and Scholtus, S. (2011)
+%%    Handbook of statistical data editing and imputation.
+%%    John Wiley & Sons, Hoboken, NJ.
   
-Friedman, J.H. (1991)
-   Multivariate adaptive regression splines.
-   \emph{The Annals of Statistics}, \bold{19}, 1--67.
+%% Friedman, J.H. (1991)
+%%    Multivariate adaptive regression splines.
+%%    \emph{The Annals of Statistics}, \bold{19}, 1--67.
 
-Gramacy, RB and Polson, NG (2012)
-   Simulation-based regularized logistic regression.
-   \emph{Bayesian Analysis}, \bold{7}, 567--590.
+%% Gramacy, RB and Polson, NG (2012)
+%%    Simulation-based regularized logistic regression.
+%%    \emph{Bayesian Analysis}, \bold{7}, 567--590.
 
-Holmes, C and Held, L (2006)
-   Bayesian auxiliary variable models for binary and multinomial regression.
-   \emph{Bayesian Analysis}, \bold{1}, 145--68.
+%% Holmes, C and Held, L (2006)
+%%    Bayesian auxiliary variable models for binary and multinomial regression.
+%%    \emph{Bayesian Analysis}, \bold{1}, 145--68.
 
-Linero, A.R. (2016)
-  Bayesian regression trees for high dimensional prediction and variable
-  selection. \emph{JASA},
-  \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
-}
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% Linero, A.R. (2016)
+%%   Bayesian regression trees for high dimensional prediction and variable
+%%   selection. \emph{JASA},
+%%   \url{http://dx.doi.org/10.1080/01621459.2016.1264957}  
+%% }
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{pbart}}
 }

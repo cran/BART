@@ -24,15 +24,16 @@ rtgamma(n, shape, rate, a)
 }
 
 \references{
-Gentle, J. E. (2013)
-   Random number generation and Monte Carlo methods. Springer, New York, NY.
+  Gentle J. (2013)
+  Random number generation and Monte Carlo methods.
+  Springer, New York, NY.
 }
 
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
-Robert Gramacy: \email{rbg@vt.edu}.
-}
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
+%% Robert Gramacy: \email{rbg@vt.edu}.
+%% }
 
 %% \seealso{
 %% \code{\link{gbmm}}

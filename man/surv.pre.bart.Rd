@@ -61,14 +61,14 @@ Besides the items listed below, the list has
    \item{tx.test}{A matrix with rows consisting of time and the
    covariates of the test data, if any.}
 }
-\references{
-  Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
-  Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
-}
-\author{
-Rodney Sparapani: \email{rsparapa@mcw.edu}
-}
+%% \references{
+%%   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
+%%   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
+%%    \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+%% }
+%% \author{
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}
+%% }
 \seealso{
 \code{\link{surv.bart}}
 }

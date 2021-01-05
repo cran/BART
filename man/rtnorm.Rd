@@ -24,16 +24,16 @@ rtnorm(n, mean, sd, tau)
 }
 
 \references{
-Robert, C.P. (1995)
-   Simulation of truncated normal variables.
-   \emph{Statistics and computing}, \bold{5(2)}, 121--125.
+  Robert C. (1995)
+  Simulation of truncated normal variables.
+  \emph{Statistics and computing}, \bold{5(2)}, 121--125.
 }
 
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
-Robert Gramacy: \email{rbg@vt.edu}.
-}
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}\cr,
+%% Robert Gramacy: \email{rbg@vt.edu}.
+%% }
 \seealso{
 \code{\link{pbart}, \link{lbart}}
 }

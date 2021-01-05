@@ -24,10 +24,10 @@ data(arq)
   to ensure non-missing values of these variables.
 }
 
-
 \references{
-National Health and Nutrition Examination Survey (NHANES)
-2009-2010 Arthritis Questionnaire.
-\url{https://wwwn.cdc.gov/nchs/nhanes/2009-2010/ARQ_F.htm}
+  National Health and Nutrition Examination Survey (NHANES)
+  2009-2010 Arthritis Questionnaire.
+  \url{https://wwwn.cdc.gov/nchs/nhanes/2009-2010/ARQ_F.htm}
 }
+
 \keyword{datasets}

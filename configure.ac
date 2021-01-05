@@ -6,7 +6,7 @@ dnl with is licensed under GPL-3 with the
 dnl Autoconf Configure Script Exception, version 3.0.
 
 AC_PREREQ(2.62)
-AC_INIT([BART],[2.8],[],[],[])
+AC_INIT([BART],[2.9],[],[],[])
 
 dnl snippet from 1.24 Using C++11 Code
 dnl https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Using-C_002b_002b11-code
@@ -37,7 +37,8 @@ AC_LANG(C++)
 	  for ac_option in -xopenmp -fopenmp -qopenmp \
                            -openmp -mp -omp -qsmp=omp -homp \
 			   -fopenmp=libomp \
-                           -Popenmp --openmp; do
+                           -Popenmp --openmp \
+			   "-Xclang -fopenmp"; do
 	    ac_save_[]_AC_LANG_PREFIX[]FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
 	    _AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $ac_option"
 	    AC_LINK_IFELSE([_AC_LANG_OPENMP],

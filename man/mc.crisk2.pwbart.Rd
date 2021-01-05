@@ -104,15 +104,15 @@ Returns an object of type \code{crisk2bart} which is essentially a list with com
    \item{cif.test2.mean}{mean of \code{cif.test2} columns for cause 2.}
 
 }
-\references{
-  Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
-  Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
-}
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% \references{
+%%   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
+%%   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
+%%    \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+%% }
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{pwbart}}, \code{\link{crisk2.bart}}, \code{\link{mc.crisk2.bart}}
 }

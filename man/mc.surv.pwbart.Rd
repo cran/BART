@@ -120,15 +120,15 @@ Returns an object of type \code{survbart} which is essentially a list with compo
    \item{cum.test.mean}{mean of \code{cum.test} over the posterior samples:
    available for \code{mc.recur.pwbart} only.}
 }
-\references{
-  Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
-  Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
-   \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
-}
-\author{
-Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
-Rodney Sparapani: \email{rsparapa@mcw.edu}.
-}
+%% \references{
+%%   Sparapani, R., Logan, B., McCulloch, R., and Laud, P. (2016)
+%%   Nonparametric survival analysis using Bayesian Additive Regression Trees (BART).
+%%    \emph{Statistics in Medicine}, \bold{16:2741-53} <doi:10.1002/sim.6893>.
+%% }
+%% \author{
+%% Robert McCulloch: \email{robert.e.mcculloch@gmail.com},\cr
+%% Rodney Sparapani: \email{rsparapa@mcw.edu}.
+%% }
 \seealso{
 \code{\link{pwbart}}
 }

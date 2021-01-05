@@ -1,0 +1,19 @@
+bibentry(bibtype = "Article",
+  title        = "Nonparametric Machine Learning and Efficient Computation with {B}ayesian Additive Regression Trees: The {BART} {R} Package",
+  author       = c(person(given = "Rodney",
+                          family = "Sparapani",
+                          email = "rsparapa@mcw.edu"),
+                   person(given = "Charles",
+                          family = "Spanbauer"),
+                   person(given = "Robert",
+                          family = "McCulloch")),
+  journal      = "Journal of Statistical Software",
+  year         = "2021",
+  volume       = "97",
+  number       = "1",
+  pages        = "1--66",
+  doi          = "10.18637/jss.v097.i01",
+
+  header       = "To cite BART in publications use:"
+)
+
