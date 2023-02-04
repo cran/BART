@@ -1,6 +1,6 @@
 
 ## BART: Bayesian Additive Regression Trees
-## Copyright (C) 2017 Robert McCulloch and Rodney Sparapani
+## Copyright (C) 2017-2022 Robert McCulloch and Rodney Sparapani
 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -47,6 +47,9 @@ surv.pre.bart <- function(
                       ztimes=NULL,
                       zdelta=NULL
                       ## column numbers of (ztimes, zdelta) time-dependent pairs
+
+                      ##u.train=NULL
+                      ## shared cluster identifiers
                       ) {
     ## currently does not handle time dependent Xs
     ## can be extended later
@@ -67,24 +70,44 @@ surv.pre.bart <- function(
     if(L!=length(zdelta))
         stop('The length of ztimes and zdelta, if any, must be identical')
 
-    if(length(K)>0) {
-        events <- unique(quantile(times, probs=(1:K)/K))
+    if(length(K)>0 || length(events)>0) {
+        if(length(events)==0)
+            events <- unique(quantile(times, probs=(1:K)/K))
+        else if(!all(events==unique(events)))
+            stop(paste0('events must be unique: ', events))
         attr(events, 'names') <- NULL
 
+        events=sort(events)
+        K <- length(events)
+
         for(i in 1:N) {
-            k <- min(which(times[i]<=events))
-            times[i] <- events[k]
+            if(times[i]>events[K]) {
+                delta[i]=0
+                times[i]=events[K]
+            } else {
+                k <- min(which(times[i]<=events))
+                times[i] <- events[k]
+            }
         }
     }
-    else if(length(events)==0) {
+    else {
         events <- unique(sort(times))
         ## time grid of events including censoring times
+        K <- length(events)
     }
 
-    K <- length(events)
+    ##K <- length(events)
 
     if(events[1]<=0)
         stop('Time points exist less than or equal to time zero.')
+
+    ## if(events[1]<0)
+    ##     stop('Time points exist less than time zero.')
+    ## else if(events[1]==0) {
+    ##     warning('Time points exist equal to time zero.')
+    ##     events=events[-1]
+    ##     K=K-1
+    ## }
 
     y.train <- integer(N) ## y.train is at least N long
 
@@ -100,15 +123,29 @@ surv.pre.bart <- function(
 
     ##binaryOffset <- qnorm(mean(y.train))
 
+    ## if(length(u.train)>0) {
+    ##     makeU = TRUE
+    ##     U.train <- integer(m)
+    ## }
+    ## else {
+    ##     makeU = FALSE
+    ##     U.train = NULL
+    ## }
+
     if(length(x.train)==0) {
         p <- 0
         n <- 1
 
         X.train <- matrix(nrow=m, ncol=1, dimnames=list(NULL, 't'))
     } else {
+        if(class(x.train)[1]=='data.frame') x.train=bartModelMatrix(x.train)
+
         p <- ncol(x.train)
 
-        if(length(x.test)>0) n <- nrow(x.test)
+        if(length(x.test)>0) {
+            if(class(x.test)[1]=='data.frame') x.test=bartModelMatrix(x.test)
+            n <- nrow(x.test)
+        }
 
         X.train <- matrix(nrow=m, ncol=p+1)
 
@@ -118,8 +155,9 @@ surv.pre.bart <- function(
     }
 
     k <- 1
-
+    
     for(i in 1:N) for(j in 1:K) if(events[j] <= times[i]) {
+        ##if(makeU) U.train[k] <- u.train[i]
         if(p==0) X.train[k, ] <- c(events[j])
         else X.train[k, ] <- c(events[j], x.train[i, ])
 
@@ -151,8 +189,8 @@ surv.pre.bart <- function(
             }
         }
     }
-        
+
     return(list(y.train=y.train, tx.train=X.train, tx.test=X.test,
                 times=events, K=K))
-                ##binaryOffset=binaryOffset))
+    ##, u.train=U.train ##binaryOffset=binaryOffset
 }

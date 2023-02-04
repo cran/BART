@@ -1,8 +1,8 @@
 Package: BART
 Type: Package
 Title: Bayesian Additive Regression Trees
-Version: 2.9
-Date: 2020-12-21
+Version: 2.9.3
+Date: 2023-02-04
 Authors@R: c(person('Robert', 'McCulloch', role='aut'),
   person('Rodney', 'Sparapani', role=c('aut', 'cre'), 
   email='rsparapa@mcw.edu'),
@@ -31,6 +31,6 @@ LinkingTo: Rcpp
 Suggests: MASS, knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2021-01-04 15:09:42 UTC; rsparapa
+Packaged: 2023-02-04 19:12:48 UTC; rsparapa
 Repository: CRAN
-Date/Publication: 2021-01-05 05:10:19 UTC
+Date/Publication: 2023-02-04 20:12:35 UTC

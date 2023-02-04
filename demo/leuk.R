@@ -27,7 +27,7 @@ for(R in 0:1)
     for(A in 0:1)
         for(C in 0:1)
             for(P in 0:1)
-                for(X2 in c(23, 32)) {
+                for(X2 in c(20, 40)) {
                     h=(k-1)*N+1:N
                     x.test3[h, ]=x.train3
                     x.test3[h, 'TB']=R*8+(1-R)*T
@@ -71,6 +71,7 @@ state2=surv.pre.bart(leukemia$TB, leukemia$R, x.train2, x.test2,
 
 ##pdf(file='leuk.pdf')
 par(mfrow=c(2, 2))
+m=0
 for(l in 1:L) {
     h=(l-1)*N*K+1:(N*K)
 
@@ -126,7 +127,9 @@ for(l in 1:L) {
                    legend=c('G=1 X8=0', 'G=2 X8=0', 'G=2 X8=1',
                             'G=3 X8=0', 'G=3 X8=1')) 
         }
+        m=m+1
+        if((m%%20)==0) dev.copy2pdf(file=paste0('leuk', m/20, '.pdf'))
     }
 }
-dev.off()
-##par(mfrow=c(1, 1))
+##dev.off()
+par(mfrow=c(1, 1))

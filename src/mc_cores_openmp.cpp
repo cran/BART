@@ -21,11 +21,11 @@
 
 #ifndef NoRcpp
 
-RcppExport SEXP mc_cores_openmp() {
+RcppExport SEXP mc_cores_openmp(void) {
 
 #else
 
-int mc_cores_openmp() {
+int mc_cores_openmp(void) {
 
 #endif
 
