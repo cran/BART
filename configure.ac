@@ -6,17 +6,18 @@ dnl with is licensed under GPL-3 with the
 dnl Autoconf Configure Script Exception, version 3.0.
 
 AC_PREREQ(2.62)
-AC_INIT([BART],[2.9],[],[],[])
+AC_INIT([BART],[2.94],[],[],[])
 
 dnl snippet from 1.24 Using C++11 Code
 dnl https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Using-C_002b_002b11-code
-CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
-if test -z "$CXX11"; then
-  AC_MSG_ERROR([No C++11 compiler is available])
+dnl C++11 is now the CRAN standard: changing to CXX
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
+if test -z "$CXX"; then
+  AC_MSG_ERROR([No C++ compiler is available])
 fi
-CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
-CXX="${CXX11} ${CXX11STD}"
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
+dnl CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+dnl CXX="${CXX11} ${CXX11STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 AC_LANG(C++)
 
 dnl additional changes as needed 

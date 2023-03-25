@@ -49,7 +49,7 @@ void makexinfo(size_t p, size_t n, double *x, xinfo& xi, int *nc)
    for(size_t i=0;i<p;i++) {
       xinc = (maxx[i]-minx[i])/(nc[i]+1.0);
       xi[i].resize(nc[i]);
-      for(size_t j=0;j<nc[i];j++) xi[i][j] = minx[i] + (j+1)*xinc;
+      for(size_t j=0;j<(size_t)nc[i];j++) xi[i][j] = minx[i] + (j+1)*xinc;
    }
 }
 //--------------------------------------------------

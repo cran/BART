@@ -1,7 +1,12 @@
+Changes and New Features in 2.9.4 (2023-03-25):
+	* C++11 is now the CRAN standard and C++17 is not needed
+
+	* casting signed int to unsigned for comparisons with unsigned
+
+	* bashism [^] in configure replaced with [!]
+
 Changes and New Features in 2.9.3 (2023-02-04):
 	* resolving CRAN checks for mc_cores_openmp and recur.pwbart
-
-	* per CRAN policy updating to C++17 
 
 	* src/Makevars is "hard-wired" for OpenMP on Windows
 	
@@ -19,6 +24,10 @@ Changes and New Features in 2.9 (2020-12-21):
 
 	* for new developments, see BART3 on our github site at
 	https://github.com/rsparapa/bnptools
+
+	* N.B. the warnings "unused variable 'grp'" are purposely kept,
+	i.e., if you want the Dirichlet sparse prior to recognize 
+	factors as grouped variables, then you need to use BART3 
 
 Changes and New Features in 2.8 (2020-11-27):
 	* fix bugs in mc.pwbart

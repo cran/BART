@@ -130,7 +130,7 @@ RcppExport SEXP cabart(
      _xi.resize(p);
      for(size_t i=0;i<p;i++) {
        _xi[i].resize(numcut[i]);
-       for(size_t j=0;j<numcut[i];j++) _xi[i][j]=Xinfo(i, j);
+       for(size_t j=0;j<(size_t)numcut[i];j++) _xi[i][j]=Xinfo(i, j);
      }
      bm.setxinfo(_xi);
    }
@@ -285,7 +285,7 @@ if(type==1) {
    int time1 = time(&tp), total=nd+burn;
    xinfo& xi = bm.getxinfo();
 
-   for(size_t i=0;i<total;i++) {
+   for(size_t i=0;i<(size_t)total;i++) {
       if(i%printevery==0) printf("done %zu (out of %lu)\n",i,nd+burn);
       //if(i%printevery==0) printf("%22zu/%zu\r",i,total);
       if(i==(burn/2)&&dart) bm.startdart();
