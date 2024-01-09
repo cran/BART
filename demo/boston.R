@@ -68,7 +68,7 @@ if(figures!='NONE')
     dev.copy2pdf(file=paste(figures, 'boston5.pdf', sep='/'))
 
 y.train = ytrain
-x.train = as.matrix(Boston[ii, -14])
+x.train = as.matrix(Boston[i, -14])
 set.seed(12) ## Aaron Rodgers
 post4 = wbart(x.train, y.train)
 

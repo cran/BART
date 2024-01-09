@@ -291,9 +291,9 @@ void cpbart(
    time_t tp;
    int time1 = time(&tp);
    xinfo& xi = bm.getxinfo();
-
-   for(size_t i=0;i<(nd+burn);i++) {
-      if(i%printevery==0) printf("done %zu (out of %lu)\n",i,nd+burn);
+   size_t total=nd+burn;
+   for(size_t i=0;i<total;i++) {
+      if(i%printevery==0) printf("done %zu (out of %zu)\n",i,total);
       if(i==(burn/2)&&dart) bm.startdart();
       //draw bart
       bm.draw(1., gen);

@@ -1,9 +1,11 @@
+
+Changes and New Features in 2.9.6 (2024-01-09):
+	* resolving CRAN checks for printf and Rd 
+
 Changes and New Features in 2.9.4 (2023-03-25):
 	* C++11 is now the CRAN standard and C++17 is not needed
 
 	* casting signed int to unsigned for comparisons with unsigned
-
-	* bashism [^] in configure replaced with [!]
 
 Changes and New Features in 2.9.3 (2023-02-04):
 	* resolving CRAN checks for mc_cores_openmp and recur.pwbart

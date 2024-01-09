@@ -6,8 +6,9 @@
 
 \description{
   BART is a Bayesian \dQuote{sum-of-trees} model.\cr
-  For numeric response \eqn{y}, we have \eqn{y = f(x) +\epsilon}
-  {y = f(x) + e}, where \eqn{\epsilon \sim N(0, 1)}{e ~ N(0, 1)}.\cr
+  For numeric response \eqn{y}, we have
+  \eqn{y = f(x) +\epsilon}{y = f(x) + e},
+  where \eqn{\epsilon \sim N(0, 1)}{e ~ N(0, 1)}.\cr
 For a multinomial response \eqn{y}, \eqn{P(Y=y | x) = F(f(x))},
 where \eqn{F} denotes the standard Normal CDF (probit link) or the
 standard Logistic CDF (logit link).

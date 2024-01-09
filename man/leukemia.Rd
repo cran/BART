@@ -48,7 +48,7 @@ in Philadelphia)}
   Klein J. and Moeschberger M.L. (2003)
   \emph{Survival Analysis: Techniques for Censored and Truncated Data},  
   New York: Springer-Verlag, 2nd Ed., Section 1.3.
-  \url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/datafromsection13.txt}
+  %\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/datafromsection13.txt}
  }
 
 \references{

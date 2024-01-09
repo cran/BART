@@ -146,10 +146,9 @@ argument \code{type} to specify a logit BART model.
    estimate.  Not used if \eqn{y} is binary.  }
 
    \item{k}{ For numeric \eqn{y}, \code{k} is the number of prior
-   standard deviations \eqn{E(Y|x) = f(x)} is away from +/-0.5.  The
-   response, code{y.train}, is internally scaled to range from -0.5 to
-   0.5.  For binary \eqn{y}, \code{k} is the number of prior standard
-   deviations \eqn{f(x)} is away from +/-3.  The bigger \code{k} is, the more
+   standard deviations \eqn{E(Y|x) = f(x)} is away from +/-0.5.  For
+   binary \eqn{y}, \code{k} is the number of prior standard deviations
+   \eqn{f(x)} is away from +/-3.  The bigger \code{k} is, the more
    conservative the fitting will be.  }
 
    \item{power}{
@@ -258,7 +257,7 @@ argument \code{type} to specify a logit BART model.
    particular draw.  The \eqn{x} is either a row from the training data,
    \code{x.train} or the test data, \code{x.test}.
 
-   For \code{x.train}/{x.test} with missing data elements, \code{gbart}
+   For \code{x.train}/\code{x.test} with missing data elements, \code{gbart}
    will singly impute them with hot decking. For one or more missing
    covariates, record-level hot-decking imputation \cite{deWaPann11} is
    employed that is biased towards the null, i.e., nonmissing values

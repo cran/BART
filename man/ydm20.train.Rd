@@ -21,8 +21,8 @@ set.
 
 The full data sets, \code{ydm.train} and \code{ydm.test}, can be
 obtained online at
-%\url{http://www.mcw.edu/FileLibrary/Groups/Biostatistics/TechReports/TechReports5175/tr064.tar}.
-\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/Tech-Report-64-April-2017-data-file.tar?la=en}.
+\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/tr064zip.zip}
+%\url{https://www.mcw.edu/-/media/MCW/Departments/Biostatistics/Tech-Report-64-April-2017-data-file.tar?la=en}.
 There are 488 patients in the full cohort: 235 in the training set and
 253 in the testing set.
 

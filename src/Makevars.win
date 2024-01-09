@@ -1,2 +1,4 @@
 
 ##CXX_STD = CXX17
+PKG_CXXFLAGS = -fopenmp
+PKG_LIBS = -fopenmp

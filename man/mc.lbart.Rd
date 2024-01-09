@@ -92,7 +92,6 @@ mc.lbart(
    \item{k}{
    For numeric y,
    k is the number of prior standard deviations \eqn{E(Y|x) = f(x)} is away from +/-.5.
-   The response (y.train) is internally scaled to range from -.5 to .5.
    For binary y,
    k is the number of prior standard deviations \eqn{f(x)} is away from +/-3.
    In both cases, the bigger k is, the more conservative the fitting will be.
