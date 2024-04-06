@@ -18,7 +18,7 @@ for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 data/datafromsection13.txt data/leukemia.R \
 	 src/DpBase.* src/DpMuTau.* src/cdpgbart.cpp \
 	 R/dpgbart.R demo/cube.dpgbart.R \
-	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp
+	 R/gbmm.R R/mc.gbmm.R man/gbmm.Rd src/cgbmm.cpp 
 do
     if [ -f $i ]
        then rm -rf $i

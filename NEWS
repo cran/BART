@@ -1,4 +1,7 @@
 
+Changes and New Features in 2.9.7 (2024-04-06):
+	* theta/omega DART settings now properly propagated in gbart 
+
 Changes and New Features in 2.9.6 (2024-01-09):
 	* resolving CRAN checks for printf and Rd 
 

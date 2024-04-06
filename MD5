@@ -1,7 +1,7 @@
 a2fe356a25c27a23f77ca0045c860f9f *COPYING
-d292ecf9a8350344f35f773805e036eb *DESCRIPTION
+9f257d0bbce62531b6b9a115fa2fbd43 *DESCRIPTION
 3d68c4b808ff5143c9532a836956fc3f *NAMESPACE
-17bece18cd22695896015c1993a270ee *NEWS
+72edf397fa9fe3b10ec41cdae8c7abb6 *NEWS
 8caa19977720153041d6ca5624cb62f9 *R/abart.R
 86a66c0a5727da7622f0c01981d6af33 *R/bartModelMatrix.R
 0f7403a71d64ce30cbc6b665b483e582 *R/crisk.bart.R
@@ -59,8 +59,8 @@ d229404622c45d56432337afec367908 *R/stratrs.R
 610c598ecb1dca6980e8408bfb44cfee *R/surv.pwbart.R
 9ecbf57c1b8334729518269577745871 *R/wbart.R
 939ada29645d77ffb2b139620e5da664 *build/vignette.rds
-3c0e2fbed813219c491f15a42ef269f4 *cleanup
-bda8b97d1358a8b3d39e6d7ad0214443 *cleanup.win
+6729c8f2f1591fde6f6c40ca9615d5f6 *cleanup
+d558dfd3461e0503ece14c9be8a54e20 *cleanup.win
 aa7303cf735751ac60f7a38429ae4e9e *configure
 758c444fba47569b6a73e8d4714dc86d *configure.ac
 dbb23c28a86e85a4e0ef8bafc07927fb *data/ACTG175.rda
@@ -177,7 +177,7 @@ acd0b9dc6b5044b7ebf8a6836aa26553 *inst/cxx-ex/tree.h
 dafd82a9abd232897f2c400a705de5e1 *inst/cxx-ex/treefuns.h
 14acb4e4ba43c8bb6f6d38010b35c629 *inst/cxx-ex/wmain.cpp
 58e6facc3ba111e3d6a3f6c7ae79daa7 *inst/doc/the-BART-R-package.Rnw
-41ca5e9d1b20f930096b4efac09248ba *inst/doc/the-BART-R-package.pdf
+30bf4c8048cf0aed3638908454347fa6 *inst/doc/the-BART-R-package.pdf
 18e1386843157954a3b09d80355b725f *man/ACTG175.Rd
 7ebdf83edb49ae75738aa0a9cd2b4d2f *man/BART-package.Rd
 d4a1e874f9d603374967f056e0d6003e *man/abart.Rd
@@ -238,7 +238,7 @@ a91b5ef4ece2cca7f6c7ad057a86c142 *src/bartfuns.h
 6478d91fc95cba345e945547a2924146 *src/bd.cpp
 4440cc180aa37de74b8004de735f7216 *src/bd.h
 2dd49ea7f0a5cf082d29b5af9f5b2354 *src/cabart.cpp
-0c267529d156e027a8ebfa33ec7e3dc2 *src/cgbart.cpp
+c2bd83e2301896b2b7873bf35be7589c *src/cgbart.cpp
 5e17bf7f74f213a9d2713f2defdab279 *src/clbart.cpp
 81af366989a0e0647f493775da2b7b16 *src/common.h
 aed27bb8c45aae3a081ad921adb83ea9 *src/cpbart.cpp

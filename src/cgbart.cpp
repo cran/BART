@@ -297,7 +297,7 @@ if(type==1) {
    //set up BART model
    bm.setprior(alpha,mybeta,tau);
    bm.setdata(p,n,ix,z,numcut);
-   bm.setdart(a,b,rho,aug,dart);
+   bm.setdart(a,b,rho,aug,dart,theta,omega);
 
    // dart iterations
    std::vector<double> ivarprb (p,0.);
