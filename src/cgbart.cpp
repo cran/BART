@@ -76,8 +76,11 @@ RcppExport SEXP cgbart(
    double *ix = &xv[0];
    Rcpp::NumericVector  yv(_iy); 
    double *iy = &yv[0];
-   Rcpp::NumericVector  xpv(_ixp);
-   double *ixp = &xpv[0];
+   //Rcpp::NumericVector  xpv(_ixp);
+   //double *ixp = &xpv[0];
+   Rcpp::NumericMatrix xpv(_ixp);
+   double *ixp = nullptr;
+   if(np>0) ixp = &xpv[0];
    size_t m = Rcpp::as<int>(_im);
    Rcpp::IntegerVector _nc(_inc);
    int *numcut = &_nc[0];

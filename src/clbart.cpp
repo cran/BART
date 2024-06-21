@@ -75,8 +75,11 @@ RcppExport SEXP clbart(
    double *ix = &xv[0];
    Rcpp::IntegerVector  yv(_iy); // binary
    int *iy = &yv[0];
-   Rcpp::NumericVector  xpv(_ixp);
-   double *ixp = &xpv[0];
+   //Rcpp::NumericVector  xpv(_ixp);
+   //double *ixp = &xpv[0];
+   Rcpp::NumericMatrix xpv(_ixp);
+   double *ixp = nullptr;
+   if(np>0) ixp = &xpv[0];
    size_t m = Rcpp::as<int>(_im);
    //size_t nc = Rcpp::as<int>(_inc);
    Rcpp::IntegerVector _nc(_inc);

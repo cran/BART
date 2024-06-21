@@ -1,4 +1,10 @@
 
+Changes and New Features in 2.9.9 (2024-06-21):
+	* resolving CRAN check Rd issue for class.ind
+
+Changes and New Features in 2.9.8 (2024-06-20):
+	* resolving CRAN checks for UBSAN when x.test is not provided 
+
 Changes and New Features in 2.9.7 (2024-04-06):
 	* theta/omega DART settings now properly propagated in gbart 
 

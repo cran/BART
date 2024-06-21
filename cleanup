@@ -14,7 +14,7 @@ for i in README src/TAGS src/BROWSE demo/*.pdf CopyrightReversion.pdf \
 	 inst/bootcamp/* src/rtruncnorm.* \
 	 src/randomkit.* src/rand_draws.* src/latent.* \
 	 src/arms.* src/cspbart.cpp R/spbart.R R/mc.spbart.R \
-	 R/class.ind.R man/class.ind.Rd src/cmbart.cpp \
+	 src/cmbart.cpp \
 	 data/datafromsection13.txt data/leukemia.R \
 	 src/DpBase.* src/DpMuTau.* src/cdpgbart.cpp \
 	 R/dpgbart.R demo/cube.dpgbart.R \

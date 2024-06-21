@@ -51,6 +51,8 @@ often taken as a baseline category in multinomial response models.  }
 
 data(alligator)
      
+\dontrun{
+library(nnet)    
 ## nnet::multinom Multinomial logit model fit with neural nets
 fit <- multinom(food ~ lake+size+sex, data=alligator, weights=count)
 
@@ -79,7 +81,6 @@ table(y.train)
 set.seed(99)
 check = mbart(x.train, y.train, nskip=1, ndpost=1)
 
-\dontrun{
 set.seed(99)
 check = mbart(x.train, y.train, nskip=1, ndpost=1)
 post=mbart(x.train, y.train, x.test)
